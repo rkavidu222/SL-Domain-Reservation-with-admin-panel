@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DomainCategory;
+use App\Http\Controllers\DomainSearchController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PaymentController;
 
@@ -27,6 +28,9 @@ Route::get('/confirmation', function () {
     return view('layouts.confirmation');
 });
 
+Route::post('/domain-search', [DomainSearchController::class, 'search']);
+
+
 // Admin routes
 Route::prefix('admin')->name('admin.')->group(function () {
     // Guest routes (login, register)
@@ -44,7 +48,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Dashboard
         Route::get('dashboard', function () {
-            return view('admin.dashboard');
+            return view('admin.layouts.dashboard');
         })->name('dashboard');
 
         // User management routes accessible to all authenticated admins
@@ -67,4 +71,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('users/{admin}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
         });
     });
+
+
+
 });

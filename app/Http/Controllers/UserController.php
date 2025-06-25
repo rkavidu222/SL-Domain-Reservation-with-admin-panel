@@ -16,7 +16,7 @@ class UserController extends Controller
             ? Admin::latest()->paginate(10)
             : Admin::where('role', '!=', 'super_admin')->latest()->paginate(10);
 
-        return view('admin.userManagement', compact('admins'));
+        return view('admin.layouts.userManagement', compact('admins'));
     }
 
     public function destroy(Admin $admin)
