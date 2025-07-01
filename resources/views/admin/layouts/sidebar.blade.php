@@ -169,6 +169,15 @@
         </li>
 
         <li class="nav-item">
+            <a href="{{ route('admin.domain_prices.index') }}" class="nav-link">
+                <i class="nav-icon bi bi-currency-dollar"></i>
+                <p>Domain Price Management</p>
+            </a>
+        </li>
+
+
+
+        <li class="nav-item">
           <a href="#" class="nav-link">
             <i class="nav-icon bi bi-chat-dots"></i>
             <p>SMS</p>

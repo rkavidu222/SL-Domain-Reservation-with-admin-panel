@@ -1,39 +1,41 @@
 <?php
 
+use App\Http\Controllers\Admin\DomainPriceController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\RegisterController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\DomainCategory;
 use App\Http\Controllers\DomainSearchController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PaymentController;
+use App\Models\DomainPrice;
+use Illuminate\Support\Facades\Route;
+
+// Public domain search page and API
 
 Route::get('/', function () {
-    return view('index');
+    $allPrices = DomainPrice::all()->keyBy('category');
+    return view('index', compact('allPrices'));
 });
 
-Route::get('/domain-category', [DomainCategory::class, 'show'])->name('domain.category');
+Route::post('/domain-search/api', [DomainSearchController::class, 'search'])->name('domain.search.api');
 
+// Contact form routes
 Route::get('/contact-information', [ContactController::class, 'showForm'])->name('contact.page');
 Route::post('/contact-information', [ContactController::class, 'submit'])->name('contact.submit');
 
+// Payment routes
 Route::post('/payment-details', [OtpController::class, 'paymentDetails'])->name('payment.details');
-
 Route::get('/skip-payment', [PaymentController::class, 'skipPayment'])->name('payment.skip');
 
 Route::get('/confirmation', function () {
     return view('layouts.confirmation');
 });
 
-Route::post('/domain-search', [DomainSearchController::class, 'search']);
-
-
-// Admin routes
+// Admin routes group
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Guest routes (login, register)
+
+    // Guest routes for admin (login/register)
     Route::middleware('guest:admin')->group(function () {
         Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
         Route::post('login', [LoginController::class, 'login'])->name('login.submit');
@@ -44,34 +46,37 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Authenticated admin routes
     Route::middleware('auth:admin')->group(function () {
+
+        // Logout
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-        // Dashboard
+        // Dashboard view
         Route::get('dashboard', function () {
             return view('admin.layouts.dashboard');
         })->name('dashboard');
 
-        // User management routes accessible to all authenticated admins
+        // Domain Prices Management
+        Route::get('domain-prices', [DomainPriceController::class, 'index'])->name('domain_prices.index');
+        Route::post('domain-prices', [DomainPriceController::class, 'update'])->name('domain_prices.update');
+
+        // User management routes for all admins
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::get('users/create', [UserController::class, 'create'])->name('users.create');
         Route::post('users', [UserController::class, 'store'])->name('users.store');
         Route::get('users/{admin}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('users/{admin}', [UserController::class, 'update'])->name('users.update');
 
-        // Soft delete (Trash) routes accessible to authenticated admins
+        // Soft delete (trash) functionality for users
         Route::prefix('users')->group(function () {
             Route::get('/trash', [UserController::class, 'trash'])->name('users.trash');
             Route::put('/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
             Route::delete('/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.forceDelete');
         });
 
-        // Super admin only routes (delete and suspend actions)
+        // Super admin-only routes for user delete and suspend
         Route::middleware('super_admin')->group(function () {
             Route::delete('users/{admin}', [UserController::class, 'destroy'])->name('users.destroy');
             Route::put('users/{admin}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
         });
     });
-
-
-
 });

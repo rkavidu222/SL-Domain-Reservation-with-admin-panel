@@ -13,19 +13,13 @@ class DatabaseSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
-
-        User::updateOrCreate(
-            ['email' => 'kk@gmail.com'],
-            [
-                'name' => 'Super Admin',
-                'password' => Hash::make('superadmin123'),
-                'role' => 'super_admin',
-            ]
-        );
-
+        $this->call([
+            DomainPriceSeeder::class,
+        ]);
     }
+
 
 
 }

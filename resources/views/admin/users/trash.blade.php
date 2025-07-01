@@ -39,46 +39,48 @@
     @if($trashedAdmins->isEmpty())
         <div class="alert alert-info text-center">No trashed admins found.</div>
     @else
-    <table class="table table-bordered table-hover align-middle text-center">
-        <thead class="table-light">
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Deleted At</th>
-                <th style="min-width: 180px;">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($trashedAdmins as $admin)
-            <tr>
-                <td>{{ $admin->id }}</td>
-                <td class="text-start">{{ $admin->name }}</td>
-                <td>{{ $admin->email }}</td>
-                <td>{{ $admin->deleted_at->format('d M Y h:i A') }}</td>
-                <td>
-                    {{-- Restore --}}
-                    <form action="{{ route('admin.users.restore', $admin->id) }}" method="POST" class="d-inline">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit" class="btn btn-success btn-sm">
-                            <i class="bi bi-arrow-counterclockwise"></i> Restore
-                        </button>
-                    </form>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th class="text-start">Name</th>
+                        <th>Email</th>
+                        <th>Deleted At</th>
+                        <th style="min-width: 180px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($trashedAdmins as $admin)
+                    <tr>
+                        <td>{{ $admin->id }}</td>
+                        <td class="text-start">{{ $admin->name }}</td>
+                        <td>{{ $admin->email }}</td>
+                        <td>{{ $admin->deleted_at->format('d M Y h:i A') }}</td>
+                        <td>
+                            {{-- Restore --}}
+                            <form action="{{ route('admin.users.restore', $admin->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                </button>
+                            </form>
 
-                    {{-- Permanent Delete --}}
-                    <form action="{{ route('admin.users.forceDelete', $admin->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Permanently delete this admin?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-sm">
-                            <i class="bi bi-x-circle"></i> Delete
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+                            {{-- Permanent Delete --}}
+                            <form action="{{ route('admin.users.forceDelete', $admin->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Permanently delete this admin?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-x-circle"></i> Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     @endif
 
     <div class="d-flex justify-content-center mt-3">
