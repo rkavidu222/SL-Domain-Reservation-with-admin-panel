@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\RegisterController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DomainOrderController;
 use App\Http\Controllers\DomainSearchController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PaymentController;
@@ -12,7 +13,6 @@ use App\Models\DomainPrice;
 use Illuminate\Support\Facades\Route;
 
 // Public domain search page and API
-
 Route::get('/', function () {
     $allPrices = DomainPrice::all()->keyBy('category');
     return view('index', compact('allPrices'));
@@ -20,7 +20,13 @@ Route::get('/', function () {
 
 Route::post('/domain-search/api', [DomainSearchController::class, 'search'])->name('domain.search.api');
 
-// Contact form routes
+// Domain order routes - consistent naming
+Route::get('/domain/contact-info', [DomainOrderController::class, 'showContactForm'])->name('domain.contact.info');
+Route::post('/domain/contact-submit', [DomainOrderController::class, 'store'])->name('domain.contact.submit');
+
+Route::get('/otp-verification', [OtpController::class, 'showVerificationForm'])->name('otp.verification.page');
+
+// Contact form routes (separate from domain order contact info)
 Route::get('/contact-information', [ContactController::class, 'showForm'])->name('contact.page');
 Route::post('/contact-information', [ContactController::class, 'submit'])->name('contact.submit');
 
@@ -28,6 +34,7 @@ Route::post('/contact-information', [ContactController::class, 'submit'])->name(
 Route::post('/payment-details', [OtpController::class, 'paymentDetails'])->name('payment.details');
 Route::get('/skip-payment', [PaymentController::class, 'skipPayment'])->name('payment.skip');
 
+// Confirmation page
 Route::get('/confirmation', function () {
     return view('layouts.confirmation');
 });

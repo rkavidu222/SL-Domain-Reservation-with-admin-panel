@@ -153,6 +153,12 @@
         return;
       }
 
+      // Prepare URLs with domain_name, price, and category for Buy Now buttons
+      function buyNowUrl(domainName, price, category) {
+        return "{{ route('domain.contact.info') }}" +
+          `?domain_name=${encodeURIComponent(domainName)}&price=${encodeURIComponent(price)}&category=${encodeURIComponent(category)}`;
+      }
+
       // Build detailed domain offers HTML dynamically from DB prices
       const cat2Html = `
         <div class="mb-4 p-4 rounded border bg-white">
@@ -164,7 +170,7 @@
             <span class="text-danger fw-bold ms-3">LKR ${Number(prices.CAT2.new).toFixed(2)}</span>
           </div>
           <div class="text-center">
-            <a href="{{ route('contact.page') }}" class="btn btn-primary">
+            <a href="${buyNowUrl(fullDomain, Number(prices.CAT2.new).toFixed(2), 'CAT2')}" class="btn btn-primary">
               <i class="bi bi-cart3 me-2"></i> Buy Now
             </a>
           </div>
@@ -186,7 +192,7 @@
             </ul>
           </div>
           <div class="text-center mt-3">
-            <a href="{{ route('contact.page') }}" class="btn btn-primary">
+            <a href="${buyNowUrl(fullDomain, Number(prices.CAT1.new).toFixed(2), 'CAT1')}" class="btn btn-primary">
               <i class="bi bi-cart3 me-2"></i> Buy Now
             </a>
           </div>
@@ -204,7 +210,7 @@
               </div>
               <div class="d-flex justify-content-between align-items-center mt-1">
                 <span class="text-danger fw-bold">LKR ${Number(prices.CAT3.new).toFixed(2)}</span>
-                <a href="{{ route('contact.page') }}" class="btn btn-sm btn-primary">
+                <a href="${buyNowUrl(baseDomain + '.' + d, Number(prices.CAT3.new).toFixed(2), 'CAT3')}" class="btn btn-sm btn-primary">
                   <i class="bi bi-cart3 me-1"></i> Buy Now
                 </a>
               </div>
@@ -222,7 +228,7 @@
             </div>
             <div class="d-flex justify-content-between align-items-center mt-1">
               <span class="text-danger fw-bold">LKR ${Number(prices.SUGGESTED.new).toFixed(2)}</span>
-              <a href="{{ route('contact.page') }}" class="btn btn-sm btn-primary">
+              <a href="${buyNowUrl(s.DomainName, Number(prices.SUGGESTED.new).toFixed(2), 'SUGGESTED')}" class="btn btn-sm btn-primary">
                 <i class="bi bi-cart3 me-1"></i> Buy Now
               </a>
             </div>
