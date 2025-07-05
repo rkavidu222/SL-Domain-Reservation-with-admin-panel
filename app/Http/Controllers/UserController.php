@@ -12,11 +12,33 @@ class UserController extends Controller
     {
         $current = auth()->guard('admin')->user();
 
-        $admins = ($current->role === 'super_admin')
-            ? Admin::latest()->paginate(10)
-            : Admin::where('role', '!=', 'super_admin')->latest()->paginate(10);
+        // Query admins (exclude super_admin if current is not super_admin)
+        $query = ($current->role === 'super_admin')
+            ? Admin::query()
+            : Admin::where('role', '!=', 'super_admin');
 
-        return view('admin.layouts.userManagement', compact('admins'));
+        // Get all admins ascending by ID
+        $admins = $query->orderBy('id', 'asc')->get();
+
+        // Put current admin first
+        $admins = $admins->sortBy(function ($admin) use ($current) {
+            return $admin->id === $current->id ? 0 : 1;
+        });
+
+        // Manual pagination
+        $perPage = 10;
+        $page = request()->get('page', 1);
+        $items = $admins->slice(($page - 1) * $perPage, $perPage)->values();
+
+        $paginatedAdmins = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $admins->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        return view('admin.layouts.management.userManagement', ['admins' => $paginatedAdmins]);
     }
 
     public function destroy(Admin $admin)
@@ -80,12 +102,39 @@ class UserController extends Controller
             abort(403, 'You are not authorized to update this profile.');
         }
 
-        $validated = $request->validate([
+        // Base validation rules
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:admins,email,' . $admin->id,
-        ]);
+        ];
 
-        $admin->update($validated);
+        // Only super_admin can update the role, and role must be in this list
+        if ($current->role === 'super_admin' && $request->has('role')) {
+            $rules['role'] = 'required|in:admin,super_admin';
+        }
+
+        // Password optional, but if present, confirmed and min length
+        if ($request->filled('password')) {
+            $rules['password'] = 'confirmed|min:6';
+        }
+
+        $validated = $request->validate($rules);
+
+        // Update basic fields
+        $admin->name = $validated['name'];
+        $admin->email = $validated['email'];
+
+        // Update password if provided
+        if (!empty($validated['password'])) {
+            $admin->password = bcrypt($validated['password']);
+        }
+
+        // Update role if current user is super_admin and role provided
+        if ($current->role === 'super_admin' && isset($validated['role'])) {
+            $admin->role = $validated['role'];
+        }
+
+        $admin->save();
 
         return redirect()->route('admin.users.index')->with('success', 'Admin profile updated successfully.');
     }

@@ -48,7 +48,7 @@
         color: #0d6efd; /* Bootstrap primary color */
     }
     /* Improve input visibility */
-    input.form-control-sm {
+    input.form-control-sm, select.form-select-sm {
         font-size: 0.9rem;
         padding: 0.375rem 0.5rem;
     }
@@ -61,7 +61,6 @@
         </svg>
         Edit Admin
     </h2>
-
 
     {{-- Validation Errors --}}
     @if ($errors->any())
@@ -81,6 +80,8 @@
         <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     @endif
+
+    @php $current = auth()->guard('admin')->user(); @endphp
 
     <form action="{{ route('admin.users.update', $admin->id) }}" method="POST" novalidate>
         @csrf
@@ -168,6 +169,22 @@
                 autocomplete="new-password"
             />
         </div>
+
+        @if($current->role === 'super_admin')
+            <div class="form-group mb-4">
+                <label for="role">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-shield-lock" viewBox="0 0 16 16" width="16" height="16">
+                        <path d="M5.5 9a1.5 1.5 0 1 1 3 0v1h-3V9z"/>
+                        <path d="M7.072 1.22a.5.5 0 0 1 .856 0l2.568 4.134 5.908.855a.5.5 0 0 1 .277.852l-4.273 4.32 1.01 5.89a.5.5 0 0 1-.725.527L8 14.347l-5.591 2.436a.5.5 0 0 1-.725-.527l1.01-5.89-4.273-4.32a.5.5 0 0 1 .277-.852l5.908-.855L7.072 1.22z"/>
+                    </svg>
+                    Role
+                </label>
+                <select name="role" id="role" class="form-select form-select-sm" required>
+                    <option value="admin" {{ $admin->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="super_admin" {{ $admin->role === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                </select>
+            </div>
+        @endif
 
         <div class="d-flex justify-content-between align-items-center">
             <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary btn-sm px-4">

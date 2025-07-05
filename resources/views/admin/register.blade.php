@@ -107,6 +107,7 @@
                     id="name"
                     name="name"
                     class="form-control"
+                    value="{{ old('name') }}"
                     required
                     autofocus
                 />
@@ -119,7 +120,21 @@
                     id="email"
                     name="email"
                     class="form-control"
+                    value="{{ old('email') }}"
                     required
+                />
+            </div>
+
+            <!-- Auth Code Input -->
+            <div class="mb-3">
+                <label for="auth_code" class="form-label">Admin Authentication Code</label>
+                <input
+                    type="text"
+                    id="auth_code"
+                    name="auth_code"
+                    class="form-control"
+                    required
+                    placeholder="Enter secret code"
                 />
             </div>
 
@@ -146,9 +161,7 @@
             </div>
 
             <button type="submit" class="btn btn-register" id="registerBtn">
-                <span id="btnText">
-                    Register
-                </span>
+                <span id="btnText">Register</span>
                 <span
                     id="btnSpinner"
                     class="spinner-border spinner-border-sm ms-2 d-none"

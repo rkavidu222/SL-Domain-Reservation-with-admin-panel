@@ -2,15 +2,17 @@
   <style>
     /* Sidebar background and font */
     .app-sidebar {
-      background-color: #1e293b; /* Dark slate blue-gray */
-      color: #cbd5e1; /* Light gray text */
+      background-color: #1e293b;
+      color: #cbd5e1;
       min-height: 100vh;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
     }
 
     /* Sidebar brand */
     .sidebar-brand a {
-      color: #38bdf8; /* Bright sky blue */
+      color: #38bdf8;
       font-weight: 700;
       font-size: 1.25rem;
       text-decoration: none;
@@ -18,6 +20,15 @@
 
     .sidebar-brand a:hover {
       color: #60a5fa;
+    }
+
+    /* Sidebar scrollable area */
+    .sidebar-wrapper {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      height: 100%;
+      scrollbar-gutter: stable;
+      padding-right: 0.5rem;
     }
 
     /* Nav links */
@@ -31,12 +42,13 @@
       font-size: 0.95rem;
       border-radius: 0.375rem;
       transition: background-color 0.25s ease, color 0.25s ease;
+      cursor: pointer;
+      text-decoration: none;
     }
 
     .nav-link:hover {
-      background-color: #2563eb; /* Bright blue */
+      background-color: #2563eb;
       color: #ffffff;
-      text-decoration: none;
     }
 
     .nav-link .nav-icon {
@@ -49,7 +61,6 @@
       color: #ffffff;
     }
 
-    /* Active nav link */
     .nav-link.active {
       background-color: #2563eb !important;
       color: #ffffff !important;
@@ -73,15 +84,14 @@
     .nav-treeview .nav-link {
       padding-left: 1rem;
       font-size: 0.9rem;
-      color: #94a3b8; /* lighter gray */
+      color: #94a3b8;
     }
 
     .nav-treeview .nav-link:hover {
-      background-color: #3b82f6; /* lighter blue */
+      background-color: #3b82f6;
       color: #fff;
     }
 
-    /* Caret icon */
     .nav-link i.right {
       margin-left: auto;
       font-size: 1rem;
@@ -94,6 +104,10 @@
       color: #60a5fa;
     }
   </style>
+
+  @php
+      $adminUser = auth()->guard('admin')->user();
+  @endphp
 
   <div class="sidebar-brand d-flex justify-content-between align-items-center px-3 py-3">
     <a href="{{ route('admin.dashboard') }}" class="nav-link fw-bold">
@@ -122,22 +136,32 @@
           <a href="#" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
             <i class="nav-icon bi bi-person-circle"></i>
             <p>
-              Admin Management
+              {{ $adminUser && $adminUser->role === 'super_admin' ? 'Admin Management' : 'Profile Management' }}
             </p>
+            <i class="right bi bi-caret-down-fill"></i>
           </a>
           <ul class="nav nav-treeview flex-column">
-            <li class="nav-item">
-              <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
-                <i class="nav-icon bi bi-people"></i>
-                <p>All Admins</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{{ route('admin.users.trash') }}" class="nav-link {{ request()->routeIs('admin.users.trash') ? 'active' : '' }}">
-                <i class="nav-icon bi bi-trash3-fill"></i>
-                <p>Trash</p>
-              </a>
-            </li>
+            @if($adminUser && $adminUser->role === 'super_admin')
+              <li class="nav-item">
+                <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-people"></i>
+                  <p>All Admins</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ route('admin.users.trash') }}" class="nav-link {{ request()->routeIs('admin.users.trash') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-trash3-fill"></i>
+                  <p>Trash</p>
+                </a>
+              </li>
+            @else
+              <li class="nav-item">
+                <a href="{{ route('admin.users.edit', $adminUser->id) }}" class="nav-link {{ request()->routeIs('admin.users.edit') && request()->route('admin') == $adminUser->id ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-person"></i>
+                  <p>My Profile</p>
+                </a>
+              </li>
+            @endif
           </ul>
         </li>
 
@@ -148,16 +172,9 @@
       <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
 
         <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="nav-icon bi bi-people-fill"></i>
-            <p>Customer Management</p>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a href="#" class="nav-link">
+          <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
             <i class="nav-icon bi bi-box-seam-fill"></i>
-            <p>Order Management</p>
+            <p>Orders</p>
           </a>
         </li>
 
@@ -169,13 +186,11 @@
         </li>
 
         <li class="nav-item">
-            <a href="{{ route('admin.domain_prices.index') }}" class="nav-link">
-                <i class="nav-icon bi bi-currency-dollar"></i>
-                <p>Domain Price Management</p>
-            </a>
+          <a href="{{ route('admin.domain_prices.index') }}" class="nav-link">
+            <i class="nav-icon bi bi-currency-dollar"></i>
+            <p>Domain Price Management</p>
+          </a>
         </li>
-
-
 
         <li class="nav-item">
           <a href="#" class="nav-link">
@@ -185,7 +200,6 @@
         </li>
 
       </ul>
-
     </nav>
   </div>
 </aside>
