@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DomainOrder;
+use App\Models\User;       // Import User model
+use Illuminate\Support\Facades\Auth;
 
 class DomainOrderController extends Controller
 {
@@ -36,9 +38,63 @@ class DomainOrderController extends Controller
         return redirect()->route('otp.verification.page')->with('success', 'Please verify your OTP.');
     }
 
+    // Admin: List all domain orders (paginated)
     public function adminIndex()
-{
-    $orders = DomainOrder::orderBy('created_at', 'asc')->paginate(15);
-    return view('admin.layouts.management.oders', compact('orders'));
-}
+    {
+        $orders = DomainOrder::orderBy('created_at', 'asc')->paginate(15);
+        return view('admin.layouts.management.orders', compact('orders'));
+    }
+
+    // Admin: Show details of a single order
+    public function show($id)
+    {
+        $order = DomainOrder::findOrFail($id);
+        return view('admin.layouts.management.order_show', compact('order'));
+    }
+
+    // Admin: Delete a domain order (soft delete)
+    public function destroy($id)
+    {
+        $order = DomainOrder::findOrFail($id);
+
+        $authUserId = auth()->id();
+
+        // Check if user exists in users table before assigning deleted_by
+        if ($authUserId && User::where('id', $authUserId)->exists()) {
+            $order->deleted_by = $authUserId;
+        } else {
+            $order->deleted_by = null;
+        }
+
+        $order->save();
+
+        $order->delete();
+
+        return redirect()->back()->with('success', 'Order moved to trash.');
+    }
+
+    // Admin: View trashed (soft-deleted) orders
+    public function trashed()
+    {
+        $orders = DomainOrder::onlyTrashed()->orderBy('deleted_at', 'desc')->paginate(15);
+        return view('admin.layouts.management.orders_trashed', compact('orders'));
+    }
+
+    // Admin: Restore a soft-deleted order
+    public function restore($id)
+    {
+        $order = DomainOrder::onlyTrashed()->findOrFail($id);
+        $order->restore();
+
+        return redirect()->route('admin.orders.index')->with('success', 'Order restored successfully.');
+    }
+
+    // Admin: Permanently delete a soft-deleted order
+    public function forceDelete($id)
+    {
+        $order = DomainOrder::onlyTrashed()->findOrFail($id);
+        $order->forceDelete();
+
+        return redirect()->route('admin.orders.trash')->with('success', 'Order permanently deleted.');
+    }
 }

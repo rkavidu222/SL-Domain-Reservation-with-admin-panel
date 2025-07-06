@@ -24,15 +24,11 @@ Route::post('/domain-search/api', [DomainSearchController::class, 'search'])->na
 Route::get('/domain/contact-info', [DomainOrderController::class, 'showContactForm'])->name('domain.contact.info');
 Route::post('/domain/contact-submit', [DomainOrderController::class, 'store'])->name('domain.contact.submit');
 
-// OTP Verification page route
 Route::get('/otp-verification', [OtpController::class, 'showVerificationForm'])->name('otp.verification.page');
 
 // Contact form routes (separate from domain order contact info)
 Route::get('/contact-information', [ContactController::class, 'showForm'])->name('contact.page');
 Route::post('/contact-information', [ContactController::class, 'submit'])->name('contact.submit');
-
-// Domain orders list for admin view (non-prefixed admin)
-Route::get('domain-orders', [DomainOrderController::class, 'adminIndex'])->name('domain_orders.index');
 
 // Payment routes
 Route::post('/payment-details', [OtpController::class, 'paymentDetails'])->name('payment.details');
@@ -43,7 +39,7 @@ Route::get('/confirmation', function () {
     return view('layouts.confirmation');
 });
 
-// Admin routes group with middleware and namespacing
+// Admin routes group
 Route::prefix('admin')->name('admin.')->group(function () {
 
     // Guest routes for admin (login/register)
@@ -89,11 +85,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('users/{admin}', [UserController::class, 'destroy'])->name('users.destroy');
             Route::put('users/{admin}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
         });
-
-        // Domain Orders Admin CRUD Routes
-        Route::get('orders', [DomainOrderController::class, 'adminIndex'])->name('orders.index');
-        Route::get('orders/{order}', [DomainOrderController::class, 'show'])->name('orders.show');
-        Route::delete('orders/{order}', [DomainOrderController::class, 'destroy'])->name('orders.destroy');  // This fixes your error
-
     });
 });

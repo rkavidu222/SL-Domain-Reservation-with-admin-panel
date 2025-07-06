@@ -1,6 +1,5 @@
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
   <style>
-    /* Sidebar background and font */
     .app-sidebar {
       background-color: #1e293b;
       color: #cbd5e1;
@@ -10,39 +9,29 @@
       flex-direction: column;
     }
 
-    /* Sidebar brand */
     .sidebar-brand a {
       color: #38bdf8;
       font-weight: 700;
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       text-decoration: none;
     }
 
-    .sidebar-brand a:hover {
-      color: #60a5fa;
-    }
-
-    /* Sidebar scrollable area */
     .sidebar-wrapper {
       flex: 1 1 auto;
       overflow-y: auto;
-      height: 100%;
-      scrollbar-gutter: stable;
       padding-right: 0.5rem;
     }
 
-    /* Nav links */
     .nav-link {
       color: #cbd5e1;
-      padding: 0.65rem 1rem;
+      padding: 0.55rem 0.85rem;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
       font-weight: 500;
-      font-size: 0.95rem;
-      border-radius: 0.375rem;
+      font-size: 0.88rem;
+      border-radius: 0.35rem;
       transition: background-color 0.25s ease, color 0.25s ease;
-      cursor: pointer;
       text-decoration: none;
     }
 
@@ -51,63 +40,54 @@
       color: #ffffff;
     }
 
-    .nav-link .nav-icon {
-      font-size: 1.2rem;
-      color: #60a5fa;
-      transition: color 0.25s ease;
-    }
-
-    .nav-link:hover .nav-icon {
-      color: #ffffff;
-    }
-
     .nav-link.active {
       background-color: #2563eb !important;
       color: #ffffff !important;
-      font-weight: 700;
-      box-shadow: 0 2px 8px rgb(37 99 235 / 0.5);
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
     }
 
-    .nav-link.active .nav-icon {
-      color: #ffffff !important;
+    .nav-link .nav-icon {
+      font-size: 1rem;
+      color: #60a5fa;
     }
 
-    /* Submenu */
     .nav-treeview {
-      margin-top: 0.35rem;
-      margin-left: 1.5rem;
-      display: flex;
+      display: none;
+      margin-left: 1.2rem;
       flex-direction: column;
-      gap: 0.4rem;
+      padding-left: 0.5rem;
+      border-left: 1px dashed #3b3b3b;
+      margin-top: 8px; /* added gap between parent link and dropdown */
     }
 
-    .nav-treeview .nav-link {
-      padding-left: 1rem;
-      font-size: 0.9rem;
-      color: #94a3b8;
-    }
-
-    .nav-treeview .nav-link:hover {
-      background-color: #3b82f6;
-      color: #fff;
+    .nav-item.menu-open > .nav-treeview {
+      display: flex;
     }
 
     .nav-link i.right {
       margin-left: auto;
-      font-size: 1rem;
+      font-size: 0.9rem;
       color: #94a3b8;
       transition: transform 0.3s ease;
     }
 
-    .nav-item.has-treeview.menu-open > a > i.right {
+    .nav-item.menu-open > a > i.right {
       transform: rotate(180deg);
-      color: #60a5fa;
+    }
+
+    /* gap between main nav items */
+    .nav > .nav-item {
+      margin-bottom: 8px;
+    }
+
+    /* gap between dropdown links */
+    .nav-treeview > .nav-item {
+      margin-bottom: 6px;
     }
   </style>
 
-  @php
-      $adminUser = auth()->guard('admin')->user();
-  @endphp
+  @php $adminUser = auth()->guard('admin')->user(); @endphp
 
   <div class="sidebar-brand d-flex justify-content-between align-items-center px-3 py-3">
     <a href="{{ route('admin.dashboard') }}" class="nav-link fw-bold">
@@ -120,82 +100,93 @@
 
   <div class="sidebar-wrapper px-2">
     <nav class="mt-3">
-
-      <!-- Section 1: Main -->
-      <h6 class="text-gray-400 px-3 mt-3 mb-2" style="letter-spacing: 1px; font-weight: 600;">MAIN</h6>
-      <ul class="nav sidebar-menu flex-column mb-4" data-lte-toggle="treeview" role="menu" data-accordion="false">
+      <!-- MAIN -->
+      <h6 class="text-gray-400 px-3 mt-3 mb-2" style="letter-spacing: 1px; font-weight: 600; font-size: 0.75rem;">MAIN</h6>
+      <ul class="nav flex-column">
 
         <li class="nav-item">
           <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
             <i class="nav-icon bi bi-speedometer"></i>
-            <p>Dashboard</p>
+            <span>Dashboard</span>
           </a>
         </li>
 
         <li class="nav-item has-treeview {{ request()->routeIs('admin.users.*') ? 'menu-open' : '' }}">
           <a href="#" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
             <i class="nav-icon bi bi-person-circle"></i>
-            <p>
-              {{ $adminUser && $adminUser->role === 'super_admin' ? 'Admin Management' : 'Profile Management' }}
-            </p>
+            <span>{{ $adminUser && $adminUser->role === 'super_admin' ? 'Admin Management' : 'Profile Management' }}</span>
             <i class="right bi bi-caret-down-fill"></i>
           </a>
-          <ul class="nav nav-treeview flex-column">
+          <ul class="nav nav-treeview">
             @if($adminUser && $adminUser->role === 'super_admin')
               <li class="nav-item">
                 <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
-                  <i class="nav-icon bi bi-people"></i>
-                  <p>All Admins</p>
+                  <i class="bi bi-people nav-icon"></i>
+                  <span>All Admins</span>
                 </a>
               </li>
               <li class="nav-item">
                 <a href="{{ route('admin.users.trash') }}" class="nav-link {{ request()->routeIs('admin.users.trash') ? 'active' : '' }}">
-                  <i class="nav-icon bi bi-trash3-fill"></i>
-                  <p>Trash</p>
+                  <i class="bi bi-trash3-fill nav-icon"></i>
+                  <span>Trash</span>
                 </a>
               </li>
             @else
               <li class="nav-item">
-                <a href="{{ route('admin.users.edit', $adminUser->id) }}" class="nav-link {{ request()->routeIs('admin.users.edit') && request()->route('admin') == $adminUser->id ? 'active' : '' }}">
-                  <i class="nav-icon bi bi-person"></i>
-                  <p>My Profile</p>
+                <a href="{{ route('admin.users.edit', $adminUser->id) }}" class="nav-link {{ request()->routeIs('admin.users.edit') ? 'active' : '' }}">
+                  <i class="bi bi-person nav-icon"></i>
+                  <span>My Profile</span>
                 </a>
               </li>
             @endif
           </ul>
         </li>
 
-      </ul>
+        <!-- MANAGEMENT -->
+        <h6 class="text-gray-400 px-3 mt-3 mb-2" style="letter-spacing: 1px; font-weight: 600; font-size: 0.75rem;">MANAGEMENT</h6>
 
-      <!-- Section 2: Management -->
-      <h6 class="text-gray-400 px-3 mt-3 mb-2" style="letter-spacing: 1px; font-weight: 600;">MANAGEMENT</h6>
-      <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
+        <li class="nav-item has-treeview {{ request()->routeIs('admin.orders.*') ? 'menu-open' : '' }}">
+          <a href="#" class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+            <i class="nav-icon bi bi-box-seam-fill"></i>
+            <span>Order Management</span>
+            <i class="right bi bi-caret-down-fill"></i>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.index') ? 'active' : '' }}">
+                <i class="bi bi-clipboard-check-fill nav-icon"></i>
+                <span>All Orders</span>
+              </a>
+            </li>
+            @if($adminUser && $adminUser->role === 'super_admin')
+              <li class="nav-item">
+                <a href="{{ route('admin.orders.trash') }}" class="nav-link {{ request()->routeIs('admin.orders.trash') ? 'active' : '' }}">
+                  <i class="bi bi-trash3-fill nav-icon"></i>
+                  <span>Trashed Orders</span>
+                </a>
+              </li>
+            @endif
+          </ul>
+        </li>
 
         <li class="nav-item">
-          <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
-            <i class="nav-icon bi bi-box-seam-fill"></i>
-            <p>Orders</p>
+          <a href="{{ route('admin.domain_prices.index') }}" class="nav-link">
+            <i class="nav-icon bi bi-currency-dollar"></i>
+            <span>Domain Price Management</span>
           </a>
         </li>
 
         <li class="nav-item">
           <a href="#" class="nav-link">
             <i class="nav-icon bi bi-receipt"></i>
-            <p>Invoice Management</p>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a href="{{ route('admin.domain_prices.index') }}" class="nav-link">
-            <i class="nav-icon bi bi-currency-dollar"></i>
-            <p>Domain Price Management</p>
+            <span>Invoice Management</span>
           </a>
         </li>
 
         <li class="nav-item">
           <a href="#" class="nav-link">
             <i class="nav-icon bi bi-chat-dots"></i>
-            <p>SMS</p>
+            <span>SMS</span>
           </a>
         </li>
 
@@ -203,3 +194,16 @@
     </nav>
   </div>
 </aside>
+
+<!-- JavaScript to handle sidebar dropdown -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.nav-item.has-treeview > a').forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        const parent = this.closest('.nav-item');
+        parent.classList.toggle('menu-open');
+      });
+    });
+  });
+</script>
