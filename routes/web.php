@@ -85,5 +85,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('users/{admin}', [UserController::class, 'destroy'])->name('users.destroy');
             Route::put('users/{admin}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
         });
+
+        // Domain Orders Management (Admin)
+        Route::prefix('orders')->group(function () {
+            Route::get('/', [DomainOrderController::class, 'adminIndex'])->name('orders.index');
+            Route::get('/trash', [DomainOrderController::class, 'trashed'])->name('orders.trash');
+            Route::get('/{id}', [DomainOrderController::class, 'show'])->name('orders.show');
+            Route::delete('/{id}', [DomainOrderController::class, 'destroy'])->name('orders.destroy');
+            Route::post('/{id}/restore', [DomainOrderController::class, 'restore'])->name('orders.restore');
+            Route::delete('/{id}/force-delete', [DomainOrderController::class, 'forceDelete'])->name('orders.forceDelete');
+        });
     });
 });

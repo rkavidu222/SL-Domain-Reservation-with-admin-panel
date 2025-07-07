@@ -5,7 +5,6 @@
 @section('head')
 <!-- Bootstrap Icons CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <style>
@@ -90,7 +89,6 @@
         margin-top: 0.25rem;
     }
 
-    /* Readonly info box */
     .info-box {
         background-color: #e9ecef;
         border-radius: 0.5rem;
@@ -98,19 +96,23 @@
         margin-bottom: 1.5rem;
         user-select: none;
     }
+
     .info-box h5 {
         margin-bottom: 0.25rem;
         color: #495057;
         font-weight: 600;
     }
+
     .info-box p {
         font-size: 1.25rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
     }
+
     .info-box .price {
         color: #d6336c;
     }
+
     .info-box .category {
         color: #0d6efd;
         font-style: italic;
@@ -120,19 +122,30 @@
 
 @section('content')
 
+@php
+    // Only for display purpose
+    $old_price = request()->query('old_price');
+@endphp
+
 <div class="form-card mx-auto mt-4" style="max-width: 500px;">
     <div class="brand-logo">
         <img src="https://www.srilankahosting.lk/logo.svg" alt="SriLanka Hosting Logo" />
     </div><br>
 
-    {{-- Read-only domain info display --}}
     @if(!empty($domain_name) && !empty($price) && !empty($category))
         <div class="info-box text-center">
             <h5>Domain Selected:</h5>
             <p>{{ $domain_name }}</p>
 
             <h5>Price:</h5>
-            <p class="price">LKR {{ number_format($price, 2) }}/=</p>
+            @if($old_price)
+                <p>
+                    <span class="text-muted text-decoration-line-through me-2">LKR {{ number_format($old_price, 2) }}/=</span>
+                    <span class="price">LKR {{ number_format($price, 2) }}/=</span>
+                </p>
+            @else
+                <p class="price">LKR {{ number_format($price, 2) }}/=</p>
+            @endif
 
             <h5>Category:</h5>
             <p class="category">{{ $category }}</p>
@@ -146,7 +159,7 @@
     <form action="{{ route('domain.contact.submit') }}" method="POST" novalidate>
         @csrf
 
-        {{-- Hidden fields to submit domain info --}}
+        {{-- Hidden fields to submit domain info (old price not included) --}}
         <input type="hidden" name="domain_name" value="{{ old('domain_name', $domain_name ?? '') }}">
         <input type="hidden" name="price" value="{{ old('price', $price ?? '') }}">
         <input type="hidden" name="category" value="{{ old('category', $category ?? '') }}">

@@ -154,10 +154,13 @@
       }
 
       // Prepare URLs with domain_name, price, and category for Buy Now buttons
-      function buyNowUrl(domainName, price, category) {
-        return "{{ route('domain.contact.info') }}" +
-          `?domain_name=${encodeURIComponent(domainName)}&price=${encodeURIComponent(price)}&category=${encodeURIComponent(category)}`;
-      }
+      function buyNowUrl(domainName, newPrice, category, oldPrice = 0) {
+		  return "{{ route('domain.contact.info') }}" +
+			`?domain_name=${encodeURIComponent(domainName)}` +
+			`&price=${encodeURIComponent(newPrice)}` +
+			`&category=${encodeURIComponent(category)}` +
+			`&old_price=${encodeURIComponent(oldPrice)}`;
+		}
 
       // Build detailed domain offers HTML dynamically from DB prices
       const cat2Html = `
@@ -170,7 +173,7 @@
             <span class="text-danger fw-bold ms-3">LKR ${Number(prices.CAT2.new).toFixed(2)}</span>
           </div>
           <div class="text-center">
-            <a href="${buyNowUrl(fullDomain, Number(prices.CAT2.new).toFixed(2), 'CAT2')}" class="btn btn-primary">
+            <a href="${buyNowUrl(fullDomain, Number(prices.CAT2.new).toFixed(2), 'CAT2', Number(prices.CAT2.old).toFixed(2))}" class="btn btn-primary">
               <i class="bi bi-cart3 me-2"></i> Buy Now
             </a>
           </div>
@@ -192,8 +195,8 @@
             </ul>
           </div>
           <div class="text-center mt-3">
-            <a href="${buyNowUrl(fullDomain, Number(prices.CAT1.new).toFixed(2), 'CAT1')}" class="btn btn-primary">
-              <i class="bi bi-cart3 me-2"></i> Buy Now
+           <a href="${buyNowUrl(fullDomain, Number(prices.CAT1.new).toFixed(2), 'CAT1', Number(prices.CAT1.old).toFixed(2))}" class="btn btn-primary">
+            <i class="bi bi-cart3 me-2"></i> Buy Now
             </a>
           </div>
         </div>`;
@@ -210,7 +213,7 @@
               </div>
               <div class="d-flex justify-content-between align-items-center mt-1">
                 <span class="text-danger fw-bold">LKR ${Number(prices.CAT3.new).toFixed(2)}</span>
-                <a href="${buyNowUrl(baseDomain + '.' + d, Number(prices.CAT3.new).toFixed(2), 'CAT3')}" class="btn btn-sm btn-primary">
+                <a <a href="${buyNowUrl(baseDomain + '.' + d, Number(prices.CAT3.new).toFixed(2), 'CAT3', Number(prices.CAT3.old).toFixed(2))}" class="btn btn-sm btn-primary">
                   <i class="bi bi-cart3 me-1"></i> Buy Now
                 </a>
               </div>
@@ -228,7 +231,7 @@
             </div>
             <div class="d-flex justify-content-between align-items-center mt-1">
               <span class="text-danger fw-bold">LKR ${Number(prices.SUGGESTED.new).toFixed(2)}</span>
-              <a href="${buyNowUrl(s.DomainName, Number(prices.SUGGESTED.new).toFixed(2), 'SUGGESTED')}" class="btn btn-sm btn-primary">
+              <a href="${buyNowUrl(s.DomainName, Number(prices.SUGGESTED.new).toFixed(2), 'SUGGESTED', Number(prices.SUGGESTED.old).toFixed(2))}" class="btn btn-sm btn-primary">
                 <i class="bi bi-cart3 me-1"></i> Buy Now
               </a>
             </div>

@@ -7,14 +7,14 @@ use App\Models\DomainPrice;
 
 class DomainSearchController extends Controller
 {
-    // Show search page with prices for initial load
+
     public function index()
     {
         $allPrices = DomainPrice::all()->keyBy('category');
         return view('domain.search', compact('allPrices'));
     }
 
-    // API endpoint to check domain availability & send prices
+
     public function search(Request $request)
     {
         $request->validate([
