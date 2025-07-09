@@ -5,7 +5,7 @@
 @section('content')
 <style>
     .admin-management-container {
-        max-width: 1100px;
+        max-width: 1400px;
         margin: 1rem auto 2rem;
         padding: 2rem;
         background: #fff;
@@ -36,21 +36,21 @@
         </div>
     @endif
 
-
+    {{-- Search Form --}}
         {{-- Search Form --}}
-        <form method="GET" action="{{ route('admin.users.trash') }}" class="mb-3 d-flex justify-content-end">
-            <input
-                type="text"
-                name="search"
-                class="form-control w-auto"
-                placeholder="Search name, email or role..."
-                value="{{ request('search') }}"
-            >
-            <button type="submit" class="btn btn-primary ms-2">Search</button>
-            @if(request('search'))
-                <a href="{{ route('admin.users.trash') }}" class="btn btn-secondary ms-2">Clear</a>
-            @endif
-        </form>
+<form method="GET" action="{{ route('admin.users.trash') }}" class="mb-3 d-flex justify-content-end">
+    <input
+        type="text"
+        name="search"
+        class="form-control w-auto"
+        placeholder="Search name, email or role..."
+        value="{{ request('search') }}"
+    >
+    <button type="submit" class="btn btn-primary ms-2">Search</button>
+    @if(request('search'))
+        <a href="{{ route('admin.users.trash') }}" class="btn btn-secondary ms-2">Clear</a>
+    @endif
+</form>
 
 
     @if($trashedAdmins->isEmpty())

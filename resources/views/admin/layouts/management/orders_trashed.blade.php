@@ -5,7 +5,7 @@
 @section('content')
 <style>
     .admin-management-container {
-        max-width: 1100px;
+        max-width: 1400px;
         margin: 1rem auto 3rem auto;
         padding: 2rem;
         background: #fff;
