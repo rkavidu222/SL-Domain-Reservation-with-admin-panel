@@ -8,31 +8,63 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
   <style>
-    body { background-color: #f3f6fa; }
-    .card-animate {
-      background: #fff;
-      border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
-      animation: fadeIn 0.3s ease-in-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .section-header {
-      border-left: 6px solid #2563EB;
-      padding-left: 12px;
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: #1F2937;
-      background-color: #F3F4F6;
-      padding: 10px;
-      border-radius: 0.25rem;
-    }
-    .price-badge { font-size: 0.95rem; }
-  </style>
+  body { background-color: #f3f6fa; }
+  .card-animate {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .section-header {
+    border-left: 6px solid #2563EB;
+    padding-left: 12px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1F2937;
+    background-color: #F3F4F6;
+    padding: 10px;
+    border-radius: 0.25rem;
+  }
+  .price-badge { font-size: 0.95rem; }
+
+@media (max-width: 576px) {
+  .d-flex.justify-content-between.align-items-center,
+  .d-flex.justify-content-between {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .text-center.my-3.d-flex {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .text-center .btn,
+  .d-flex .btn {
+    width: 100%;
+  }
+
+  ul.list-unstyled.d-inline-block {
+    width: 100%;
+    align-items: center;
+  }
+
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+</style>
+
 </head>
 <body>
 
@@ -145,7 +177,7 @@
         `;
       }
 
-      // Render by category logic
+
       if (category === 'CAT4') {
         html += `
           <div class="mb-4 p-4 rounded border bg-white">
@@ -225,7 +257,7 @@
             </div>
             <div class="text-center text-muted small mt-3">
               <p class="mb-2">You automatically reserve the following names:</p>
-              <ul class="list-unstyled text-start d-inline-block">
+              <ul class="list-unstyled text-center d-inline-block">
                 ${reservedSLDs.map(sld => `<li>${baseDomain}.${sld}.lk</li>`).join('')}
               </ul>
             </div>

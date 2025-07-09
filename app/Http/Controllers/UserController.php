@@ -8,38 +8,31 @@ use Illuminate\Support\Facades\Session;
 
 class UserController extends Controller
 {
-    public function index()
-    {
-        $current = auth()->guard('admin')->user();
+    public function index(Request $request)
+{
+    $current = auth()->guard('admin')->user();
 
-        // Query admins (exclude super_admin if current is not super_admin)
-        $query = ($current->role === 'super_admin')
-            ? Admin::query()
-            : Admin::where('role', '!=', 'super_admin');
+    // Base query: super admin sees all, others only see themselves
+    $query = ($current->role === 'super_admin')
+        ? Admin::query()
+        : Admin::where('id', $current->id);
 
-        // Get all admins ascending by ID
-        $admins = $query->orderBy('id', 'asc')->get();
-
-        // Put current admin first
-        $admins = $admins->sortBy(function ($admin) use ($current) {
-            return $admin->id === $current->id ? 0 : 1;
+    // Search filter
+    if ($request->filled('search')) {
+        $search = $request->input('search');
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%")
+              ->orWhere('role', 'like', "%{$search}%");
         });
-
-        // Manual pagination
-        $perPage = 10;
-        $page = request()->get('page', 1);
-        $items = $admins->slice(($page - 1) * $perPage, $perPage)->values();
-
-        $paginatedAdmins = new \Illuminate\Pagination\LengthAwarePaginator(
-            $items,
-            $admins->count(),
-            $perPage,
-            $page,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
-
-        return view('admin.layouts.management.userManagement', ['admins' => $paginatedAdmins]);
     }
+
+    // Paginate results
+    $admins = $query->orderBy('id')->paginate(10)->withQueryString(); // Keep search in pagination links
+
+    return view('admin.layouts.management.userManagement', compact('admins'));
+}
+
 
     public function destroy(Admin $admin)
     {
