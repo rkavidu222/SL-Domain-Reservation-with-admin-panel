@@ -28,7 +28,7 @@ class UserController extends Controller
     }
 
     // Paginate results
-    $admins = $query->orderBy('id')->paginate(10)->withQueryString(); // Keep search in pagination links
+    $admins = $query->orderBy('id')->paginate(10)->withQueryString();
 
     return view('admin.layouts.management.userManagement', compact('admins'));
 }
@@ -132,11 +132,24 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'Admin profile updated successfully.');
     }
 
-    public function trash()
-    {
-        $trashedAdmins = Admin::onlyTrashed()->paginate(10);
-        return view('admin.users.trash', compact('trashedAdmins'));
+public function trash(Request $request)
+{
+    $search = $request->input('search');
+
+    $query = Admin::onlyTrashed();
+
+    if ($search) {
+        $query->where(function($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%");
+        });
     }
+
+    $trashedAdmins = $query->paginate(10);
+
+    return view('admin.users.trash', compact('trashedAdmins'));
+}
+
 
     public function restore($id)
     {

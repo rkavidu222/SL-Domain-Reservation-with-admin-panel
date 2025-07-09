@@ -36,6 +36,23 @@
         </div>
     @endif
 
+
+        {{-- Search Form --}}
+        <form method="GET" action="{{ route('admin.users.trash') }}" class="mb-3 d-flex justify-content-end">
+            <input
+                type="text"
+                name="search"
+                class="form-control w-auto"
+                placeholder="Search name, email or role..."
+                value="{{ request('search') }}"
+            >
+            <button type="submit" class="btn btn-primary ms-2">Search</button>
+            @if(request('search'))
+                <a href="{{ route('admin.users.trash') }}" class="btn btn-secondary ms-2">Clear</a>
+            @endif
+        </form>
+
+
     @if($trashedAdmins->isEmpty())
         <div class="alert alert-info text-center">No trashed admins found.</div>
     @else
@@ -84,7 +101,7 @@
     @endif
 
     <div class="d-flex justify-content-center mt-3">
-        {{ $trashedAdmins->links() }}
+        {{ $trashedAdmins->appends(request()->query())->links() }}
     </div>
 </div>
 @endsection

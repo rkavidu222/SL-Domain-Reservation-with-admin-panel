@@ -41,6 +41,15 @@
             text-overflow: ellipsis;
         }
     }
+
+    /* Search form style */
+    form.search-form {
+        max-width: 400px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
 </style>
 
 <div class="admin-management-container">
@@ -63,10 +72,28 @@
         </div>
     @endif
 
+
+
+	{{-- Search Form --}}
+        <form method="GET" action="{{ route('admin.orders.trash') }}" class="mb-3 d-flex justify-content-end">
+            <input
+                type="text"
+                name="search"
+                class="form-control w-auto"
+                placeholder="Search name, email or role..."
+                value="{{ request('search') }}"
+            >
+            <button type="submit" class="btn btn-primary ms-2">Search</button>
+            @if(request('search'))
+                <a href="{{ route('admin.orders.trash') }}" class="btn btn-secondary ms-2">Clear</a>
+            @endif
+        </form>
+
+
     @if($orders->count() > 0)
         <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle text-center">
-                <thead class="table-danger">
+                <thead class="table-light">
                     <tr>
                         <th>#</th>
                         <th class="text-start">Customer Name</th>
@@ -112,7 +139,7 @@
         </div>
 
         <div class="d-flex justify-content-center mt-3">
-            {{ $orders->links() }}
+            {{ $orders->appends(request()->except('page'))->links() }}
         </div>
     @else
         <div class="alert alert-info text-center">

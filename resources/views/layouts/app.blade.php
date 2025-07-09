@@ -9,6 +9,9 @@
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
+  <!-- Bootstrap Icons CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
   @yield('head')
@@ -20,6 +23,7 @@
     .whatsapp-float { position: fixed; bottom: 20px; right: 20px; z-index: 999; }
   </style>
 </head>
+
 <body>
 
   @include('partials.header')

@@ -67,6 +67,15 @@
         </div>
     @endif
 
+    {{-- Search Form --}}
+    <form method="GET" action="{{ route('admin.orders.index') }}" class="mb-3 d-flex justify-content-end">
+        <input type="text" name="search" class="form-control w-auto" placeholder="Search orders..." value="{{ request('search') }}">
+        <button type="submit" class="btn btn-primary ms-2">Search</button>
+        @if(request('search'))
+            <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary ms-2">Clear</a>
+        @endif
+    </form>
+
     @if($orders->count() > 0)
         <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle text-center">
@@ -87,10 +96,10 @@
                     @foreach($orders as $order)
                     <tr>
                         <td>{{ $order->id }}</td>
-                        <td class="text-start text-truncate">{{ $order->first_name }} {{ $order->last_name }}</td>
+                        <td class="text-start text-truncate" style="max-width: 150px;">{{ $order->first_name }} {{ $order->last_name }}</td>
                         <td>{{ $order->email }}</td>
                         <td>{{ $order->mobile ?? '-' }}</td>
-                        <td class="text-start text-truncate">{{ $order->domain_name ?? 'N/A' }}</td>
+                        <td class="text-start text-truncate" style="max-width: 150px;">{{ $order->domain_name ?? 'N/A' }}</td>
                         <td>{{ $order->category ?? '-' }}</td>
                         <td>Rs.{{ number_format($order->price, 2) }}</td>
                         <td>{{ $order->created_at->format('d M Y H:i') }}</td>
@@ -113,7 +122,7 @@
         </div>
 
         <div class="d-flex justify-content-center mt-3">
-            {{ $orders->links() }}
+            {{ $orders->appends(['search' => request('search')])->links() }}
         </div>
     @else
         <div class="alert alert-info text-center">

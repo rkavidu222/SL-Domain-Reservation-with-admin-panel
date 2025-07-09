@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DomainOrder;
-use App\Models\User;       // Import User model
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class DomainOrderController extends Controller
@@ -38,12 +38,27 @@ class DomainOrderController extends Controller
         return redirect()->route('otp.verification.page')->with('success', 'Please verify your OTP.');
     }
 
-    // Admin: List all domain orders (paginated)
-    public function adminIndex()
-    {
-        $orders = DomainOrder::orderBy('created_at', 'asc')->paginate(15);
-        return view('admin.layouts.management.orders', compact('orders'));
-    }
+    // Admin: List all domain orders (paginated) with search
+	public function adminIndex(Request $request)
+	{
+		$search = $request->input('search');
+
+		$orders = DomainOrder::query()
+			->when($search, function($query, $search) {
+				$query->where('first_name', 'like', "%{$search}%")
+					  ->orWhere('last_name', 'like', "%{$search}%")
+					  ->orWhere('email', 'like', "%{$search}%")
+					  ->orWhere('mobile', 'like', "%{$search}%")
+					  ->orWhere('domain_name', 'like', "%{$search}%")
+					  ->orWhere('category', 'like', "%{$search}%");
+			})
+			->orderBy('created_at', 'asc')
+			->paginate(15)
+			->withQueryString();
+
+		return view('admin.layouts.management.orders', compact('orders', 'search'));
+	}
+
 
     // Admin: Show details of a single order
     public function show($id)
@@ -54,31 +69,35 @@ class DomainOrderController extends Controller
 
     // Admin: Delete a domain order (soft delete)
     public function destroy($id)
-    {
-        $order = DomainOrder::findOrFail($id);
+{
+    $order = DomainOrder::findOrFail($id);
+    $order->delete();
+    return redirect()->back()->with('success', 'Order moved to trash.');
+}
 
-        $authUserId = auth()->id();
+    // Admin: View trashed (soft-deleted) orders with search
+	public function trashed(Request $request)
+	{
+		$search = $request->input('search');
 
-        // Check if user exists in users table before assigning deleted_by
-        if ($authUserId && User::where('id', $authUserId)->exists()) {
-            $order->deleted_by = $authUserId;
-        } else {
-            $order->deleted_by = null;
-        }
+		$ordersQuery = DomainOrder::onlyTrashed();
 
-        $order->save();
+		if ($search) {
+			$ordersQuery->where(function ($query) use ($search) {
+				$query->where('first_name', 'like', "%{$search}%")
+					  ->orWhere('last_name', 'like', "%{$search}%")
+					  ->orWhere('email', 'like', "%{$search}%")
+					  ->orWhere('mobile', 'like', "%{$search}%")
+					  ->orWhere('domain_name', 'like', "%{$search}%")
+					  ->orWhere('category', 'like', "%{$search}%");
+			});
+		}
 
-        $order->delete();
+		$orders = $ordersQuery->orderBy('deleted_at', 'desc')->paginate(15);
 
-        return redirect()->back()->with('success', 'Order moved to trash.');
-    }
+		return view('admin.layouts.management.orders_trashed', compact('orders', 'search'));
+	}
 
-    // Admin: View trashed (soft-deleted) orders
-    public function trashed()
-    {
-        $orders = DomainOrder::onlyTrashed()->orderBy('deleted_at', 'desc')->paginate(15);
-        return view('admin.layouts.management.orders_trashed', compact('orders'));
-    }
 
     // Admin: Restore a soft-deleted order
     public function restore($id)
