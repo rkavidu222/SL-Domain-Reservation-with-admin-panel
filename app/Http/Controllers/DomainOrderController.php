@@ -40,24 +40,43 @@ class DomainOrderController extends Controller
 
     // Admin: List all domain orders (paginated) with search
 	public function adminIndex(Request $request)
-	{
-		$search = $request->input('search');
+{
+    $search = $request->input('search');
+    $category = $request->input('category');
+    $dateFrom = $request->input('date_from');
+    $dateTo = $request->input('date_to');
 
-		$orders = DomainOrder::query()
-			->when($search, function($query, $search) {
-				$query->where('first_name', 'like', "%{$search}%")
-					  ->orWhere('last_name', 'like', "%{$search}%")
-					  ->orWhere('email', 'like', "%{$search}%")
-					  ->orWhere('mobile', 'like', "%{$search}%")
-					  ->orWhere('domain_name', 'like', "%{$search}%")
-					  ->orWhere('category', 'like', "%{$search}%");
-			})
-			->orderBy('created_at', 'asc')
-			->paginate(15)
-			->withQueryString();
+    $orders = DomainOrder::query();
 
-		return view('admin.layouts.management.orders', compact('orders', 'search'));
-	}
+    if ($search) {
+        $orders->where(function ($q) use ($search) {
+            $q->where('first_name', 'like', "%{$search}%")
+              ->orWhere('last_name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%")
+              ->orWhere('mobile', 'like', "%{$search}%")
+              ->orWhere('domain_name', 'like', "%{$search}%")
+              ->orWhere('category', 'like', "%{$search}%");
+        });
+    }
+
+    if ($category) {
+        $orders->where('category', $category);
+    }
+
+    if ($dateFrom) {
+        $orders->whereDate('created_at', '>=', $dateFrom);
+    }
+
+    if ($dateTo) {
+        $orders->whereDate('created_at', '<=', $dateTo);
+    }
+
+    $orders = $orders->orderBy('created_at', 'asc')->paginate(10)->withQueryString();
+
+    return view('admin.layouts.management.orders', compact('orders', 'search', 'category', 'dateFrom', 'dateTo'));
+}
+
+
 
 
     // Admin: Show details of a single order
@@ -75,29 +94,12 @@ class DomainOrderController extends Controller
     return redirect()->back()->with('success', 'Order moved to trash.');
 }
 
-    // Admin: View trashed (soft-deleted) orders with search
-	public function trashed(Request $request)
-	{
-		$search = $request->input('search');
-
-		$ordersQuery = DomainOrder::onlyTrashed();
-
-		if ($search) {
-			$ordersQuery->where(function ($query) use ($search) {
-				$query->where('first_name', 'like', "%{$search}%")
-					  ->orWhere('last_name', 'like', "%{$search}%")
-					  ->orWhere('email', 'like', "%{$search}%")
-					  ->orWhere('mobile', 'like', "%{$search}%")
-					  ->orWhere('domain_name', 'like', "%{$search}%")
-					  ->orWhere('category', 'like', "%{$search}%");
-			});
-		}
-
-		$orders = $ordersQuery->orderBy('deleted_at', 'desc')->paginate(15);
-
-		return view('admin.layouts.management.orders_trashed', compact('orders', 'search'));
-	}
-
+    // Admin: View trashed (soft-deleted) orders
+    public function trashed()
+    {
+        $orders = DomainOrder::onlyTrashed()->orderBy('deleted_at', 'desc')->paginate(15);
+        return view('admin.layouts.management.orders_trashed', compact('orders'));
+    }
 
     // Admin: Restore a soft-deleted order
     public function restore($id)
