@@ -4,7 +4,7 @@
 
 @section('content')
 <style>
-    /* Your full style remains unchanged */
+
     .admin-management-container {
         max-width: 1400px;
         margin: 1rem auto 3rem auto;
@@ -241,18 +241,18 @@
         // Category auto-submit
         document.getElementById('category').addEventListener('change', () => filterForm.submit());
 
-        // Date auto-submit
+
         document.getElementById('date_from').addEventListener('change', () => filterForm.submit());
         document.getElementById('date_to').addEventListener('change', () => filterForm.submit());
 
-        // Search input debounce
+
         const searchInput = document.getElementById('search');
         let timeout = null;
 
         searchInput.addEventListener('input', function () {
             clearTimeout(timeout);
             timeout = setTimeout(() => {
-                // Trigger form submit only if search value is not empty
+
                 if (searchInput.value.length >= 2 || searchInput.value.length === 0) {
                     filterForm.submit();
                 }

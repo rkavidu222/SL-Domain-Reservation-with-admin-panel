@@ -40,82 +40,115 @@ class DomainOrderController extends Controller
 
     // Admin: List all domain orders (paginated) with search
 	public function adminIndex(Request $request)
-{
-    $search = $request->input('search');
-    $category = $request->input('category');
-    $dateFrom = $request->input('date_from');
-    $dateTo = $request->input('date_to');
+	{
+		$search = $request->input('search');
+		$category = $request->input('category');
+		$dateFrom = $request->input('date_from');
+		$dateTo = $request->input('date_to');
 
-    $orders = DomainOrder::query();
+		$orders = DomainOrder::query();
 
-    if ($search) {
-        $orders->where(function ($q) use ($search) {
-            $q->where('first_name', 'like', "%{$search}%")
-              ->orWhere('last_name', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%")
-              ->orWhere('mobile', 'like', "%{$search}%")
-              ->orWhere('domain_name', 'like', "%{$search}%")
-              ->orWhere('category', 'like', "%{$search}%");
-        });
-    }
+		if ($search) {
+			$orders->where(function ($q) use ($search) {
+				$q->where('first_name', 'like', "%{$search}%")
+				  ->orWhere('last_name', 'like', "%{$search}%")
+				  ->orWhere('email', 'like', "%{$search}%")
+				  ->orWhere('mobile', 'like', "%{$search}%")
+				  ->orWhere('domain_name', 'like', "%{$search}%")
+				  ->orWhere('category', 'like', "%{$search}%");
+			});
+		}
 
-    if ($category) {
-        $orders->where('category', $category);
-    }
+		if ($category) {
+			$orders->where('category', $category);
+		}
 
-    if ($dateFrom) {
-        $orders->whereDate('created_at', '>=', $dateFrom);
-    }
+		if ($dateFrom) {
+			$orders->whereDate('created_at', '>=', $dateFrom);
+		}
 
-    if ($dateTo) {
-        $orders->whereDate('created_at', '<=', $dateTo);
-    }
+		if ($dateTo) {
+			$orders->whereDate('created_at', '<=', $dateTo);
+		}
 
-    $orders = $orders->orderBy('created_at', 'asc')->paginate(10)->withQueryString();
+		$orders = $orders->orderBy('created_at', 'asc')->paginate(10)->withQueryString();
 
-    return view('admin.layouts.management.orders', compact('orders', 'search', 'category', 'dateFrom', 'dateTo'));
-}
-
-
+		return view('admin.layouts.management.orders', compact('orders', 'search', 'category', 'dateFrom', 'dateTo'));
+	}
 
 
-    // Admin: Show details of a single order
-    public function show($id)
-    {
-        $order = DomainOrder::findOrFail($id);
-        return view('admin.layouts.management.order_show', compact('order'));
-    }
 
-    // Admin: Delete a domain order (soft delete)
-    public function destroy($id)
-{
-    $order = DomainOrder::findOrFail($id);
-    $order->delete();
-    return redirect()->back()->with('success', 'Order moved to trash.');
-}
 
-    // Admin: View trashed (soft-deleted) orders
-    public function trashed()
-    {
-        $orders = DomainOrder::onlyTrashed()->orderBy('deleted_at', 'desc')->paginate(15);
-        return view('admin.layouts.management.orders_trashed', compact('orders'));
-    }
+		// Admin: Show details of a single order
+		public function show($id)
+		{
+			$order = DomainOrder::findOrFail($id);
+			return view('admin.layouts.management.order_show', compact('order'));
+		}
 
-    // Admin: Restore a soft-deleted order
-    public function restore($id)
-    {
-        $order = DomainOrder::onlyTrashed()->findOrFail($id);
-        $order->restore();
+		// Admin: Delete a domain order (soft delete)
+		public function destroy($id)
+	{
+		$order = DomainOrder::findOrFail($id);
+		$order->delete();
+		return redirect()->back()->with('success', 'Order moved to trash.');
+	}
 
-        return redirect()->route('admin.orders.index')->with('success', 'Order restored successfully.');
-    }
+		// Admin: View trashed (soft-deleted) orders
+		public function trashed(Request $request)
+	{
+		$search    = $request->input('search');
+		$category  = $request->input('category');
+		$dateFrom  = $request->input('date_from');
+		$dateTo    = $request->input('date_to');
 
-    // Admin: Permanently delete a soft-deleted order
-    public function forceDelete($id)
-    {
-        $order = DomainOrder::onlyTrashed()->findOrFail($id);
-        $order->forceDelete();
+		$orders = DomainOrder::onlyTrashed()
+			->when($search, function ($query, $search) {
+				$query->where(function ($q) use ($search) {
+					$q->where('first_name', 'like', "%{$search}%")
+					  ->orWhere('last_name', 'like', "%{$search}%")
+					  ->orWhere('email', 'like', "%{$search}%")
+					  ->orWhere('mobile', 'like', "%{$search}%")
+					  ->orWhere('domain_name', 'like', "%{$search}%");
+				});
+			})
+			->when($category, function ($query, $category) {
+				$query->where('category', $category);
+			})
+			->when($dateFrom, function ($query, $dateFrom) {
+				$query->whereDate('deleted_at', '>=', $dateFrom);
+			})
+			->when($dateTo, function ($query, $dateTo) {
+				$query->whereDate('deleted_at', '<=', $dateTo);
+			})
+			   ->orderBy('deleted_at', 'desc')
+				->paginate(10)
+				->appends(request()->except('page'));
+			return view('admin.layouts.management.orders_trashed', compact('orders', 'search', 'category', 'dateFrom', 'dateTo'));
+	}
 
-        return redirect()->route('admin.orders.trash')->with('success', 'Order permanently deleted.');
-    }
-}
+
+		// Admin: Restore a soft-deleted order
+		public function restore($id)
+		{
+			$order = DomainOrder::onlyTrashed()->findOrFail($id);
+			$order->restore();
+
+			$trashedCount = DomainOrder::onlyTrashed()->count();
+
+			if ($trashedCount > 0) {
+				return redirect()->route('admin.orders.trash')->with('success', 'Order restored successfully.');
+			} else {
+				return redirect()->route('admin.orders.index')->with('success', 'Order restored successfully. Trash is now empty.');
+			}
+		}
+
+		// Admin: Permanently delete a soft-deleted order
+		public function forceDelete($id)
+		{
+			$order = DomainOrder::onlyTrashed()->findOrFail($id);
+			$order->forceDelete();
+
+			return redirect()->route('admin.orders.trash')->with('success', 'Order permanently deleted.');
+		}
+	}
