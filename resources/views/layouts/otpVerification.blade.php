@@ -131,7 +131,7 @@
   <form action="{{ route('payment.details') }}" method="POST" id="otpForm">
     @csrf
     <div class="mb-3">
-      <input type="text" class="otp-input" id="otp" name="otp" placeholder="XXXXX6" required maxlength="6" minlength="4" pattern="\d+">
+      <input type="text" class="otp-input" id="otp" name="otp" placeholder="XXXXXX" required maxlength="6" minlength="4" pattern="\d+">
     </div>
 
     <button type="submit" class="verify-btn" id="verifyBtn">

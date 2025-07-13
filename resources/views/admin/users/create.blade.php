@@ -30,31 +30,30 @@
 
 
     .btn-add-admin {
-        background: #28a745;
-        font-weight: 700;
-        padding: 0.6rem 1.5rem;
-        border-radius: 50px;
-        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
-        transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 1rem;
-        border: none;
-        cursor: pointer;
-        text-decoration: none;
-        user-select: none;
-    }
-    .btn-add-admin:hover {
-        background: #218838;
-        box-shadow: 0 6px 12px rgba(33, 136, 56, 0.6);
-        text-decoration: none;
-        color: white;
-    }
-    .btn-add-admin:focus {
-        outline: none;
-        box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.5);
-    }
+		background-color: #28a745;
+		color: white;
+		font-weight: 700;
+		padding: 0.6rem 1.5rem;
+		border-radius: 50px;
+		border: none;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 1rem;
+		text-decoration: none;
+		user-select: none;
+		transition: none;
+	}
+
+	.btn-add-admin:hover,
+	.btn-add-admin:focus {
+		background-color: #28a745;
+		color: white;
+		box-shadow: none;
+		outline: none;
+		text-decoration: none;
+	}
 
 
     form.search-form {

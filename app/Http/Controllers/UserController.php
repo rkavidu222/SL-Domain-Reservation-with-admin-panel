@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -132,20 +133,21 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'Admin profile updated successfully.');
     }
 
-public function trash(Request $request)
-{
-    $search = $request->input('search');
+    public function trash(Request $request)
+	{
+		$query = Admin::onlyTrashed();
 
-    $query = Admin::onlyTrashed();
+		// Apply search filter
+		if ($request->filled('search')) {
+			$search = $request->input('search');
+			$query->where(function ($q) use ($search) {
+				$q->where('name', 'like', "%{$search}%")
+				  ->orWhere('email', 'like', "%{$search}%")
+				  ->orWhere('role', 'like', "%{$search}%");
+			});
+		}
 
-    if ($search) {
-        $query->where(function($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%");
-        });
-    }
-
-    $trashedAdmins = $query->paginate(10);
+    $trashedAdmins = $query->orderByDesc('deleted_at')->paginate(10);
 
     return view('admin.users.trash', compact('trashedAdmins'));
 }
@@ -166,4 +168,50 @@ public function trash(Request $request)
 
         return redirect()->route('admin.users.trash')->with('success', 'Admin permanently deleted.');
     }
+
+
+
+
+
+
+	public function create()
+    {
+        $current = auth()->guard('admin')->user();
+
+        if ($current->role !== 'super_admin') {
+            abort(403, 'Only Super Admins can add new admins.');
+        }
+
+        return view('admin.users.create');
+    }
+
+    // Store new admin
+    public function store(Request $request)
+    {
+        $current = auth()->guard('admin')->user();
+
+        if ($current->role !== 'super_admin') {
+            abort(403, 'Only Super Admins can add new admins.');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:admins,email',
+            'password' => 'required|string|min:6|confirmed',
+            'role' => 'required|in:admin,super_admin',
+        ]);
+
+        Admin::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
+            'is_suspended' => false,
+        ]);
+
+        return redirect()->route('admin.users.index')->with('success', 'Admin added successfully.');
+    }
+
+
+
 }
