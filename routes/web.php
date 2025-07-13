@@ -25,6 +25,7 @@ Route::get('/domain/contact-info', [DomainOrderController::class, 'showContactFo
 Route::post('/domain/contact-submit', [DomainOrderController::class, 'store'])->name('domain.contact.submit');
 
 Route::get('/otp-verification', [OtpController::class, 'showVerificationForm'])->name('otp.verification.page');
+Route::post('/otp-resend', [OtpController::class, 'resendOtp'])->name('otp.resend');  // Added this route for resend AJAX
 
 // Contact form routes (separate from domain order contact info)
 Route::get('/contact-information', [ContactController::class, 'showForm'])->name('contact.page');
@@ -65,8 +66,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Domain Prices Management
         Route::get('domain-prices', [DomainPriceController::class, 'index'])->name('domain_prices.index');
         Route::post('domain-prices', [DomainPriceController::class, 'update'])->name('domain_prices.update');
-		Route::put('/domain-prices/{id}/update', [DomainPriceController::class, 'updateSingle'])->name('domain_prices.update.single');
-
+        Route::put('/domain-prices/{id}/update', [DomainPriceController::class, 'updateSingle'])->name('domain_prices.update.single');
 
         // User management routes for all admins
         Route::get('users', [UserController::class, 'index'])->name('users.index');
@@ -74,9 +74,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('users', [UserController::class, 'store'])->name('users.store');
         Route::get('users/{admin}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('users/{admin}', [UserController::class, 'update'])->name('users.update');
-		Route::get('users/create', [UserController::class, 'create'])->name('users.create');
-		Route::post('users', [UserController::class, 'store'])->name('users.store');
 
+        // Duplicated user routes kept but commented out to prevent route conflicts
+        // Route::get('users/create', [UserController::class, 'create'])->name('users.create');
+        // Route::post('users', [UserController::class, 'store'])->name('users.store');
 
         // Soft delete (trash) functionality for users
         Route::prefix('users')->group(function () {

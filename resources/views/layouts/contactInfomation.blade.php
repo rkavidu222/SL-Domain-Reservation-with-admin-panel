@@ -212,10 +212,34 @@
             @enderror
         </div>
 
-        <button type="submit" class="submit-btn">
-            <i class="bi bi-check-circle me-2"></i>Continue
-        </button>
+       <button type="submit" class="submit-btn" id="submitBtn">
+			<i class="bi bi-check-circle me-2"></i>
+			<span class="btn-text">Continue</span>
+			<span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true" id="btnSpinner"></span>
+		</button>
+
+
     </form>
 </div>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const btnText = submitBtn.querySelector('.btn-text');
+
+        form.addEventListener('submit', function () {
+            // Disable the button to prevent multiple clicks
+            submitBtn.disabled = true;
+
+            // Hide button text and show spinner
+            btnText.textContent = 'Please wait...';
+            btnSpinner.classList.remove('d-none');
+        });
+    });
+</script>
 
 @endsection
