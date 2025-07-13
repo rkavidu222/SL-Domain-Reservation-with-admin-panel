@@ -35,27 +35,29 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.domain_prices.update') }}">
-        @csrf
-        @foreach($prices as $price)
-            <div class="card mb-3">
+    @foreach($prices as $price)
+        <form method="POST" action="{{ route('admin.domain_prices.update.single', $price->id) }}" class="mb-4">
+            @csrf
+            @method('PUT')
+            <div class="card">
                 <div class="card-header fw-bold">{{ $price->category }}</div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Old Price</label>
-                            <input type="number" step="0.01" class="form-control" name="prices[{{ $price->id }}][old_price]" value="{{ $price->old_price }}">
+                            <input type="number" step="0.01" class="form-control" name="old_price" value="{{ $price->old_price }}" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">New Price</label>
-                            <input type="number" step="0.01" class="form-control" name="prices[{{ $price->id }}][new_price]" value="{{ $price->new_price }}">
+                            <input type="number" step="0.01" class="form-control" name="new_price" value="{{ $price->new_price }}" required>
                         </div>
                     </div>
                 </div>
+                <div class="card-footer text-end">
+                    <button type="submit" class="btn btn-success">Update {{ $price->category }}</button>
+                </div>
             </div>
-        @endforeach
-
-        <button type="submit" class="btn btn-success">Update Prices</button>
-    </form>
+        </form>
+    @endforeach
 </div>
 @endsection

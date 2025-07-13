@@ -31,4 +31,21 @@ class DomainPriceController extends Controller
 
         return redirect()->back()->with('success', 'Prices updated successfully.');
     }
+
+	public function updateSingle(Request $request, $id)
+{
+    $request->validate([
+        'old_price' => 'required|numeric',
+        'new_price' => 'required|numeric',
+    ]);
+
+    $price = DomainPrice::findOrFail($id);
+    $price->update([
+        'old_price' => $request->old_price,
+        'new_price' => $request->new_price,
+    ]);
+
+    return redirect()->back()->with('success', "{$price->category} price updated successfully.");
+}
+
 }
