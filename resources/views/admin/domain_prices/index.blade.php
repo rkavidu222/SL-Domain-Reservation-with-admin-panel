@@ -24,9 +24,13 @@
 </style>
 
 <div class="management-container">
-    <h2 class="text-primary text-center mb-4 d-flex justify-content-center align-items-center gap-2">
-        <i class="bi bi-currency-dollar fs-4"></i> Manage Domain Pricing
-    </h2>
+	<h2 class="mb-4 d-flex justify-content-center align-items-center gap-2 text-primary fw-bold flex-wrap text-center">
+		<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-tag-fill" viewBox="0 0 16 16" width="24" height="24">
+			<path d="M2 1a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7.414 7.414a2 2 0 0 0 2.828 0l4.586-4.586a2 2 0 0 0 0-2.828L7.121 1.293A1 1 0 0 0 6.414 1H2zm3.5 3a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+		</svg>
+		 Domain Price Management
+	</h2>
+
 
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

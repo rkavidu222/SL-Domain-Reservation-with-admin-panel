@@ -68,6 +68,7 @@ class DomainOrderController extends Controller
         'otp' => $otp,
         'mobile' => $normalizedMobile,
         'email' => $validated['email'],
+		'otp_expires_at' => now()->addMinutes(5),
     ]);
 
     // Send SMS
@@ -214,4 +215,15 @@ class DomainOrderController extends Controller
 
         return redirect()->route('admin.orders.trash')->with('success', 'Order permanently deleted.');
     }
+
+
+
+	public function showPaymentDetails($orderId)
+{
+    $order = DomainOrder::findOrFail($orderId);
+
+    return view('layouts.paymentDetails', compact('order'));
+}
+
+
 }

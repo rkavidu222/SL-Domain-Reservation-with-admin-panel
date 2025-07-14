@@ -25,40 +25,43 @@ class OtpController extends Controller
     }
 
     // Verify OTP and proceed with order saving and payment details view
-    public function paymentDetails(Request $request)
-    {
-        $sessionOtp = session('otp');
-        $expiresAt = session('otp_expires_at');
-        $enteredOtp = $request->input('otp');
+   public function paymentDetails(Request $request)
+	{
+		$sessionOtp = session('otp');
+		$expiresAt = session('otp_expires_at');
+		$enteredOtp = $request->input('otp');
 
-        if (!$expiresAt || now()->gt($expiresAt)) {
-            return redirect()->back()->withErrors(['otp' => 'OTP expired. Please request a new one.']);
-        }
+		if (!$expiresAt || now()->gt($expiresAt)) {
+			return redirect()->back()->withErrors(['otp' => 'OTP expired. Please request a new one.']);
+		}
 
-        if ($enteredOtp == $sessionOtp) {
-            $data = session('domain_order_data');
+		if ($enteredOtp == $sessionOtp) {
+			$data = session('domain_order_data');
 
-            if ($data) {
-                DomainOrder::create([
-                    'domain_name' => $data['domain_name'],
-                    'price'       => $data['price'],
-                    'category'    => $data['category'],
-                    'first_name'  => $data['first_name'],
-                    'last_name'   => $data['last_name'],
-                    'email'       => $data['email'],
-                    'mobile'      => $data['mobile'],
-                ]);
+			if ($data) {
+				$order = DomainOrder::create([
+					'domain_name' => $data['domain_name'],
+					'price'       => $data['price'],
+					'category'    => $data['category'],
+					'first_name'  => $data['first_name'],
+					'last_name'   => $data['last_name'],
+					'email'       => $data['email'],
+					'mobile'      => $data['mobile'],
+				]);
 
-                session()->forget(['otp', 'otp_expires_at', 'domain_order_data', 'email', 'mobile']);
+				session()->forget(['otp', 'otp_expires_at', 'domain_order_data', 'email', 'mobile']);
 
-                return view('layouts.paymentDetails')->with('success', 'OTP verified. Order saved successfully.');
-            } else {
-                return redirect()->route('contact.form')->withErrors(['session' => 'Session expired. Please try again.']);
-            }
-        } else {
-            return redirect()->back()->withErrors(['otp' => 'Invalid OTP. Please try again.']);
-        }
-    }
+				return view('layouts.paymentDetails', [
+					'success' => 'OTP verified. Order saved successfully.',
+					'order' => $order,
+				]);
+			} else {
+				return redirect()->route('contact.form')->withErrors(['session' => 'Session expired. Please try again.']);
+			}
+		} else {
+			return redirect()->back()->withErrors(['otp' => 'Invalid OTP. Please try again.']);
+		}
+	}
 
     // Resend OTP and reset timer, send SMS again
     public function resendOtp(Request $request)
@@ -108,11 +111,8 @@ class OtpController extends Controller
         ]);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
+        $response = curl_exec($ch);
 
-        //$response = curl_exec($ch);
-        //if ($response === false) {
-          //  \Log::error('SMS sending failed: ' . curl_error($ch));
-        //}
-       curl_close($ch);
+        curl_close($ch);
     }
 }
