@@ -109,38 +109,60 @@ class DomainOrderController extends Controller
     public function adminIndex(Request $request)
     {
         $search = $request->input('search');
-        $category = $request->input('category');
-        $dateFrom = $request->input('date_from');
-        $dateTo = $request->input('date_to');
+    $category = $request->input('category');
+    $dateFrom = $request->input('date_from');
+    $dateTo = $request->input('date_to');
 
-        $orders = DomainOrder::query();
+    $baseQuery = DomainOrder::query();
 
-        if ($search) {
-            $orders->where(function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('mobile', 'like', "%{$search}%")
-                  ->orWhere('domain_name', 'like', "%{$search}%")
-                  ->orWhere('category', 'like', "%{$search}%");
-            });
-        }
+    if ($search) {
+        $baseQuery->where(function ($q) use ($search) {
+            $q->where('first_name', 'like', "%{$search}%")
+              ->orWhere('last_name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%")
+              ->orWhere('mobile', 'like', "%{$search}%")
+              ->orWhere('domain_name', 'like', "%{$search}%")
+              ->orWhere('category', 'like', "%{$search}%");
+        });
+    }
 
-        if ($category) {
-            $orders->where('category', $category);
-        }
+    if ($category) {
+        $baseQuery->where('category', $category);
+    }
 
-        if ($dateFrom) {
-            $orders->whereDate('created_at', '>=', $dateFrom);
-        }
+    if ($dateFrom) {
+        $baseQuery->whereDate('created_at', '>=', $dateFrom);
+    }
 
-        if ($dateTo) {
-            $orders->whereDate('created_at', '<=', $dateTo);
-        }
+    if ($dateTo) {
+        $baseQuery->whereDate('created_at', '<=', $dateTo);
+    }
 
-        $orders = $orders->orderBy('created_at', 'asc')->paginate(10)->withQueryString();
+    // Clone query for each status subset
+    $allOrders = (clone $baseQuery)->orderBy('created_at', 'desc')->paginate(10, ['*'], 'all_page')->withQueryString();
 
-        return view('admin.layouts.management.orders', compact('orders', 'search', 'category', 'dateFrom', 'dateTo'));
+    // Assuming you have a payment_status column with values like 'paid' and 'pending'
+    $paidOrders = (clone $baseQuery)
+        ->where('payment_status', 'paid')
+        ->orderBy('created_at', 'desc')
+        ->paginate(10, ['*'], 'paid_page')
+        ->withQueryString();
+
+    $pendingOrders = (clone $baseQuery)
+        ->where('payment_status', 'pending')
+        ->orderBy('created_at', 'desc')
+        ->paginate(10, ['*'], 'pending_page')
+        ->withQueryString();
+
+    return view('admin.layouts.management.orders', [
+        'orders' => $allOrders,
+        'paidOrders' => $paidOrders,
+        'pendingOrders' => $pendingOrders,
+        'search' => $search,
+        'category' => $category,
+        'dateFrom' => $dateFrom,
+        'dateTo' => $dateTo,
+    ]);
     }
 
     // Admin: Show details of a single order

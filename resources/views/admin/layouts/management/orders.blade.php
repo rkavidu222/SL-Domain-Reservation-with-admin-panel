@@ -75,13 +75,16 @@
         min-width: 100px;
     }
 
+    /* Responsive horizontal scroll for small devices */
     .table-responsive {
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     table.table {
         width: 100%;
         border-collapse: collapse;
+        min-width: 600px; /* Ensure enough width for mobile scroll */
     }
 
     table.table thead {
@@ -130,6 +133,25 @@
         z-index: 11;
         box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
     }
+
+    #ordersTab .nav-link {
+        color: #1e40af;
+        background-color: #dbeafe;
+        border: 1px solid transparent;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    #ordersTab .nav-link:hover {
+        background-color: #bfdbfe;
+        color: #1e3a8a;
+    }
+
+    #ordersTab .nav-link.active {
+        color: #ffffff !important;
+        background-color: #2563eb !important;
+        border-color: #2563eb !important;
+        font-weight: 600;
+    }
 </style>
 
 <div class="admin-management-container">
@@ -138,7 +160,7 @@
             <path d="M0 1.5A.5.5 0 0 1 .5 1h1a.5.5 0 0 1 .485.379L2.89 6H14.5a.5.5 0 0 1 .49.598l-1.5 7A.5.5 0 0 1 13 14H4a.5.5 0 0 1-.491-.408L1.01 2H.5a.5.5 0 0 1-.5-.5z"/>
             <path d="M5 12a2 2 0 1 0 4 0H5z"/>
         </svg>
-        All Orders
+        Order Management
     </h2>
 
     {{-- Filter UI --}}
@@ -176,64 +198,101 @@
         </div>
     </form>
 
-    {{-- Orders Table --}}
-    @if($orders->count() > 0)
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center">
-            <thead class="table-light">
-                <tr>
-                    <th>#</th>
-                    <th class="text-start">Customer Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th class="text-start">Domain</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Order Date</th>
-                    <th style="min-width: 160px;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($orders as $order)
-                <tr>
-                    <td>{{ $order->id }}</td>
-                    <td class="text-start">{{ $order->first_name }}</td>
-                    <td>{{ $order->email }}</td>
-                    <td>{{ $order->mobile ?? '-' }}</td>
-                    <td class="text-start">{{ $order->domain_name ?? 'N/A' }}</td>
-                    <td>{{ $order->category ?? '-' }}</td>
-                    <td>Rs.{{ number_format($order->price, 2) }}</td>
-                    <td>{{ $order->created_at->format('d M Y') }}</td>
-                    <td>
-                        <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-info mb-1">
-                            <i class="bi bi-eye"></i> View
-                        </a>
-                        <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this order?');">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-danger mb-1" type="submit">
-                                <i class="bi bi-trash"></i> Delete
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
+    {{-- Tabs navigation --}}
+    <ul class="nav nav-tabs mb-4" id="ordersTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">
+          All Orders ({{ $orders->total() }})
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="paid-tab" data-bs-toggle="tab" data-bs-target="#paid" type="button" role="tab" aria-controls="paid" aria-selected="false">
+          Paid Orders ({{ $paidOrders->total() }})
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="false">
+          Pending Orders ({{ $pendingOrders->total() }})
+        </button>
+      </li>
+    </ul>
 
-    {{-- Pagination --}}
-    @if ($orders->hasPages())
-    <div class="d-flex justify-content-end mt-4">
-        {{ $orders->appends(request()->query())->links() }}
-    </div>
-    @endif
-
-    @else
-        <div class="alert alert-info text-center mt-4">
-            No orders found.
+    <div class="tab-content" id="ordersTabContent">
+      {{-- All Orders Tab --}}
+      <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+        @include('admin.layouts.management.partials.orders_table', ['orders' => $orders])
+        @if ($orders->hasPages())
+        <div class="d-flex justify-content-end mt-3">
+          {{ $orders->appends(request()->query())->links() }}
         </div>
-    @endif
+        @endif
+      </div>
+
+      {{-- Paid Orders Tab --}}
+      <div class="tab-pane fade" id="paid" role="tabpanel" aria-labelledby="paid-tab">
+        @include('admin.layouts.management.partials.orders_table', ['orders' => $paidOrders])
+        @if ($paidOrders->hasPages())
+        <div class="d-flex justify-content-end mt-3">
+          {{ $paidOrders->appends(request()->query())->links() }}
+        </div>
+        @endif
+      </div>
+
+      {{-- Pending Orders Tab --}}
+      <div class="tab-pane fade" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+        @include('admin.layouts.management.partials.orders_table', ['orders' => $pendingOrders])
+        @if ($pendingOrders->hasPages())
+        <div class="d-flex justify-content-end mt-3">
+          {{ $pendingOrders->appends(request()->query())->links() }}
+        </div>
+        @endif
+      </div>
+    </div>
+</div>
+
+{{-- Order Details Modal --}}
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Order ID</dt>
+          <dd class="col-sm-8" id="modal-order-id"></dd>
+
+          <dt class="col-sm-4">Customer Name</dt>
+          <dd class="col-sm-8" id="modal-customer-name"></dd>
+
+          <dt class="col-sm-4">Email</dt>
+          <dd class="col-sm-8" id="modal-email"></dd>
+
+          <dt class="col-sm-4">Phone</dt>
+          <dd class="col-sm-8" id="modal-phone"></dd>
+
+          <dt class="col-sm-4">Domain</dt>
+          <dd class="col-sm-8" id="modal-domain"></dd>
+
+          <dt class="col-sm-4">Category</dt>
+          <dd class="col-sm-8" id="modal-category"></dd>
+
+          <dt class="col-sm-4">Price</dt>
+          <dd class="col-sm-8" id="modal-price"></dd>
+
+          <dt class="col-sm-4">Order Date</dt>
+          <dd class="col-sm-8" id="modal-order-date"></dd>
+
+          <dt class="col-sm-4">Payment Status</dt>
+          <dd class="col-sm-8" id="modal-payment-status"></dd>
+        </dl>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -254,6 +313,45 @@
                 }
             }, 600);
         });
+
+        // Modal logic for viewing order details
+        const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+        document.querySelectorAll('.btn-view-order').forEach(button => {
+          button.addEventListener('click', function () {
+            const order = JSON.parse(this.dataset.order);
+
+            document.getElementById('modal-order-id').textContent = order.id || '-';
+            document.getElementById('modal-customer-name').textContent = `${order.first_name} ${order.last_name ?? ''}`.trim();
+            document.getElementById('modal-email').textContent = order.email || '-';
+            document.getElementById('modal-phone').textContent = order.mobile || '-';
+            document.getElementById('modal-domain').textContent = order.domain_name || '-';
+            document.getElementById('modal-category').textContent = order.category || '-';
+            document.getElementById('modal-price').textContent = order.price ? 'Rs.' + parseFloat(order.price).toFixed(2) : '-';
+            document.getElementById('modal-order-date').textContent = order.created_at ? new Date(order.created_at).toLocaleDateString() : '-';
+            document.getElementById('modal-payment-status').textContent = order.payment_status ? order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1) : '-';
+
+            modal.show();
+          });
+        });
+
+        // Remember last active tab on page reload using URL hash
+        const urlHash = window.location.hash;
+        if (urlHash) {
+          const triggerEl = document.querySelector(`button[data-bs-target="${urlHash}"]`);
+          if (triggerEl) {
+            const tab = new bootstrap.Tab(triggerEl);
+            tab.show();
+          }
+        }
+
+        // Update URL hash on tab change
+        const tabButtons = document.querySelectorAll('#ordersTab button[data-bs-toggle="tab"]');
+        tabButtons.forEach(btn => {
+          btn.addEventListener('shown.bs.tab', function (event) {
+            history.replaceState(null, null, event.target.getAttribute('data-bs-target'));
+          });
+        });
     });
 </script>
+
 @endsection

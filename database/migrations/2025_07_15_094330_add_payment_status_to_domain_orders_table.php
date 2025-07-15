@@ -4,19 +4,25 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddCategoryToDomainOrdersTable extends Migration
+class AddPaymentStatusToDomainOrdersTable extends Migration
 {
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
     public function up()
     {
         Schema::table('domain_orders', function (Blueprint $table) {
-            $table->string('category', 50)->after('price')->nullable(false);
+            $table->string('payment_status')->default('pending')->after('price');
         });
     }
 
     public function down()
     {
         Schema::table('domain_orders', function (Blueprint $table) {
-            $table->dropColumn('category');
+            $table->dropColumn('payment_status');
         });
     }
+
 }

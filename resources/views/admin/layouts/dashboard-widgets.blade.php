@@ -8,7 +8,7 @@
       <div class="col-lg-3 col-12 mb-3">
         <div class="small-box text-bg-primary">
           <div class="inner">
-            <h3>2</h3>
+            <h3>20</h3>
             <p>Admin</p>
           </div>
           <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
