@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DomainPriceController;
+use App\Http\Controllers\Admin\DashboardController; // Added
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\RegisterController;
 use App\Http\Controllers\UserController;
@@ -58,10 +59,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Logout
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-        // Dashboard view
-        Route::get('dashboard', function () {
-            return view('admin.layouts.dashboard');
-        })->name('dashboard');
+        // Dashboard view (FIXED: call DashboardController@index to pass data)
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Domain Prices Management
         Route::get('domain-prices', [DomainPriceController::class, 'index'])->name('domain_prices.index');
@@ -74,10 +73,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('users', [UserController::class, 'store'])->name('users.store');
         Route::get('users/{admin}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('users/{admin}', [UserController::class, 'update'])->name('users.update');
-
-        // Duplicated user routes kept but commented out to prevent route conflicts
-        // Route::get('users/create', [UserController::class, 'create'])->name('users.create');
-        // Route::post('users', [UserController::class, 'store'])->name('users.store');
 
         // Soft delete (trash) functionality for users
         Route::prefix('users')->group(function () {
