@@ -163,4 +163,7 @@ class DomainOrderController extends Controller
         $order = DomainOrder::findOrFail($orderId);
         return view('layouts.paymentDetails', compact('order'));
     }
+
+
+
 }
