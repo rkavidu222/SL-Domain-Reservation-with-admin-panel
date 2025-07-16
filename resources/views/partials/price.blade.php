@@ -83,7 +83,7 @@
     <h2 class="mb-2 text-center text-primary fs-3 fw-semibold">Search .LK Domain</h2><br>
 
     <div class="mb-4 text-center">
-      <input type="text" id="domainInput" class="form-control" placeholder="Enter your domain" />
+      <input type="text" id="domainInput" class="form-control" placeholder="Enter your domain without .LK " />
       <button id="searchBtn" class="btn btn-primary mt-3">Search</button>
     </div>
 
@@ -180,94 +180,118 @@
 
       if (category === 'CAT4') {
         html += `
-          <div class="mb-4 p-4 rounded border bg-white">
-            <div class="section-header">CAT4 - Premium Domain</div>
-            <div class="text-center my-3 d-flex justify-content-center align-items-center gap-2">
-              <i class="bi bi-globe2 text-primary"></i>
-              <span class="fw-medium">${domainFullName}</span>
-              <span class="text-decoration-line-through text-muted ms-3">LKR ${Number(prices.CAT4.old_price).toFixed(2)}</span>
-              <span class="text-danger fw-bold ms-3">LKR ${Number(prices.CAT4.new_price).toFixed(2)}</span>
-            </div>
-            <div class="text-center text-muted small mt-3">
-              <p class="mb-2">You automatically reserve following names</p>
-              <ul class="list-unstyled text-start d-inline-block">
-                ${reservedSLDs.map(sld => `<li>${baseDomain}.${sld}.lk</li>`).join('')}
-              </ul>
-            </div>
-            <div class="text-center mt-3">
-              <a href="${buyNowUrl(domainFullName, prices.CAT4.new_price, 'CAT4', prices.CAT4.old_price)}" class="btn btn-primary">
-                <i class="bi bi-cart3 me-2"></i> Buy Now
-              </a>
-            </div>
-          </div>
-        `;
+		  <div class="mb-4 p-4 rounded border bg-white">
+			<div class="section-header">CAT4 - Premium Domain</div>
+
+			<div class="mb-3 p-3 border rounded bg-light">
+			  <div class="d-flex justify-content-between flex-wrap">
+				<span class="d-flex align-items-center gap-2">
+				  <i class="bi bi-globe2 text-primary"></i> ${domainFullName}
+				</span>
+				<span class="text-muted text-decoration-line-through">
+				  LKR ${Number(prices.CAT4.old_price).toFixed(2)}
+				</span>
+			  </div>
+
+			  <div class="d-flex justify-content-between align-items-center mt-1 flex-wrap">
+				<span class="text-danger fw-bold">
+				  LKR ${Number(prices.CAT4.new_price).toFixed(2)}
+				</span>
+				<a href="${buyNowUrl(domainFullName, prices.CAT4.new_price, 'CAT4', prices.CAT4.old_price)}"
+				   class="btn btn-sm btn-primary mt-2 mt-sm-0">
+				  <i class="bi bi-cart3 me-1"></i> Buy Now
+				</a>
+			  </div>
+			</div>
+
+			<div class="text-center text-muted small mt-3">
+			  <p class="mb-2">You automatically reserve the following names</p>
+			  <ul class="list-unstyled text-center d-inline-block">
+				${reservedSLDs.map(sld => `<li>${baseDomain}.${sld}.lk</li>`).join('')}
+			  </ul>
+			</div>
+		  </div>
+		`;
+
       }
       else if (category === 'CAT5') {
         html += `
-          <div class="mb-4 p-4 rounded border bg-white">
-            <div class="section-header">CAT5 - Special Domain</div>
-            <div class="text-center my-3 d-flex justify-content-center align-items-center gap-2">
-              <i class="bi bi-globe2 text-primary"></i>
-              <span class="fw-medium">${domainFullName}</span>
-              <span class="text-decoration-line-through text-muted ms-3">LKR ${Number(prices.CAT5.old_price).toFixed(2)}</span>
-              <span class="text-danger fw-bold ms-3">LKR ${Number(prices.CAT5.new_price).toFixed(2)}</span>
-            </div>
-            <div class="text-center text-muted small mt-3">
-              <p class="mb-2">You automatically reserve following names</p>
-              <ul class="list-unstyled text-start d-inline-block">
-                ${reservedSLDs.map(sld => `<li>${baseDomain}.${sld}.lk</li>`).join('')}
-              </ul>
-            </div>
-            <div class="text-center mt-3">
-              <a href="${buyNowUrl(domainFullName, prices.CAT5.new_price, 'CAT5', prices.CAT5.old_price)}" class="btn btn-primary">
-                <i class="bi bi-cart3 me-2"></i> Buy Now
-              </a>
-            </div>
-          </div>
-        `;
+		  <div class="mb-4 p-4 rounded border bg-white">
+			<div class="section-header">CAT5 - Special Domain</div>
+
+			<div class="mb-3 p-3 border rounded bg-light">
+			  <div class="d-flex justify-content-between flex-wrap">
+				<span class="d-flex align-items-center gap-2">
+				  <i class="bi bi-globe2 text-primary"></i> ${domainFullName}
+				</span>
+				<span class="text-decoration-line-through text-muted ms-3">
+				  LKR ${Number(prices.CAT5.old_price).toFixed(2)}
+				</span>
+				<span class="text-danger fw-bold ms-3">
+				  LKR ${Number(prices.CAT5.new_price).toFixed(2)}
+				</span>
+			  </div>
+			</div>
+
+			<div class="text-center text-muted small mt-3">
+			  <p class="mb-2">You automatically reserve following names</p>
+			  <ul class="list-unstyled text-center d-inline-block">
+				${reservedSLDs.map(sld => `<li>${baseDomain}.${sld}.lk</li>`).join('')}
+			  </ul>
+			</div>
+
+			<div class="text-center mt-3">
+			  <a href="${buyNowUrl(domainFullName, prices.CAT5.new_price, 'CAT5', prices.CAT5.old_price)}" class="btn btn-primary">
+				<i class="bi bi-cart3 me-2"></i> Buy Now
+			  </a>
+			</div>
+		  </div>
+		`;
+
       }
       else {
         // Show CAT2 - Top Level Domain Only
-        html += `
-          <div class="mb-4 p-4 rounded border bg-white">
-            <div class="section-header">CAT2 - Top Level Domain Only</div>
-            <div class="text-center my-3 d-flex justify-content-center align-items-center gap-2">
-              <i class="bi bi-globe2 text-primary"></i>
-              <span class="fw-medium">${domainFullName}</span>
-              <span class="text-decoration-line-through text-muted ms-3">LKR ${Number(prices.CAT2.old_price).toFixed(2)}</span>
-              <span class="text-danger fw-bold ms-3">LKR ${Number(prices.CAT2.new_price).toFixed(2)}</span>
-            </div>
-            <div class="text-center">
-              <a href="${buyNowUrl(domainFullName, prices.CAT2.new_price, 'CAT2', prices.CAT2.old_price)}" class="btn btn-primary">
-                <i class="bi bi-cart3 me-2"></i> Buy Now
-              </a>
-            </div>
-          </div>
-        `;
+       html += `
+		<div class="mb-4 p-4 rounded border bg-white">
+		  <div class="section-header">CAT2 - Top Level Domain Only</div>
+		  <div class="mb-3 p-3 border rounded bg-light">
+			<div class="d-flex justify-content-between flex-wrap">
+			  <span class="d-flex align-items-center gap-2">
+				<i class="bi bi-globe2 text-primary"></i> ${domainFullName}
+			  </span>
+			  <span class="text-muted text-decoration-line-through">LKR ${Number(prices.CAT2.old_price).toFixed(2)}</span>
+			</div>
+			<div class="d-flex justify-content-between align-items-center mt-1 flex-wrap">
+			  <span class="text-danger fw-bold">LKR ${Number(prices.CAT2.new_price).toFixed(2)}</span>
+			  <a href="${buyNowUrl(domainFullName, prices.CAT2.new_price, 'CAT2', prices.CAT2.old_price)}" class="btn btn-sm btn-primary mt-2 mt-sm-0">
+				<i class="bi bi-cart3 me-1"></i> Buy Now
+			  </a>
+			</div>
+		  </div>
+		</div>
+		`;
+
 
         // Show CAT1 - Full Package
-        html += `
-          <div class="mb-4 p-4 rounded border bg-white">
-            <div class="section-header">CAT1 - Full Domain Package</div>
-            <div class="text-center my-3 d-flex justify-content-center align-items-center gap-2">
-              <i class="bi bi-globe2 text-primary"></i>
-              <span class="fw-medium">${domainFullName}</span>
-              <span class="text-decoration-line-through text-muted ms-3">LKR ${Number(prices.CAT1.old_price).toFixed(2)}</span>
-              <span class="text-danger fw-bold ms-3">LKR ${Number(prices.CAT1.new_price).toFixed(2)}</span>
-            </div>
-            <div class="text-center text-muted small mt-3">
-              <p class="mb-2">You automatically reserve the following names:</p>
-              <ul class="list-unstyled text-center d-inline-block">
-                ${reservedSLDs.map(sld => `<li>${baseDomain}.${sld}.lk</li>`).join('')}
-              </ul>
-            </div>
-            <div class="text-center mt-3">
-              <a href="${buyNowUrl(domainFullName, prices.CAT1.new_price, 'CAT1', prices.CAT1.old_price)}" class="btn btn-primary">
-                <i class="bi bi-cart3 me-2"></i> Buy Now
-              </a>
-            </div>
-          </div>
-        `;
+       html += `
+		<div class="mb-4 p-4 rounded border bg-white">
+		  <div class="section-header">CAT2 - Top Level Domain Only</div>
+		  <div class="mb-3 p-3 border rounded bg-light">
+			<div class="d-flex justify-content-between flex-wrap">
+			  <span class="d-flex align-items-center gap-2">
+				<i class="bi bi-globe2 text-primary"></i> ${domainFullName}
+			  </span>
+			  <span class="text-muted text-decoration-line-through">LKR ${Number(prices.CAT2.old_price).toFixed(2)}</span>
+			</div>
+			<div class="d-flex justify-content-between align-items-center mt-1 flex-wrap">
+			  <span class="text-danger fw-bold">LKR ${Number(prices.CAT2.new_price).toFixed(2)}</span>
+			  <a href="${buyNowUrl(domainFullName, prices.CAT2.new_price, 'CAT2', prices.CAT2.old_price)}" class="btn btn-sm btn-primary mt-2 mt-sm-0">
+				<i class="bi bi-cart3 me-1"></i> Buy Now
+			  </a>
+			</div>
+		  </div>
+		</div>
+		`;
 
         // Show CAT3 - Second Level Domains only
 		html += `
