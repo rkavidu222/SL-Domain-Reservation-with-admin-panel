@@ -23,17 +23,14 @@ class DomainOrderController extends Controller
     {
         $number = trim($number);
 
-        // Remove leading '+'
         if (substr($number, 0, 1) === '+') {
             $number = substr($number, 1);
         }
 
-        // If starts with 0, replace with 94
         if (substr($number, 0, 1) === '0') {
             $number = '94' . substr($number, 1);
         }
 
-        // If does not start with 94, prepend it (just in case)
         if (substr($number, 0, 2) !== '94') {
             $number = '94' . $number;
         }
@@ -43,56 +40,48 @@ class DomainOrderController extends Controller
 
     // Store submitted data to DB and redirect to OTP verification page
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'domain_name' => 'required|string|max:255',
-        'price' => 'required|numeric',
-        'category' => 'required|string|max:50',
-        'first_name' => 'required|string|max:100',
-        'last_name' => 'required|string|max:100',
-        'email' => 'required|email|max:255',
-        'mobile' => 'required|string|max:20',
-    ]);
+    {
+        $validated = $request->validate([
+            'domain_name' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'category' => 'required|string|max:50',
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'email' => 'required|email|max:255',
+            'mobile' => 'required|string|max:20',
+        ]);
 
-    // Save data temporarily in session
-    session([
-        'domain_order_data' => $validated,
-    ]);
+        session(['domain_order_data' => $validated]);
 
-    // Generate OTP
-    $otp = rand(100000, 999999);
-    $normalizedMobile = $this->normalizeSriLankanMobile($validated['mobile']);
+        $otp = rand(100000, 999999);
+        $normalizedMobile = $this->normalizeSriLankanMobile($validated['mobile']);
 
-    // Store OTP and mobile/email in session
-    session([
-        'otp' => $otp,
-        'mobile' => $normalizedMobile,
-        'email' => $validated['email'],
-		'otp_expires_at' => now()->addMinutes(5),
-    ]);
+        session([
+            'otp' => $otp,
+            'mobile' => $normalizedMobile,
+            'email' => $validated['email'],
+            'otp_expires_at' => now()->addMinutes(5),
+        ]);
 
-    // Send SMS
-    $smsData = [
-        'api_token' => '10|BJcXe3w1SVIpoJKYLm6cpgCaWMIMkCyiCfq4NHFU97b97a43',
-        'recipient' => $normalizedMobile,
-        'sender_id' => 'SLHosting',
-        'type' => 'plain',
-        'message' => "Your OTP code is: {$otp}",
-    ];
+        $smsData = [
+            'api_token' => '10|BJcXe3w1SVIpoJKYLm6cpgCaWMIMkCyiCfq4NHFU97b97a43',
+            'recipient' => $normalizedMobile,
+            'sender_id' => 'SLHosting',
+            'type' => 'plain',
+            'message' => "Your OTP code is: {$otp}",
+        ];
 
-    $this->sendOtpSms($smsData);
+        $this->sendOtpSms($smsData);
 
-    return redirect()->route('otp.verification.page')->with('success', 'OTP sent to your mobile number.');
-}
+        return redirect()->route('otp.verification.page')->with('success', 'OTP sent to your mobile number.');
+    }
 
-
-    // Send OTP SMS using cURL and log results
+    // Send OTP SMS using cURL
     private function sendOtpSms(array $data)
     {
         $url = 'https://sms.serverclub.lk/api/http/sms/send';
 
         $ch = curl_init($url);
-
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -105,64 +94,18 @@ class DomainOrderController extends Controller
         curl_close($ch);
     }
 
-    // Admin: List all domain orders (paginated) with search
-    public function adminIndex(Request $request)
+    // Admin: List all domain orders (paginated) with filters
+    public function adminIndex()
     {
-        $search = $request->input('search');
-    $category = $request->input('category');
-    $dateFrom = $request->input('date_from');
-    $dateTo = $request->input('date_to');
+        $allOrders = DomainOrder::orderBy('created_at', 'desc')->paginate(10, ['*'], 'all_page');
+        $paidOrders = DomainOrder::where('payment_status', 'paid')->orderBy('created_at', 'desc')->paginate(10, ['*'], 'paid_page');
+        $pendingOrders = DomainOrder::where('payment_status', 'pending')->orderBy('created_at', 'desc')->paginate(10, ['*'], 'pending_page');
 
-    $baseQuery = DomainOrder::query();
-
-    if ($search) {
-        $baseQuery->where(function ($q) use ($search) {
-            $q->where('first_name', 'like', "%{$search}%")
-              ->orWhere('last_name', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%")
-              ->orWhere('mobile', 'like', "%{$search}%")
-              ->orWhere('domain_name', 'like', "%{$search}%")
-              ->orWhere('category', 'like', "%{$search}%");
-        });
-    }
-
-    if ($category) {
-        $baseQuery->where('category', $category);
-    }
-
-    if ($dateFrom) {
-        $baseQuery->whereDate('created_at', '>=', $dateFrom);
-    }
-
-    if ($dateTo) {
-        $baseQuery->whereDate('created_at', '<=', $dateTo);
-    }
-
-    // Clone query for each status subset
-    $allOrders = (clone $baseQuery)->orderBy('created_at', 'desc')->paginate(10, ['*'], 'all_page')->withQueryString();
-
-    // Assuming you have a payment_status column with values like 'paid' and 'pending'
-    $paidOrders = (clone $baseQuery)
-        ->where('payment_status', 'paid')
-        ->orderBy('created_at', 'desc')
-        ->paginate(10, ['*'], 'paid_page')
-        ->withQueryString();
-
-    $pendingOrders = (clone $baseQuery)
-        ->where('payment_status', 'pending')
-        ->orderBy('created_at', 'desc')
-        ->paginate(10, ['*'], 'pending_page')
-        ->withQueryString();
-
-    return view('admin.layouts.management.orders', [
-        'orders' => $allOrders,
-        'paidOrders' => $paidOrders,
-        'pendingOrders' => $pendingOrders,
-        'search' => $search,
-        'category' => $category,
-        'dateFrom' => $dateFrom,
-        'dateTo' => $dateTo,
-    ]);
+        return view('admin.layouts.management.orders', [
+            'orders' => $allOrders,
+            'paidOrders' => $paidOrders,
+            'pendingOrders' => $pendingOrders,
+        ]);
     }
 
     // Admin: Show details of a single order
@@ -180,38 +123,14 @@ class DomainOrderController extends Controller
         return redirect()->back()->with('success', 'Order moved to trash.');
     }
 
-    // Admin: View trashed (soft-deleted) orders
-    public function trashed(Request $request)
+    // Admin: View trashed (soft-deleted) orders (All / Paid / Pending tabs support)
+    public function trashed()
     {
-        $search    = $request->input('search');
-        $category  = $request->input('category');
-        $dateFrom  = $request->input('date_from');
-        $dateTo    = $request->input('date_to');
+        $all = DomainOrder::onlyTrashed()->orderBy('deleted_at', 'desc')->get();
+        $paid = DomainOrder::onlyTrashed()->where('payment_status', 'paid')->orderBy('deleted_at', 'desc')->get();
+        $pending = DomainOrder::onlyTrashed()->where('payment_status', 'pending')->orderBy('deleted_at', 'desc')->get();
 
-        $orders = DomainOrder::onlyTrashed()
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('first_name', 'like', "%{$search}%")
-                      ->orWhere('last_name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('mobile', 'like', "%{$search}%")
-                      ->orWhere('domain_name', 'like', "%{$search}%");
-                });
-            })
-            ->when($category, function ($query, $category) {
-                $query->where('category', $category);
-            })
-            ->when($dateFrom, function ($query, $dateFrom) {
-                $query->whereDate('deleted_at', '>=', $dateFrom);
-            })
-            ->when($dateTo, function ($query, $dateTo) {
-                $query->whereDate('deleted_at', '<=', $dateTo);
-            })
-            ->orderBy('deleted_at', 'desc')
-            ->paginate(10)
-            ->appends(request()->except('page'));
-
-        return view('admin.layouts.management.orders_trashed', compact('orders', 'search', 'category', 'dateFrom', 'dateTo'));
+        return view('admin.layouts.management.orders_trashed', compact('all', 'paid', 'pending'));
     }
 
     // Admin: Restore a soft-deleted order
@@ -238,14 +157,10 @@ class DomainOrderController extends Controller
         return redirect()->route('admin.orders.trash')->with('success', 'Order permanently deleted.');
     }
 
-
-
-	public function showPaymentDetails($orderId)
-{
-    $order = DomainOrder::findOrFail($orderId);
-
-    return view('layouts.paymentDetails', compact('order'));
-}
-
-
+    // Show payment details (frontend)
+    public function showPaymentDetails($orderId)
+    {
+        $order = DomainOrder::findOrFail($orderId);
+        return view('layouts.paymentDetails', compact('order'));
+    }
 }
