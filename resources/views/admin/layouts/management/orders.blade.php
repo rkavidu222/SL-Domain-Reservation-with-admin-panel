@@ -248,8 +248,8 @@
     // Bootstrap modal instance
     const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
 
-    // View button click handler to fill modal
-    $('.btn-view-order').on('click', function () {
+    // Use delegated event handler to handle clicks on dynamically created .btn-view-order buttons
+    $(document).on('click', '.btn-view-order', function () {
       const order = $(this).data('order');
       $('#modal-order-id').text(order.id ?? '-');
       $('#modal-customer-name').text(`${order.first_name ?? ''} ${order.last_name ?? ''}`.trim() || '-');
