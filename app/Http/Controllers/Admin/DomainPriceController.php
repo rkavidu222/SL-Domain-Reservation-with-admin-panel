@@ -11,7 +11,8 @@ class DomainPriceController extends Controller
     public function index()
     {
         $prices = DomainPrice::all();
-        return view('admin.domain_prices.index', compact('prices'));
+        return view('admin.layouts.management.domainPrice', compact('prices'));
+
     }
 
     public function update(Request $request)

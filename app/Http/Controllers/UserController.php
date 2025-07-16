@@ -10,30 +10,19 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     public function index(Request $request)
-{
-    $current = auth()->guard('admin')->user();
+    {
+        $current = auth()->guard('admin')->user();
 
-    // Base query: super admin sees all, others only see themselves
-    $query = ($current->role === 'super_admin')
-        ? Admin::query()
-        : Admin::where('id', $current->id);
+        // Super admin sees all, others only themselves
+        $query = ($current->role === 'super_admin')
+            ? Admin::query()
+            : Admin::where('id', $current->id);
 
-    // Search filter
-    if ($request->filled('search')) {
-        $search = $request->input('search');
-        $query->where(function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%")
-              ->orWhere('role', 'like', "%{$search}%");
-        });
+        // Paginate results without any search filtering
+        $admins = $query->orderBy('id')->paginate(10);
+
+        return view('admin.layouts.management.adminManagement', compact('admins'));
     }
-
-    // Paginate results
-    $admins = $query->orderBy('id')->paginate(10)->withQueryString();
-
-    return view('admin.layouts.management.userManagement', compact('admins'));
-}
-
 
     public function destroy(Admin $admin)
     {
@@ -85,7 +74,7 @@ class UserController extends Controller
             abort(403, 'ACCESS DENIED: SUPER ADMINS ONLY.');
         }
 
-        return view('admin.layouts.editAdmin', compact('admin'));
+        return view('admin.users.editAdmin', compact('admin'));
     }
 
     public function update(Request $request, Admin $admin)
@@ -96,34 +85,28 @@ class UserController extends Controller
             abort(403, 'You are not authorized to update this profile.');
         }
 
-        // Base validation rules
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:admins,email,' . $admin->id,
         ];
 
-        // Only super_admin can update the role, and role must be in this list
         if ($current->role === 'super_admin' && $request->has('role')) {
             $rules['role'] = 'required|in:admin,super_admin';
         }
 
-        // Password optional, but if present, confirmed and min length
         if ($request->filled('password')) {
             $rules['password'] = 'confirmed|min:6';
         }
 
         $validated = $request->validate($rules);
 
-        // Update basic fields
         $admin->name = $validated['name'];
         $admin->email = $validated['email'];
 
-        // Update password if provided
         if (!empty($validated['password'])) {
             $admin->password = bcrypt($validated['password']);
         }
 
-        // Update role if current user is super_admin and role provided
         if ($current->role === 'super_admin' && isset($validated['role'])) {
             $admin->role = $validated['role'];
         }
@@ -133,25 +116,12 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'Admin profile updated successfully.');
     }
 
-    public function trash(Request $request)
-	{
-		$query = Admin::onlyTrashed();
+    public function trash()
+    {
+        $trashedAdmins = Admin::onlyTrashed()->orderByDesc('deleted_at')->paginate(10);
 
-		// Apply search filter
-		if ($request->filled('search')) {
-			$search = $request->input('search');
-			$query->where(function ($q) use ($search) {
-				$q->where('name', 'like', "%{$search}%")
-				  ->orWhere('email', 'like', "%{$search}%")
-				  ->orWhere('role', 'like', "%{$search}%");
-			});
-		}
-
-    $trashedAdmins = $query->orderByDesc('deleted_at')->paginate(10);
-
-    return view('admin.users.trash', compact('trashedAdmins'));
-}
-
+        return view('admin.users.trash', compact('trashedAdmins'));
+    }
 
     public function restore($id)
     {
@@ -169,12 +139,7 @@ class UserController extends Controller
         return redirect()->route('admin.users.trash')->with('success', 'Admin permanently deleted.');
     }
 
-
-
-
-
-
-	public function create()
+    public function create()
     {
         $current = auth()->guard('admin')->user();
 
@@ -185,7 +150,6 @@ class UserController extends Controller
         return view('admin.users.create');
     }
 
-    // Store new admin
     public function store(Request $request)
     {
         $current = auth()->guard('admin')->user();
@@ -211,7 +175,4 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', 'Admin added successfully.');
     }
-
-
-
 }

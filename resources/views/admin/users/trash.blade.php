@@ -24,26 +24,6 @@
             0 12px 30px rgba(0, 0, 0, 0.1);
     }
 
-    .search-form {
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.5rem;
-        flex-wrap: nowrap;
-        max-width: 500px; /* limit max width on desktop */
-        margin-left: auto; /* align right */
-    }
-
-    .search-form input {
-        flex-grow: 1;
-        min-width: 180px;
-        max-width: 300px;
-    }
-
-    .search-form button,
-    .search-form a {
-        white-space: nowrap;
-    }
-
     table {
         width: 100%;
         min-width: 600px; /* prevent table collapsing on small screens */
@@ -58,27 +38,6 @@
             min-width: 100%;
         }
     }
-
-    @media (max-width: 576px) {
-        .search-form {
-            flex-direction: column !important;
-            align-items: stretch !important;
-            max-width: 100% !important;
-            margin-left: 0 !important;
-        }
-
-        .search-form input,
-        .search-form button,
-        .search-form a {
-            width: 100% !important;
-            margin-bottom: 0.5rem;
-        }
-
-        .search-form button,
-        .search-form a {
-            margin-left: 0 !important;
-        }
-    }
 </style>
 
 <div class="admin-management-container">
@@ -86,34 +45,11 @@
         <i class="bi bi-trash3-fill fs-4"></i> Trashed Admins
     </h2>
 
-    {{-- Flash messages --}}
-    @if(Session::has('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ Session::get('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    {{-- Search Form --}}
-    <form method="GET" action="{{ route('admin.users.trash') }}" class="mb-3 search-form">
-        <input
-            type="text"
-            name="search"
-            class="form-control"
-            placeholder="Search name, email or role..."
-            value="{{ request('search') }}"
-        >
-        <button type="submit" class="btn btn-primary">Search</button>
-        @if(request('search'))
-            <a href="{{ route('admin.users.trash') }}" class="btn btn-secondary">Clear</a>
-        @endif
-    </form>
-
     @if($trashedAdmins->isEmpty())
         <div class="alert alert-info text-center">No trashed admins found.</div>
     @else
         <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle text-center">
+            <table id="trashedAdminsTable" class="table table-bordered table-hover align-middle text-center">
                 <thead class="table-light">
                     <tr>
                         <th>#</th>
@@ -157,9 +93,22 @@
             </table>
         </div>
     @endif
-
-    <div class="d-flex justify-content-center mt-3">
-        {{ $trashedAdmins->appends(request()->query())->links() }}
-    </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    $(document).ready(function() {
+        $('#trashedAdminsTable').DataTable({
+            paging: true,
+            lengthChange: true,
+            searching: true,   // DataTables search box
+            ordering: true,
+            info: true,
+            autoWidth: false,
+            responsive: true,
+            // Optional: Adjust initial page length or language options here if needed
+        });
+    });
+</script>
 @endsection

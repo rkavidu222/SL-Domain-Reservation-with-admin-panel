@@ -4,6 +4,7 @@
 
 @section('content')
 <style>
+    /* Keep your existing container styles */
     .admin-management-container {
         max-width: 1400px;
         margin: 1rem auto 3rem auto;
@@ -18,74 +19,35 @@
         box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15), 0 12px 30px rgba(0, 0, 0, 0.1);
     }
 
-
-    .actions-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-
+    /* Smaller, friendlier Add Admin Button */
     .btn-add-admin {
-		background-color: #28a745;
-		color: white;
-		font-weight: 700;
-		padding: 0.6rem 1.5rem;
-		border-radius: 50px;
-		border: none;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 1rem;
-		text-decoration: none;
-		user-select: none;
-		transition: none;
-	}
-
-	.btn-add-admin:hover,
-	.btn-add-admin:focus {
-		background-color: #28a745;
-		color: white;
-		box-shadow: none;
-		outline: none;
-		text-decoration: none;
-	}
-
-
-    form.search-form {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: nowrap;
-        flex: 1 1 auto;
-        min-width: 250px;
-        max-width: 500px;
+        background-color: #28a745;       /* Bootstrap Success Green */
+        color: white !important;
+        font-weight: 600;
+        padding: 0.375rem 1rem;           /* Smaller padding */
+        border-radius: 0.375rem;          /* Slightly rounded corners */
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.9rem;                /* Slightly smaller font */
+        user-select: none;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    form.search-form input[type="text"] {
-        flex-grow: 1;
-        min-width: 0;
+    .btn-add-admin i {
+        font-size: 1rem;                  /* Slightly smaller icon */
     }
-    form.search-form button,
-    form.search-form a.btn {
-        flex-shrink: 0;
-        min-width: 100px;
-    }
-
-    /* Responsive */
-    @media (max-width: 576px) {
-        .actions-row {
-            flex-direction: column;
-            align-items: stretch;
-        }
-        form.search-form {
-            max-width: 100%;
-        }
-        .btn-add-admin {
-            justify-content: center;
-        }
+    .btn-add-admin:hover,
+    .btn-add-admin:focus {
+        background-color: #218838;        /* Darker green on hover */
+        color: white !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        outline: none;
+        text-decoration: none;
     }
 </style>
 
@@ -97,50 +59,15 @@
         All Admins
     </h2>
 
-    {{-- Flash Messages --}}
-    @if(Session::has('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ Session::get('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    @if(Session::has('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ Session::get('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
     @php $current = auth()->guard('admin')->user(); @endphp
+    @if($current->role === 'super_admin')
+        <a href="{{ route('admin.users.create') }}" class="btn-add-admin">
+            <i class="bi bi-person-plus-fill"></i> Add Admin
+        </a>
+    @endif
 
-    {{-- Actions row: Add Admin Button on left + Search on right --}}
-    <div class="actions-row">
-        @if($current->role === 'super_admin')
-            <a href="{{ route('admin.users.create') }}" class="btn-add-admin">
-                <i class="bi bi-person-plus-fill"></i> Add Admin
-            </a>
-        @endif
-
-        <form method="GET" action="{{ route('admin.users.index') }}" class="search-form">
-            <input
-                type="text"
-                name="search"
-                class="form-control"
-                placeholder="Search name, email or role..."
-                value="{{ request('search') }}"
-                aria-label="Search admins"
-            >
-            <button type="submit" class="btn btn-primary">Search</button>
-            @if(request('search'))
-                <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Clear</a>
-            @endif
-        </form>
-    </div>
-
-    {{-- Table --}}
     <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center">
+        <table id="adminsTable" class="table table-bordered table-hover align-middle text-center" style="width:100%">
             <thead class="table-light">
                 <tr>
                     <th>#</th>
@@ -153,7 +80,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($admins as $admin)
+                @foreach($admins as $admin)
                     <tr>
                         <td>{{ $admin->id }}</td>
                         <td class="text-start">{{ $admin->name }}</td>
@@ -173,7 +100,6 @@
                                     <i class="bi bi-pencil-square"></i> Edit
                                 </a>
                             @endif
-
                             @if($current->role === 'super_admin' && $current->id !== $admin->id)
                                 <form action="{{ route('admin.users.destroy', $admin->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this admin?');">
                                     @csrf
@@ -182,7 +108,6 @@
                                         <i class="bi bi-trash"></i> Delete
                                     </button>
                                 </form>
-
                                 <form action="{{ route('admin.users.suspend', $admin->id) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ $admin->is_suspended ? 'Activate this admin?' : 'Suspend this admin?' }}');">
                                     @csrf
                                     @method('PUT')
@@ -194,18 +119,25 @@
                             @endif
                         </td>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="text-center">No admin records found.</td>
-                    </tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
     </div>
-
-    {{-- Pagination --}}
-    <div class="d-flex justify-content-center mt-3">
-        {{ $admins->appends(['search' => request('search')])->links() }}
-    </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    $(document).ready(function() {
+        $('#adminsTable').DataTable({
+            paging: true,
+            lengthChange: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            autoWidth: false,
+            responsive: true,
+        });
+    });
+</script>
 @endsection
