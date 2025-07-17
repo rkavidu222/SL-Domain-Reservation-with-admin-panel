@@ -37,31 +37,100 @@
     border-color: #2563eb !important;
     font-weight: 600;
   }
+
+  /* Make the date filter inline with tabs and aligned right */
+  .tab-filter-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .date-filter {
+    max-width: 280px;
+    position: relative;
+  }
+
+  .date-filter input {
+    cursor: pointer;
+    background-color: #f0f4ff;
+    border: 1px solid #2563eb;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    width: 100%;
+    font-weight: 500;
+    color: #1e40af;
+  }
+
+  .date-filter .clear-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #2563eb;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: none;
+  }
+
+  .date-filter input:not(:placeholder-shown) + .clear-btn {
+    display: block;
+  }
+
+  @media (max-width: 575.98px) {
+    .tab-filter-container {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .date-filter {
+      max-width: 100%;
+    }
+  }
 </style>
 
 <div class="admin-management-container">
   <h2 class="mb-4 text-primary fw-bold text-center">Order Management</h2>
 
-  <ul class="nav nav-tabs mb-4" id="ordersTab" role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">
-        All Orders ({{ $orders->total() }})
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="paid-tab" data-bs-toggle="tab" data-bs-target="#paid" type="button" role="tab" aria-controls="paid" aria-selected="false">
-        Paid Orders ({{ $paidOrders->total() }})
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="false">
-        Pending Orders ({{ $pendingOrders->total() }})
-      </button>
-    </li>
-  </ul>
+  <div class="tab-filter-container">
+    {{-- Tabs --}}
+    <ul class="nav nav-tabs mb-0" id="ordersTab" role="tablist" style="flex: 1;">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">
+          All Orders ({{ $orders->count() }})
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="paid-tab" data-bs-toggle="tab" data-bs-target="#paid" type="button" role="tab" aria-controls="paid" aria-selected="false">
+          Paid Orders ({{ $paidOrders->count() }})
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="false">
+          Pending Orders ({{ $pendingOrders->count() }})
+        </button>
+      </li>
+    </ul>
 
+    {{-- Date Range Filter --}}
+    <div class="date-filter">
+      <input
+        type="text"
+        id="dateRangeInput"
+        placeholder="Filter by date range"
+        autocomplete="off"
+        value="{{ request('date_range') ?? '' }}"
+        readonly
+        aria-label="Date Range Filter"
+      />
+      <button type="button" class="clear-btn" aria-label="Clear date filter">&times;</button>
+    </div>
+  </div>
+
+  {{-- Tab contents --}}
   <div class="tab-content" id="ordersTabContent">
-
     {{-- All Orders --}}
     <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
       <div class="table-responsive">
@@ -198,7 +267,6 @@
         </table>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -232,9 +300,14 @@
 @endsection
 
 @section('scripts')
+{{-- daterangepicker CSS/JS --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
 <script>
   $(function () {
-    // Initialize all DataTables
+    // Initialize DataTables on all three tables
     $('#ordersTable, #paidOrdersTable, #pendingOrdersTable').DataTable({
       paging: true,
       lengthChange: true,
@@ -248,8 +321,8 @@
     // Bootstrap modal instance
     const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
 
-    // Use delegated event handler to handle clicks on dynamically created .btn-view-order buttons
-    $(document).on('click', '.btn-view-order', function () {
+    // Show order details modal on button click
+    $('.btn-view-order').on('click', function () {
       const order = $(this).data('order');
       $('#modal-order-id').text(order.id ?? '-');
       $('#modal-customer-name').text(`${order.first_name ?? ''} ${order.last_name ?? ''}`.trim() || '-');
@@ -263,6 +336,45 @@
       modal.show();
     });
 
+    // Initialize daterangepicker on date input
+    $('#dateRangeInput').daterangepicker({
+      autoUpdateInput: false,
+      opens: 'left',
+      locale: {
+        format: 'YYYY-MM-DD',
+        cancelLabel: 'Clear'
+      },
+    });
+
+    // On apply, update input and reload page with date_range param
+    $('#dateRangeInput').on('apply.daterangepicker', function(ev, picker) {
+      const start = picker.startDate.format('YYYY-MM-DD');
+      const end = picker.endDate.format('YYYY-MM-DD');
+      const dateRange = `${start} - ${end}`;
+      $(this).val(dateRange);
+
+      const url = new URL(window.location.href);
+      url.searchParams.set('date_range', dateRange);
+      window.location.href = url.toString();
+    });
+
+    // On cancel, clear input and reload page without date_range param
+    $('#dateRangeInput').on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('date_range');
+      window.location.href = url.toString();
+    });
+
+    // Clear button to clear date filter
+    $('.clear-btn').on('click', function() {
+      $('#dateRangeInput').val('').trigger('cancel.daterangepicker');
+    });
+
+    // Set dateRangeInput value if exists in query string on page load
+    @if(request('date_range'))
+      $('#dateRangeInput').val("{{ request('date_range') }}");
+    @endif
   });
 </script>
 @endsection

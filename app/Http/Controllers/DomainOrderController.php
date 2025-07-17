@@ -95,18 +95,40 @@ class DomainOrderController extends Controller
     }
 
     // Admin: List all domain orders (paginated) with filters
-    public function adminIndex()
-    {
-        $allOrders = DomainOrder::orderBy('created_at', 'desc')->paginate(10, ['*'], 'all_page');
-        $paidOrders = DomainOrder::where('payment_status', 'paid')->orderBy('created_at', 'desc')->paginate(10, ['*'], 'paid_page');
-        $pendingOrders = DomainOrder::where('payment_status', 'pending')->orderBy('created_at', 'desc')->paginate(10, ['*'], 'pending_page');
+    public function adminIndex(Request $request)
+{
+    $queryAll = DomainOrder::orderBy('created_at', 'desc');
+    $queryPaid = DomainOrder::where('payment_status', 'paid')->orderBy('created_at', 'desc');
+    $queryPending = DomainOrder::where('payment_status', 'pending')->orderBy('created_at', 'desc');
 
-        return view('admin.layouts.management.orders', [
-            'orders' => $allOrders,
-            'paidOrders' => $paidOrders,
-            'pendingOrders' => $pendingOrders,
-        ]);
+    if ($request->has('date_range') && !empty($request->date_range)) {
+        $dates = explode(' - ', $request->date_range);
+
+        if (count($dates) === 2) {
+            $startDate = $dates[0];
+            $endDate = $dates[1];
+
+            $startDateTime = $startDate . ' 00:00:00';
+            $endDateTime = $endDate . ' 23:59:59';
+
+            $queryAll->whereBetween('created_at', [$startDateTime, $endDateTime]);
+            $queryPaid->whereBetween('created_at', [$startDateTime, $endDateTime]);
+            $queryPending->whereBetween('created_at', [$startDateTime, $endDateTime]);
+        }
     }
+
+    // ✨ Return full datasets (no pagination)
+    $allOrders = $queryAll->get();
+    $paidOrders = $queryPaid->get();
+    $pendingOrders = $queryPending->get();
+
+    return view('admin.layouts.management.orders', [
+        'orders' => $allOrders,
+        'paidOrders' => $paidOrders,
+        'pendingOrders' => $pendingOrders,
+    ]);
+}
+
 
     // Admin: Show details of a single order
     public function show($id)
