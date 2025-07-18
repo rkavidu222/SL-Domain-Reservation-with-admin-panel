@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Add New Admin')
+@section('title', 'Edit Admin')
 
 @section('content')
 <style>
@@ -27,9 +27,10 @@
         transform: translateY(-2px);
         transition: transform 0.2s ease;
     }
-    /* Form group spacing */
+    /* Form group spacing & relative positioning for toggle icons */
     .form-group {
         margin-bottom: 1rem;
+        position: relative; /* needed for absolute position toggle icon */
     }
     /* Label and icon alignment */
     label {
@@ -51,17 +52,47 @@
     input.form-control-sm, select.form-select-sm {
         font-size: 0.9rem;
         padding: 0.375rem 0.5rem;
+        padding-right: 2.5rem; /* room for toggle icon */
+    }
+    /* Password toggle icon styling */
+    .password-toggle-icon {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        z-index: 10;
+        font-size: 1.1rem;
+        color: #6c757d;
+        user-select: none;
+    }
+    /* Password rules styling */
+    .password-rules {
+        font-size: 0.75rem;
+        margin-top: 6px;
+        line-height: 1.4;
+    }
+    .password-rules .valid {
+        color: green;
+    }
+    .password-rules .invalid {
+        color: red;
+    }
+    /* Password mismatch message */
+    #passwordMismatch {
+        font-size: 0.8rem;
+        color: red;
+        margin-top: 4px;
+        display: none;
     }
 </style>
 
 <div class="edit-admin-container">
     <h2 class="mb-4 d-flex justify-content-center align-items-center gap-2 text-primary text-center fw-bold">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-person-plus-fill" viewBox="0 0 16 16" width="24" height="24">
-            <path d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-            <path d="M8 10a5 5 0 0 0-5 5v1h10v-1a5 5 0 0 0-5-5z"/>
-            <path fill-rule="evenodd" d="M13 6.5a.5.5 0 0 1 .5.5v1H15a.5.5 0 0 1 0 1h-1.5v1a.5.5 0 0 1-1 0v-1H11a.5.5 0 0 1 0-1h1.5v-1a.5.5 0 0 1 .5-.5z"/>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16" width="24" height="24">
+            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
         </svg>
-        Add New Admin
+        Edit Admin
     </h2>
 
     {{-- Validation Errors --}}
@@ -85,8 +116,9 @@
 
     @php $current = auth()->guard('admin')->user(); @endphp
 
-    <form action="{{ route('admin.users.store') }}" method="POST" novalidate>
+    <form action="{{ route('admin.users.update', $admin->id) }}" method="POST" novalidate>
         @csrf
+        @method('PUT')
 
         <div class="form-group">
             <label for="name">
@@ -102,9 +134,8 @@
                 id="name"
                 name="name"
                 placeholder="Full Name"
-                value="{{ old('name') }}"
+                value="{{ old('name', $admin->name) }}"
                 required
-                autofocus
             />
             @error('name')
             <div class="invalid-feedback">{{ $message }}</div>
@@ -125,7 +156,7 @@
                 id="email"
                 name="email"
                 placeholder="Email Address"
-                value="{{ old('email') }}"
+                value="{{ old('email', $admin->email) }}"
                 required
             />
             @error('email')
@@ -139,7 +170,7 @@
                     <path d="M8 1a3 3 0 0 0-3 3v3h6V4a3 3 0 0 0-3-3z"/>
                     <path d="M3 8a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
                 </svg>
-                Password
+                Password <small class="text-muted">(leave blank to keep current)</small>
             </label>
             <input
                 type="password"
@@ -148,8 +179,18 @@
                 name="password"
                 placeholder="Password"
                 autocomplete="new-password"
-                required
             />
+            <i class="bi bi-eye-fill password-toggle-icon" onclick="toggleVisibility('password', this)"></i>
+
+            {{-- Password Validation Rules --}}
+            <div class="password-rules" id="passwordRules">
+                <div id="length" class="invalid">• At least 8 characters</div>
+                <div id="uppercase" class="invalid">• One uppercase letter</div>
+                <div id="lowercase" class="invalid">• One lowercase letter</div>
+                <div id="number" class="invalid">• One number</div>
+                <div id="special" class="invalid">• One special character</div>
+            </div>
+
             @error('password')
             <div class="invalid-feedback">{{ $message }}</div>
             @enderror
@@ -170,8 +211,10 @@
                 name="password_confirmation"
                 placeholder="Confirm Password"
                 autocomplete="new-password"
-                required
             />
+            <i class="bi bi-eye-fill password-toggle-icon" onclick="toggleVisibility('password_confirmation', this)"></i>
+
+            <div id="passwordMismatch">Passwords do not match</div>
         </div>
 
         @if($current->role === 'super_admin')
@@ -184,9 +227,8 @@
                     Role
                 </label>
                 <select name="role" id="role" class="form-select form-select-sm" required>
-                    <option value="" disabled selected>Select role</option>
-                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                    <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                    <option value="admin" {{ $admin->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="super_admin" {{ $admin->role === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
                 </select>
             </div>
         @endif
@@ -196,7 +238,7 @@
                 Cancel
             </a>
             <button type="submit" class="btn btn-primary btn-sm px-4">
-                Create
+                Update
             </button>
         </div>
     </form>
@@ -213,4 +255,49 @@
     }, 3000);
 </script>
 @endif
+
+<script>
+    function toggleVisibility(inputId, icon) {
+        const input = document.getElementById(inputId);
+        const type = input.getAttribute('type');
+        if(type === 'password') {
+            input.setAttribute('type', 'text');
+            icon.classList.remove('bi-eye-fill');
+            icon.classList.add('bi-eye-slash-fill');
+        } else {
+            input.setAttribute('type', 'password');
+            icon.classList.remove('bi-eye-slash-fill');
+            icon.classList.add('bi-eye-fill');
+        }
+    }
+
+    // Password validation rules references
+    const password = document.getElementById('password');
+    const confirm = document.getElementById('password_confirmation');
+    const mismatch = document.getElementById('passwordMismatch');
+
+    const rules = {
+        length: document.getElementById('length'),
+        uppercase: document.getElementById('uppercase'),
+        lowercase: document.getElementById('lowercase'),
+        number: document.getElementById('number'),
+        special: document.getElementById('special'),
+    };
+
+    password.addEventListener('input', () => {
+        const val = password.value;
+        rules.length.className = val.length >= 8 ? 'valid' : 'invalid';
+        rules.uppercase.className = /[A-Z]/.test(val) ? 'valid' : 'invalid';
+        rules.lowercase.className = /[a-z]/.test(val) ? 'valid' : 'invalid';
+        rules.number.className = /\d/.test(val) ? 'valid' : 'invalid';
+        rules.special.className = /[^A-Za-z0-9]/.test(val) ? 'valid' : 'invalid';
+
+        // Show mismatch if confirm is non-empty and doesn't match password
+        mismatch.style.display = confirm.value && confirm.value !== val ? 'block' : 'none';
+    });
+
+    confirm.addEventListener('input', () => {
+        mismatch.style.display = confirm.value !== password.value ? 'block' : 'none';
+    });
+</script>
 @endsection

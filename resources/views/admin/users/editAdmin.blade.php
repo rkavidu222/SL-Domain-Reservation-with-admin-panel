@@ -27,9 +27,10 @@
         transform: translateY(-2px);
         transition: transform 0.2s ease;
     }
-    /* Form group spacing */
+    /* Form group spacing & relative positioning for toggle icons */
     .form-group {
         margin-bottom: 1rem;
+        position: relative; /* needed for absolute position toggle icon */
     }
     /* Label and icon alignment */
     label {
@@ -51,6 +52,38 @@
     input.form-control-sm, select.form-select-sm {
         font-size: 0.9rem;
         padding: 0.375rem 0.5rem;
+        padding-right: 2.5rem; /* room for toggle icon */
+    }
+    /* Password toggle icon styling */
+    .password-toggle-icon {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        z-index: 10;
+        font-size: 1.1rem;
+        color: #6c757d;
+        user-select: none;
+    }
+    /* Password rules styling */
+    .password-rules {
+        font-size: 0.75rem;
+        margin-top: 6px;
+        line-height: 1.4;
+    }
+    .password-rules .valid {
+        color: green;
+    }
+    .password-rules .invalid {
+        color: red;
+    }
+    /* Password mismatch message */
+    #passwordMismatch {
+        font-size: 0.8rem;
+        color: red;
+        margin-top: 4px;
+        display: none;
     }
 </style>
 
@@ -147,6 +180,17 @@
                 placeholder="Password"
                 autocomplete="new-password"
             />
+            <i class="bi bi-eye-fill password-toggle-icon" onclick="toggleVisibility('password', this)"></i>
+
+            {{-- Password Validation Rules --}}
+            <div class="password-rules" id="passwordRules">
+                <div id="length" class="invalid">• At least 8 characters</div>
+                <div id="uppercase" class="invalid">• One uppercase letter</div>
+                <div id="lowercase" class="invalid">• One lowercase letter</div>
+                <div id="number" class="invalid">• One number</div>
+                <div id="special" class="invalid">• One special character</div>
+            </div>
+
             @error('password')
             <div class="invalid-feedback">{{ $message }}</div>
             @enderror
@@ -168,6 +212,9 @@
                 placeholder="Confirm Password"
                 autocomplete="new-password"
             />
+            <i class="bi bi-eye-fill password-toggle-icon" onclick="toggleVisibility('password_confirmation', this)"></i>
+
+            <div id="passwordMismatch">Passwords do not match</div>
         </div>
 
         @if($current->role === 'super_admin')
@@ -208,4 +255,49 @@
     }, 3000);
 </script>
 @endif
+
+<script>
+    function toggleVisibility(inputId, icon) {
+        const input = document.getElementById(inputId);
+        const type = input.getAttribute('type');
+        if(type === 'password') {
+            input.setAttribute('type', 'text');
+            icon.classList.remove('bi-eye-fill');
+            icon.classList.add('bi-eye-slash-fill');
+        } else {
+            input.setAttribute('type', 'password');
+            icon.classList.remove('bi-eye-slash-fill');
+            icon.classList.add('bi-eye-fill');
+        }
+    }
+
+    // Password validation rules references
+    const password = document.getElementById('password');
+    const confirm = document.getElementById('password_confirmation');
+    const mismatch = document.getElementById('passwordMismatch');
+
+    const rules = {
+        length: document.getElementById('length'),
+        uppercase: document.getElementById('uppercase'),
+        lowercase: document.getElementById('lowercase'),
+        number: document.getElementById('number'),
+        special: document.getElementById('special'),
+    };
+
+    password.addEventListener('input', () => {
+        const val = password.value;
+        rules.length.className = val.length >= 8 ? 'valid' : 'invalid';
+        rules.uppercase.className = /[A-Z]/.test(val) ? 'valid' : 'invalid';
+        rules.lowercase.className = /[a-z]/.test(val) ? 'valid' : 'invalid';
+        rules.number.className = /\d/.test(val) ? 'valid' : 'invalid';
+        rules.special.className = /[^A-Za-z0-9]/.test(val) ? 'valid' : 'invalid';
+
+        // Show mismatch if confirm is non-empty and doesn't match password
+        mismatch.style.display = confirm.value && confirm.value !== val ? 'block' : 'none';
+    });
+
+    confirm.addEventListener('input', () => {
+        mismatch.style.display = confirm.value !== password.value ? 'block' : 'none';
+    });
+</script>
 @endsection
