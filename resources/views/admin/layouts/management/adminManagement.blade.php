@@ -4,7 +4,7 @@
 
 @section('content')
 <style>
-    /* Keep your existing container styles */
+
     .admin-management-container {
         max-width: 1400px;
         margin: 1rem auto 3rem auto;
@@ -19,19 +19,19 @@
         box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15), 0 12px 30px rgba(0, 0, 0, 0.1);
     }
 
-    /* Smaller, friendlier Add Admin Button */
+
     .btn-add-admin {
-        background-color: #28a745;       /* Bootstrap Success Green */
+        background-color: #28a745;
         color: white !important;
         font-weight: 600;
-        padding: 0.375rem 1rem;           /* Smaller padding */
-        border-radius: 0.375rem;          /* Slightly rounded corners */
+        padding: 0.375rem 1rem;
+        border-radius: 0.375rem;
         border: none;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
         gap: 0.4rem;
-        font-size: 0.9rem;                /* Slightly smaller font */
+        font-size: 0.9rem;
         user-select: none;
         transition: background-color 0.2s ease;
         text-decoration: none;
@@ -39,16 +39,92 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .btn-add-admin i {
-        font-size: 1rem;                  /* Slightly smaller icon */
+        font-size: 1rem;
     }
     .btn-add-admin:hover,
     .btn-add-admin:focus {
-        background-color: #218838;        /* Darker green on hover */
+        background-color: #218838;
         color: white !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         outline: none;
         text-decoration: none;
     }
+
+	.toast-notification {
+	  position: fixed;
+	  top: 20px;
+	  right: 20px;
+	  min-width: 320px;
+	  max-width: 400px;
+	  padding: 1rem 1.25rem;
+	  border-radius: 8px;
+	  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+	  color: #fff;
+	  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	  font-size: 1rem;
+	  display: flex;
+	  align-items: center;
+	  gap: 1rem;
+	  opacity: 0;
+	  transform: translateX(120%);
+	  animation: slideIn 0.4s forwards;
+	  z-index: 1080;
+	  user-select: none;
+	}
+
+	.toast-success {
+	  background-color: #28a745;
+	}
+
+	.toast-error {
+	  background-color: #dc3545;
+	}
+
+	.toast-icon svg {
+	  stroke: #fff;
+	  flex-shrink: 0;
+	}
+
+	.toast-message {
+	  flex: 1;
+	  line-height: 1.3;
+	}
+
+	.toast-close {
+	  background: transparent;
+	  border: none;
+	  color: rgba(255,255,255,0.8);
+	  font-size: 1.25rem;
+	  font-weight: bold;
+	  cursor: pointer;
+	  padding: 0;
+	  line-height: 1;
+	  transition: color 0.2s ease;
+	  flex-shrink: 0;
+	}
+
+	.toast-close:hover {
+	  color: #fff;
+	}
+
+
+	@keyframes slideIn {
+	  to {
+		opacity: 1;
+		transform: translateX(0);
+	  }
+	}
+
+
+	@keyframes slideOut {
+	  to {
+		opacity: 0;
+		transform: translateX(120%);
+	  }
+	}
+
+
+
 </style>
 
 <div class="admin-management-container">
@@ -58,6 +134,39 @@
         </svg>
         All Admins
     </h2>
+
+	{{-- Flash Message Container --}}
+	@if(session('success'))
+	  <div class="toast-notification toast-success" role="alert" aria-live="polite" aria-atomic="true">
+		<div class="toast-icon">
+		  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M20 6L9 17l-5-5"/>
+		  </svg>
+		</div>
+		<div class="toast-message">
+		  {!! session('success') !!}
+		</div>
+		<button class="toast-close" aria-label="Close notification">&times;</button>
+	  </div>
+	@endif
+
+	@if(session('error'))
+	  <div class="toast-notification toast-error" role="alert" aria-live="assertive" aria-atomic="true">
+		<div class="toast-icon">
+		  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<circle cx="12" cy="12" r="10"/>
+			<line x1="12" y1="8" x2="12" y2="12"/>
+			<line x1="12" y1="16" x2="12" y2="16"/>
+		  </svg>
+		</div>
+		<div class="toast-message">
+		  <strong>Error:</strong> {!! session('error') !!}
+		</div>
+		<button class="toast-close" aria-label="Close notification">&times;</button>
+	  </div>
+	@endif
+
+
 
     @php $current = auth()->guard('admin')->user(); @endphp
     @if($current->role === 'super_admin')
@@ -128,16 +237,40 @@
 
 @section('scripts')
 <script>
-    $(document).ready(function() {
-        $('#adminsTable').DataTable({
-            paging: true,
-            lengthChange: true,
-            searching: true,
-            ordering: true,
-            info: true,
-            autoWidth: false,
-            responsive: true,
-        });
+     document.addEventListener('DOMContentLoaded', () => {
+	  const toasts = document.querySelectorAll('.toast-notification');
+
+	  toasts.forEach(toast => {
+		const timeoutId = setTimeout(() => {
+		  hideToast(toast);
+		}, 4000);
+
+
+		const closeBtn = toast.querySelector('.toast-close');
+		closeBtn.addEventListener('click', () => {
+		  clearTimeout(timeoutId);
+		  hideToast(toast);
+		});
+	  });
+
+	  function hideToast(toast) {
+		toast.style.animation = 'slideOut 0.4s forwards';
+		toast.addEventListener('animationend', () => {
+		  toast.remove();
+		});
+	  }
+	});
+
+  $(document).ready(function() {
+    $('#adminsTable').DataTable({
+      paging: true,
+      lengthChange: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      autoWidth: false,
+      responsive: true,
     });
+  });
 </script>
 @endsection

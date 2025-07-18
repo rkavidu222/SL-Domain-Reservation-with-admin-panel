@@ -74,12 +74,77 @@
     padding: 0.3rem 0.6rem;
     border-radius: 0.35rem;
   }
+
+
+	#flashMessage {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 11000;
+    min-width: 320px;
+    max-width: 400px;
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    animation: fadeInSlide 0.5s ease forwards;
+  }
+
+  #flashMessage.success {
+    background-color: #28a745; /* Bootstrap success green */
+  }
+
+  #flashMessage.error {
+    background-color: #dc3545; /* Bootstrap danger red */
+  }
+
+  #flashMessage .btn-close {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+  }
+  #flashMessage .btn-close:hover {
+    opacity: 1;
+  }
+
+  @keyframes fadeInSlide {
+    0% {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @keyframes fadeOutSlide {
+    0% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+  }
+
 </style>
 
 <div class="admin-management-container">
   <h2 class="mb-4 text-primary fw-bold text-center">
     <i class="bi bi-trash3-fill"></i> Trashed Orders
   </h2>
+
+	@if(session('success') || session('error'))
+  <div id="flashMessage" class="flash-message {{ session('success') ? 'success' : 'error' }}">
+    <div class="flash-content">
+      {!! session('success') ?? session('error') !!}
+      <button type="button" class="btn-close btn-close-white ms-3" aria-label="Close" onclick="closeFlash()"></button>
+    </div>
+  </div>
+@endif
 
   <ul class="nav nav-tabs mb-3" id="trashedTabs" role="tablist">
     <li class="nav-item" role="presentation">
@@ -284,5 +349,8 @@
       }
     });
   });
+
+
+
 </script>
 @endsection

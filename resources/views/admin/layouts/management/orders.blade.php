@@ -38,7 +38,7 @@
     font-weight: 600;
   }
 
-  /* Make the date filter inline with tabs and aligned right */
+
   .tab-filter-container {
     display: flex;
     justify-content: space-between;
@@ -89,10 +89,121 @@
       max-width: 100%;
     }
   }
+
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  min-width: 320px;
+  max-width: 400px;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  opacity: 0;
+  transform: translateX(120%);
+  animation: slideIn 0.4s forwards;
+  z-index: 1080;
+  user-select: none;
+}
+
+.toast-success {
+  background-color: #28a745;
+}
+
+.toast-error {
+  background-color: #dc3545;
+}
+
+.toast-icon svg {
+  stroke: #fff;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  flex: 1;
+  line-height: 1.3;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.8);
+  font-size: 1.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.toast-close:hover {
+  color: #fff;
+}
+
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+@keyframes slideOut {
+  to {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+}
+
+
+
 </style>
 
 <div class="admin-management-container">
   <h2 class="mb-4 text-primary fw-bold text-center">Order Management</h2>
+
+	{{-- Flash Messages --}}
+@if (session('success'))
+  <div class="toast-notification toast-success" role="alert" aria-live="polite" aria-atomic="true">
+    <div class="toast-icon">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+    </div>
+    <div class="toast-message">
+      <strong>Success:</strong> {{ session('success') }}
+    </div>
+    <button class="toast-close" aria-label="Close notification">&times;</button>
+  </div>
+@endif
+
+@if (session('error'))
+  <div class="toast-notification toast-error" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-icon">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12" y2="16"/>
+      </svg>
+    </div>
+    <div class="toast-message">
+      <strong>Error:</strong> {{ session('error') }}
+    </div>
+    <button class="toast-close" aria-label="Close notification">&times;</button>
+  </div>
+@endif
+
+
+
+
 
   <div class="tab-filter-container">
     {{-- Tabs --}}
@@ -300,14 +411,11 @@
 @endsection
 
 @section('scripts')
-{{-- daterangepicker CSS/JS --}}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-<script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
 
 <script>
   $(function () {
-    // Initialize DataTables on all three tables
+
     $('#ordersTable, #paidOrdersTable, #pendingOrdersTable').DataTable({
       paging: true,
       lengthChange: true,
@@ -318,7 +426,7 @@
       responsive: true,
     });
 
-    // Bootstrap modal instance
+
     const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
 
     // Show order details modal on button click
@@ -336,7 +444,7 @@
       modal.show();
     });
 
-    // Initialize daterangepicker on date input
+
     $('#dateRangeInput').daterangepicker({
       autoUpdateInput: false,
       opens: 'left',
@@ -346,7 +454,7 @@
       },
     });
 
-    // On apply, update input and reload page with date_range param
+
     $('#dateRangeInput').on('apply.daterangepicker', function(ev, picker) {
       const start = picker.startDate.format('YYYY-MM-DD');
       const end = picker.endDate.format('YYYY-MM-DD');
@@ -358,7 +466,7 @@
       window.location.href = url.toString();
     });
 
-    // On cancel, clear input and reload page without date_range param
+
     $('#dateRangeInput').on('cancel.daterangepicker', function(ev, picker) {
       $(this).val('');
       const url = new URL(window.location.href);
@@ -366,15 +474,42 @@
       window.location.href = url.toString();
     });
 
-    // Clear button to clear date filter
+
     $('.clear-btn').on('click', function() {
       $('#dateRangeInput').val('').trigger('cancel.daterangepicker');
     });
 
-    // Set dateRangeInput value if exists in query string on page load
+
     @if(request('date_range'))
       $('#dateRangeInput').val("{{ request('date_range') }}");
     @endif
+  });
+
+
+
+	 document.addEventListener('DOMContentLoaded', () => {
+    const toasts = document.querySelectorAll('.toast-notification');
+
+    toasts.forEach(toast => {
+
+      const timeoutId = setTimeout(() => {
+        hideToast(toast);
+      }, 4000);
+
+
+      const closeBtn = toast.querySelector('.toast-close');
+      closeBtn.addEventListener('click', () => {
+        clearTimeout(timeoutId);
+        hideToast(toast);
+      });
+    });
+
+    function hideToast(toast) {
+      toast.style.animation = 'slideOut 0.4s forwards';
+      toast.addEventListener('animationend', () => {
+        toast.remove();
+      });
+    }
   });
 </script>
 @endsection

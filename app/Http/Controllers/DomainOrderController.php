@@ -94,7 +94,7 @@ class DomainOrderController extends Controller
         curl_close($ch);
     }
 
-    // Admin: List all domain orders (paginated) with filters
+    // Admin: List all domain orders
     public function adminIndex(Request $request)
 {
     $queryAll = DomainOrder::orderBy('created_at', 'desc');
@@ -117,7 +117,7 @@ class DomainOrderController extends Controller
         }
     }
 
-    // ✨ Return full datasets (no pagination)
+    // Return full datasets
     $allOrders = $queryAll->get();
     $paidOrders = $queryPaid->get();
     $pendingOrders = $queryPending->get();
