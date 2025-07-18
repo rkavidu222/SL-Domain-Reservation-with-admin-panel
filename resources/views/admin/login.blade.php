@@ -154,10 +154,12 @@
       </button>
     </form>
 
-    <div class="form-footer">
-      Don't have an account? <a href="{{ route('admin.register') }}">Register here</a>
-    </div>
-  </div>
+    {{--
+	  <div class="form-footer">
+		Don't have an account? <a href="{{ route('admin.register') }}">Register here</a>
+	  </div>
+	--}}
+
 
   <!-- Bootstrap 5 JS Bundle (for alert dismiss) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
