@@ -413,25 +413,29 @@
 @section('scripts')
 
 
+@section('scripts')
 <script>
   $(function () {
-
-    $('#ordersTable, #paidOrdersTable, #pendingOrdersTable').DataTable({
-      paging: true,
-      lengthChange: true,
-      searching: true,
-      ordering: true,
-      info: true,
-      autoWidth: false,
-      responsive: true,
-    });
+    // Initialize DataTables
+    ['#ordersTable', '#paidOrdersTable', '#pendingOrdersTable'].forEach(tableId => {
+	  $(tableId).DataTable({
+		responsive: true,
+		paging: true,
+		lengthChange: true,
+		searching: true,
+		ordering: true,
+		info: true,
+		autoWidth: false,
+	  });
+	});
 
 
     const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
 
-    // Show order details modal on button click
-    $('.btn-view-order').on('click', function () {
+    // Delegated click handler to support dynamic/responsive elements
+    $(document).on('click', '.btn-view-order', function () {
       const order = $(this).data('order');
+
       $('#modal-order-id').text(order.id ?? '-');
       $('#modal-customer-name').text(`${order.first_name ?? ''} ${order.last_name ?? ''}`.trim() || '-');
       $('#modal-email').text(order.email ?? '-');
@@ -441,10 +445,11 @@
       $('#modal-price').text(order.price !== undefined ? 'Rs.' + parseFloat(order.price).toFixed(2) : '-');
       $('#modal-order-date').text(order.created_at ? new Date(order.created_at).toLocaleDateString() : '-');
       $('#modal-payment-status').text(order.payment_status ? order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1) : '-');
+
       modal.show();
     });
 
-
+    // Date range filter
     $('#dateRangeInput').daterangepicker({
       autoUpdateInput: false,
       opens: 'left',
@@ -453,7 +458,6 @@
         cancelLabel: 'Clear'
       },
     });
-
 
     $('#dateRangeInput').on('apply.daterangepicker', function(ev, picker) {
       const start = picker.startDate.format('YYYY-MM-DD');
@@ -466,7 +470,6 @@
       window.location.href = url.toString();
     });
 
-
     $('#dateRangeInput').on('cancel.daterangepicker', function(ev, picker) {
       $(this).val('');
       const url = new URL(window.location.href);
@@ -474,28 +477,21 @@
       window.location.href = url.toString();
     });
 
-
     $('.clear-btn').on('click', function() {
       $('#dateRangeInput').val('').trigger('cancel.daterangepicker');
     });
-
 
     @if(request('date_range'))
       $('#dateRangeInput').val("{{ request('date_range') }}");
     @endif
   });
 
-
-
-	 document.addEventListener('DOMContentLoaded', () => {
+  // Toast auto-hide and close
+  document.addEventListener('DOMContentLoaded', () => {
     const toasts = document.querySelectorAll('.toast-notification');
 
     toasts.forEach(toast => {
-
-      const timeoutId = setTimeout(() => {
-        hideToast(toast);
-      }, 4000);
-
+      const timeoutId = setTimeout(() => hideToast(toast), 4000);
 
       const closeBtn = toast.querySelector('.toast-close');
       closeBtn.addEventListener('click', () => {
@@ -506,10 +502,10 @@
 
     function hideToast(toast) {
       toast.style.animation = 'slideOut 0.4s forwards';
-      toast.addEventListener('animationend', () => {
-        toast.remove();
-      });
+      toast.addEventListener('animationend', () => toast.remove());
     }
   });
 </script>
+@endsection
+
 @endsection

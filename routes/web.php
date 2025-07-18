@@ -96,5 +96,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{id}/restore', [DomainOrderController::class, 'restore'])->name('orders.restore');
             Route::delete('/{id}/force-delete', [DomainOrderController::class, 'forceDelete'])->name('orders.forceDelete');
         });
+
+
     });
 });
