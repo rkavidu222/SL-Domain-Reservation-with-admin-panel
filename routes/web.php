@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DomainPriceController;
 use App\Http\Controllers\Admin\DashboardController; // Added
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\RegisterController;
+use App\Http\Controllers\SmsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DomainOrderController;
@@ -95,6 +96,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{id}', [DomainOrderController::class, 'destroy'])->name('orders.destroy');
             Route::post('/{id}/restore', [DomainOrderController::class, 'restore'])->name('orders.restore');
             Route::delete('/{id}/force-delete', [DomainOrderController::class, 'forceDelete'])->name('orders.forceDelete');
+        });
+
+
+        Route::prefix('sms')->name('sms.')->group(function () {
+
+            Route::get('/send', [SmsController::class, 'showSendForm'])->name('send');
+            Route::post('/send', [SmsController::class, 'sendSms'])->name('send.submit');
+
+            // Dummy route for sender ID request
+            Route::post('/request-sender-id', [SmsController::class, 'requestSenderId'])->name('request_sender_id');
+
+            Route::get('/template', [SmsController::class, 'createTemplate'])->name('template');
+            Route::post('/template', [SmsController::class, 'storeTemplate'])->name('template.store');
+
+            Route::get('/report', [SmsController::class, 'report'])->name('report');
         });
 
 

@@ -42,7 +42,7 @@ class UserController extends Controller
         return redirect()->route('admin.users.index');
     }
 
-    public function suspend(Admin $admin)
+     public function suspend(Admin $admin)
     {
         $current = auth()->guard('admin')->user();
 

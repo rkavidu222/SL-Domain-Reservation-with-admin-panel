@@ -183,12 +183,38 @@
           </a>
         </li>
 
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="nav-icon bi bi-chat-dots"></i>
-            <span>SMS</span>
-          </a>
-        </li>
+        <li class="nav-item has-treeview {{ request()->routeIs('admin.sms.*') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link {{ request()->routeIs('admin.sms.*') ? 'active' : '' }}">
+                <i class="nav-icon bi bi-chat-dots"></i>
+                <span>SMS</span>
+                <i class="right bi bi-caret-down-fill"></i>
+            </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item">
+                <a href="{{ route('admin.sms.template') }}" class="nav-link {{ request()->routeIs('admin.sms.template') ? 'active' : '' }}">
+                    <i class="bi bi-file-text nav-icon"></i>
+                    <span>SMS Template</span>
+                </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.sms.send') }}" class="nav-link {{ request()->routeIs('admin.sms.send') ? 'active' : '' }}">
+                        <i class="bi bi-send nav-icon"></i>
+                        <span>Send SMS</span>
+                    </a>
+                </li>
+
+
+
+                <li class="nav-item">
+                <a href="{{ route('admin.sms.report') }}" class="nav-link {{ request()->routeIs('admin.sms.report') ? 'active' : '' }}">
+                    <i class="bi bi-bar-chart-line nav-icon"></i>
+                    <span>SMS Report</span>
+                </a>
+                </li>
+            </ul>
+            </li>
+
 
       </ul>
     </nav>
