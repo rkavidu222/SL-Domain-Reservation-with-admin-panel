@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SmsTemplate;
+use App\Models\SmsLog;
 use Illuminate\Support\Facades\Log;
 
 class SmsController extends Controller
@@ -108,6 +109,14 @@ class SmsController extends Controller
             // Send SMS via cURL helper
             $result = $this->sendSmsCurl($smsData);
 
+
+            SmsLog::create([
+                'recipient' => $normalizedPhone,
+                'message' => $message,
+                'status' => $result['success'] ? 'success' : 'failed',
+                'response' => json_encode($result['response'] ?? $result['error']),
+            ]);
+
             if ($result['success']) {
                 $totalSent++;
             } else {
@@ -146,6 +155,7 @@ class SmsController extends Controller
     // SMS report view
     public function report()
     {
-        return view('admin.layouts.sms.report');
+        $logs = \App\Models\SmsLog::latest()->paginate(50);
+        return view('admin.layouts.sms.report', compact('logs'));
     }
 }
