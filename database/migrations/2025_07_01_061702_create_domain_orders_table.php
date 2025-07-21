@@ -1,7 +1,5 @@
 <?php
 
-
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,6 +17,12 @@ class CreateDomainOrdersTable extends Migration
             $table->string('email');
             $table->string('mobile');
             $table->timestamps();
+
+            // Soft delete + foreign key
+            $table->softDeletes(); // adds 'deleted_at'
+
+            $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->foreign('deleted_by')->references('id')->on('users')->onDelete('set null');
         });
     }
 

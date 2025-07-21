@@ -5,11 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SmsTemplates extends Model
+class SmsTemplate extends Model
 {
-
-    protected $fillable = ['title', 'slug', 'content'];
-
-
+     protected $fillable = ['name', 'slug', 'content'];
     use HasFactory;
 }

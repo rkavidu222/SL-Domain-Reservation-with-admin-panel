@@ -69,7 +69,7 @@
 <body>
 
 <div id="step1" class="my-4">
-
+	
 	{{-- Show CAT2 price initially --}}
     @php $cat2Price = $allPrices->get('CAT2'); @endphp
     @if($cat2Price)
@@ -177,7 +177,7 @@
         `;
       }
 
-
+     
       if (category === 'CAT4') {
         html += `
 		  <div class="mb-4 p-4 rounded border bg-white">
@@ -213,7 +213,7 @@
 		  </div>
 		`;
 
-      }
+      } 
       else if (category === 'CAT5') {
         html += `
 		  <div class="mb-4 p-4 rounded border bg-white">
@@ -248,7 +248,7 @@
 		  </div>
 		`;
 
-      }
+      } 
       else {
         // Show CAT2 - Top Level Domain Only
        html += `

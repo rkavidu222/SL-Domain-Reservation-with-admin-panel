@@ -5,6 +5,7 @@
 @section('head')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <style>
+  /* Your CSS from before */
   body {
     background: #f9fafb;
     font-family: 'Inter', sans-serif;
@@ -141,7 +142,7 @@
 
   <div class="section-title">Payment Details</div>
 
-  <form method="POST" action="{{ route('payment.details') }}" onsubmit="showLoading()">
+ <form method="POST" action="{{ route('payment.details') }}" onsubmit="showLoading()">
 
     @csrf
 
@@ -194,9 +195,8 @@
     skipBtn.disabled = true;
     skipBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Redirecting...`;
 
-    const orderId = "{{ $order->id }}";
     setTimeout(() => {
-      window.location.href = "{{ route('payment.skip') }}" + "?order_id=" + orderId;
+      window.location.href = "{{ route('payment.skip') }}";
     }, 500);
   }
 </script>

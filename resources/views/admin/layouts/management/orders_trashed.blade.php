@@ -74,9 +74,8 @@
     padding: 0.3rem 0.6rem;
     border-radius: 0.35rem;
   }
-
-
-	#flashMessage {
+  
+  #flashMessage {
     position: fixed;
     top: 1rem;
     right: 1rem;
@@ -129,22 +128,21 @@
       transform: translateX(100%);
     }
   }
-
 </style>
 
 <div class="admin-management-container">
   <h2 class="mb-4 text-primary fw-bold text-center">
     <i class="bi bi-trash3-fill"></i> Trashed Orders
   </h2>
-
-	@if(session('success') || session('error'))
-  <div id="flashMessage" class="flash-message {{ session('success') ? 'success' : 'error' }}">
-    <div class="flash-content">
-      {!! session('success') ?? session('error') !!}
-      <button type="button" class="btn-close btn-close-white ms-3" aria-label="Close" onclick="closeFlash()"></button>
+  
+  @if(session('success') || session('error'))
+    <div id="flashMessage" class="flash-message {{ session('success') ? 'success' : 'error' }}">
+      <div class="flash-content">
+        {!! session('success') ?? session('error') !!}
+        <button type="button" class="btn-close btn-close-white ms-3" aria-label="Close" onclick="closeFlash()"></button>
+      </div>
     </div>
-  </div>
-@endif
+  @endif
 
   <ul class="nav nav-tabs mb-3" id="trashedTabs" role="tablist">
     <li class="nav-item" role="presentation">
@@ -200,7 +198,7 @@
                   @endif
                 </td>
                 <td>
-                  <form action="{{ route('admin.orders.restore', $order->id) }}" method="POST" class="d-inline">
+                  <form action="{{ route('admin.orders.restore', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Do you want to restore this order?');">
                     @csrf
                     <button class="btn btn-sm btn-success" title="Restore">
                       <i class="bi bi-arrow-counterclockwise"></i> Restore
@@ -250,7 +248,7 @@
                 <td class="text-end">{{ number_format($order->price, 2) }}</td>
                 <td><span class="badge bg-success">Paid</span></td>
                 <td>
-                  <form action="{{ route('admin.orders.restore', $order->id) }}" method="POST" class="d-inline">
+                  <form action="{{ route('admin.orders.restore', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Do you want to restore this order?');">
                     @csrf
                     <button class="btn btn-sm btn-success" title="Restore">
                       <i class="bi bi-arrow-counterclockwise"></i> Restore
@@ -300,7 +298,7 @@
                 <td class="text-end">{{ number_format($order->price, 2) }}</td>
                 <td><span class="badge bg-warning text-dark">Pending</span></td>
                 <td>
-                  <form action="{{ route('admin.orders.restore', $order->id) }}" method="POST" class="d-inline">
+                  <form action="{{ route('admin.orders.restore', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Do you want to restore this order?');">
                     @csrf
                     <button class="btn btn-sm btn-success" title="Restore">
                       <i class="bi bi-arrow-counterclockwise"></i> Restore
@@ -350,7 +348,12 @@
     });
   });
 
-
-
+  // Flash message close function
+  function closeFlash() {
+    const flash = document.getElementById('flashMessage');
+    if (!flash) return;
+    flash.style.animation = 'fadeOutSlide 0.5s ease forwards';
+    setTimeout(() => flash.remove(), 500);
+  }
 </script>
 @endsection

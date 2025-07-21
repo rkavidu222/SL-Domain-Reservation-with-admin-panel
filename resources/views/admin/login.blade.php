@@ -154,7 +154,7 @@
       </button>
     </form>
 
-    {{--
+    {{-- 
 	  <div class="form-footer">
 		Don't have an account? <a href="{{ route('admin.register') }}">Register here</a>
 	  </div>

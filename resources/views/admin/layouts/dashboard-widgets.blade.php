@@ -12,9 +12,6 @@
           <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M2.25 2.25a.75.75 0 000 1.5h1.386c.17 0 .318.114.362.278l2.558 9.592a3.752 3.752 0 00-2.806 3.63c0 .414.336.75.75.75h15.75a.75.75 0 000-1.5H5.378A2.25 2.25 0 017.5 15h11.218a.75.75 0 00.674-.421 60.358 60.358 0 002.96-7.228.75.75 0 00-.525-.965A60.864 60.864 0 005.68 4.509l-.232-.867A1.875 1.875 0 003.636 2.25H2.25zM3.75 20.25a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zM16.5 20.25a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z"/>
           </svg>
-          <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-            More info <i class="bi bi-link-45deg"></i>
-          </a>
         </div>
       </div>
 
@@ -28,9 +25,6 @@
           <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M3 3h18v2H3V3zm0 4h18v2H3V7zm0 4h18v2H3v-2zm0 4h18v2H3v-2zm0 4h18v2H3v-2z"/>
           </svg>
-          <a href="{{ route('admin.orders.index') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-            View All <i class="bi bi-link-45deg"></i>
-          </a>
         </div>
       </div>
 
@@ -44,9 +38,6 @@
           <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2C6.477 2 2 6.484 2 12s4.477 10 10 10 10-4.484 10-10S17.523 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
           </svg>
-          <a href="{{ route('admin.orders.index', ['search' => '', 'category' => '', 'payment_status' => 'paid']) }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-            View Paid <i class="bi bi-link-45deg"></i>
-          </a>
         </div>
       </div>
 
@@ -60,9 +51,6 @@
           <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-.75 5a.75.75 0 011.5 0v4.25l3.25 1.95a.75.75 0 11-.75 1.3L11.25 12V7z"/>
           </svg>
-          <a href="{{ route('admin.orders.index', ['search' => '', 'category' => '', 'payment_status' => 'pending']) }}" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
-            View Pending <i class="bi bi-link-45deg"></i>
-          </a>
         </div>
       </div>
 
@@ -76,9 +64,6 @@
           <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd" d="M6 7V5a2 2 0 012-2h8a2 2 0 012 2v2h3a1 1 0 110 2h-1v11a2 2 0 01-2 2H6a2 2 0 01-2-2V9H3a1 1 0 110-2h3zm2-2v2h8V5H8zm-2 4v11h12V9H6z" clip-rule="evenodd"/>
           </svg>
-          <a href="{{ route('admin.orders.trash') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-            View Trash <i class="bi bi-link-45deg"></i>
-          </a>
         </div>
       </div>
 

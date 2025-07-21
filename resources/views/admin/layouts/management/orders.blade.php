@@ -89,7 +89,7 @@
       max-width: 100%;
     }
   }
-
+	
 .toast-notification {
   position: fixed;
   top: 20px;
@@ -117,7 +117,7 @@
 }
 
 .toast-error {
-  background-color: #dc3545;
+  background-color: #dc3545; 
 }
 
 .toast-icon svg {
@@ -169,7 +169,7 @@
 
 <div class="admin-management-container">
   <h2 class="mb-4 text-primary fw-bold text-center">Order Management</h2>
-
+	
 	{{-- Flash Messages --}}
 @if (session('success'))
   <div class="toast-notification toast-success" role="alert" aria-live="polite" aria-atomic="true">

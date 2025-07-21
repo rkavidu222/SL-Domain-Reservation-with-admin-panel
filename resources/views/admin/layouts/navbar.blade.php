@@ -12,7 +12,7 @@
   <style>
     .navbar-custom-bg {
       background-color: #3a5068;
-      z-index: 1050;
+      z-index: 1050; 
     }
 
     .navbar-custom-bg .nav-link,
@@ -59,14 +59,14 @@
       background: transparent;
       border: none;
       padding: 0.5rem 1rem;
-      color: #2c3e50;
+      color: #2c3e50; 
       cursor: pointer;
       font-weight: 600;
       transition: color 0.3s ease;
     }
 
     .btn-flat:hover {
-      color: #1a252f;
+      color: #1a252f; 
       text-decoration: underline;
     }
 
@@ -74,7 +74,7 @@
       padding-top: 56px;
     }
 
-
+   
     .dropdown-menu {
       background-color: #ffffff;
       border: 1px solid #2c3e50;
@@ -99,7 +99,7 @@
       </ul>
 
       <ul class="navbar-nav ms-auto">
-
+        
         <!-- User Menu Dropdown -->
         <li class="nav-item dropdown user-menu">
           <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">

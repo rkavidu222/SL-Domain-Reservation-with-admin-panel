@@ -75,9 +75,6 @@
 </head>
 <body>
 
-<main>
-  <!-- Page content here -->
-</main>
 
 <!-- WhatsApp Button -->
 <div class="fixed bottom-4 right-4 z-50"

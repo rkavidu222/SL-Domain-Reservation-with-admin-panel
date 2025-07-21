@@ -100,18 +100,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         Route::prefix('sms')->name('sms.')->group(function () {
-
-            Route::get('/send', [SmsController::class, 'showSendForm'])->name('send');
-            Route::post('/send', [SmsController::class, 'sendSms'])->name('send.submit');
-
-            // Dummy route for sender ID request
-            Route::post('/request-sender-id', [SmsController::class, 'requestSenderId'])->name('request_sender_id');
-
             Route::get('/template', [SmsController::class, 'createTemplate'])->name('template');
             Route::post('/template', [SmsController::class, 'storeTemplate'])->name('template.store');
 
+
+            Route::get('/template/{id}/edit', [SmsController::class, 'editTemplate'])->name('template.edit');
+            Route::delete('/template/{id}', [SmsController::class, 'destroyTemplate'])->name('template.destroy');
+
+
             Route::get('/report', [SmsController::class, 'report'])->name('report');
+
+            Route::get('/send', [SmsController::class, 'showSendForm'])->name('send');
+            Route::post('/send', [SmsController::class, 'sendSms'])->name('send.post');
+
+            Route::post('/request-sender-id', [SmsController::class, 'requestSenderId'])->name('request_sender_id');
         });
+
 
 
     });

@@ -17,10 +17,17 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name'=>'required',
-            'email'=>'required|email|unique:admins,email',
-            'password'=>'required|confirmed|min:6',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:admins,email',
+            'password' => 'required|confirmed|min:6',
+            'auth_code' => 'required|string',
         ]);
+
+        $correctCode = '@#slh';
+
+        if ($request->auth_code !== $correctCode) {
+            return back()->withErrors(['auth_code' => 'Invalid authentication code'])->withInput();
+        }
 
         Admin::create([
             'name' => $request->name,

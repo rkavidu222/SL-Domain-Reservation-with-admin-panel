@@ -7,15 +7,13 @@ use App\Models\DomainPrice;
 
 class DomainPriceSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $prices = [
-            ['category' => 'CAT1', 'old_price' => 5000.00, 'new_price' => 4500.00],
-            ['category' => 'CAT2', 'old_price' => 3000.00, 'new_price' => 2500.00],
-            ['category' => 'CAT3', 'old_price' => 1500.00, 'new_price' => 1200.00],
-            ['category' => 'CAT4', 'old_price' => 8000.00, 'new_price' => 7000.00],
-            ['category' => 'CAT5', 'old_price' => 10000.00, 'new_price' => 8500.00],
-            ['category' => 'SUGGESTED', 'old_price' => 2000.00, 'new_price' => 1800.00],
+            ['category' => 'CAT1', 'old_price' => 8000.00, 'new_price' => 7500.00],
+            ['category' => 'CAT2', 'old_price' => 5000.00, 'new_price' => 4600.00],
+            ['category' => 'CAT3', 'old_price' => 1000.00, 'new_price' => 950.00],
+            ['category' => 'SUGGESTED', 'old_price' => 5000.00, 'new_price' => 4600.00],
         ];
 
         foreach ($prices as $price) {
