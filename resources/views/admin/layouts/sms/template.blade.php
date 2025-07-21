@@ -1,135 +1,211 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Quick SMS Send')
+@section('title', 'Create SMS Template')
 
 @section('content')
 <style>
-    .quick-sms-container {
-        max-width: 1000px;
-        margin: 1rem auto;
-        background: #fff;
-        padding: 2rem;
-        border-radius: 1rem;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
+  .admin-management-container {
+    max-width: 1400px;
+    margin: 1rem auto 3rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 1rem;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 8px 20px rgba(0, 0, 0, 0.07);
+    transition: box-shadow 0.3s ease;
+  }
 
-    .quick-sms-header {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #0d6efd;
-        margin-bottom: 1.5rem;
-    }
+  .admin-management-container:hover {
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15), 0 12px 30px rgba(0, 0, 0, 0.1);
+  }
 
-    .form-label {
-        font-weight: 500;
-        margin-bottom: 0.3rem;
-    }
+  .form-label {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
 
-    textarea.form-control {
-        resize: vertical;
-        min-height: 120px;
-    }
+  .form-control:focus, .form-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+  }
 
-    .char-count {
-        font-size: 0.9rem;
-        color: #6c757d;
-    }
+  .btn-blue {
+    background-color: #2563eb;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
 
-    .badge-count {
-        font-size: 0.9rem;
-        margin-left: 0.5rem;
-    }
+  .btn-blue:hover {
+    background-color: #1d4ed8;
+  }
 
-    @media(max-width: 768px) {
-        .quick-sms-container {
-            padding: 1.5rem;
-        }
-    }
+  table.table thead {
+    background-color: #2563eb;
+    color: white;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  table.table th, table.table td {
+    padding: 0.75rem 1rem;
+    border: 1px solid #dee2e6;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  table.table th.text-start,
+  table.table td.text-start {
+    text-align: left;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  table.table tbody tr:hover {
+    background-color: #e0e7ff;
+  }
+
+  .btn-sm {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.35rem;
+  }
 </style>
 
-<div class="quick-sms-container">
-    <div class="quick-sms-header">
-        <i class="bi bi-send-fill me-2"></i>Quick SMS Send
+<!-- Create Template Form -->
+<div class="admin-management-container">
+  <h2 class="mb-4 text-primary fw-bold">
+    <i class="bi bi-envelope-plus"></i> Create SMS Template
+  </h2>
+
+  <form>
+    <div class="mb-3">
+      <label class="form-label">Template Title</label>
+      <input type="text" class="form-control" placeholder="e.g., Job Creation Alert" />
     </div>
 
-    <form method="POST" action="#">
-        @csrf
+    <div class="mb-3">
+      <label class="form-label">Receiver</label>
+      <select class="form-select">
+        <option value="">Select Receiver</option>
+        <option value="client">Client</option>
+        <option value="user">Internal User</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label">Originator</label>
-            <input type="text" class="form-control" value="SLHosting" readonly>
-        </div>
+    <div class="mb-3">
+      <label class="form-label">SMS Content</label>
+      <textarea class="form-control" rows="5" placeholder="Type SMS body here..."></textarea>
+      <small class="text-muted mt-2 d-block">You can use variables like <code>{client_name}</code>, <code>{job_id}</code></small>
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label">Country Code</label>
-            <input type="text" class="form-control" value="+94" readonly>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Recipients:</label>
-            <textarea class="form-control" id="recipients" rows="3" placeholder="Enter up to 100 phone numbers, one per line or comma-separated"></textarea>
-            <div class="form-text">Note: You can send a maximum of 100 rows by copy-pasting.</div>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Total Number of Recipients:</label>
-            <div class="form-control bg-light" id="recipient-count">0</div>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">SMS Template (Optional)</label>
-            <select class="form-select" id="template">
-                <option selected>Select one</option>
-                <option>Promo: Get 25% off today!</option>
-                <option>Reminder: Your payment is due.</option>
-                <option>Notice: Your account has been updated.</option>
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Message</label>
-            <textarea class="form-control" id="message" rows="4" maxlength="160" placeholder="Enter your message here..."></textarea>
-            <div class="d-flex justify-content-between mt-1">
-                <span class="char-count" id="char-count">REMAINING: 160 / 160 (0 CHARACTERS)</span>
-                <span class="badge bg-primary badge-count" id="msg-count">MESSAGE(S): 0</span>
-            </div>
-            <div class="form-text">
-                You can randomize the message by using spintax. For example: <code>{Hi|Hello} {John|Jane}</code> will result in <code>Hi John</code> or <code>Hello Jane</code>.
-            </div>
-        </div>
-
-        <div class="text-end">
-            <button type="submit" class="btn btn-primary">
-                <i class="bi bi-send me-1"></i>Send SMS
-            </button>
-        </div>
-    </form>
+    <button type="submit" class="btn-blue">Save Template</button>
+  </form>
 </div>
 
+<!-- Template List Table -->
+<div class="admin-management-container">
+  <h4 class="mb-3 fw-bold text-dark">
+    <i class="bi bi-table"></i> SMS Templates
+  </h4>
+
+  <div class="table-responsive">
+    <table id="smsTemplateTable" class="table table-bordered table-hover align-middle table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th class="text-start">Title</th>
+          <th>Receiver</th>
+          <th class="text-start">Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @php
+          $templates = [
+              ['id' => 1, 'title' => 'Job Creation Alert', 'receiver' => 'Client', 'content' => 'Hello {client_name}, a job with ID {job_id} was created.', 'created_at' => '2025-07-19'],
+              ['id' => 2, 'title' => 'New Admin Notice', 'receiver' => 'Admin', 'content' => 'Admin Alert: A new job {job_id} was posted.', 'created_at' => '2025-07-18'],
+              ['id' => 3, 'title' => 'Internal Notification', 'receiver' => 'User', 'content' => 'Dear user, job {job_id} is assigned to you.', 'created_at' => '2025-07-17'],
+          ];
+        @endphp
+        @foreach($templates as $template)
+        <tr>
+          <td>{{ $template['id'] }}</td>
+          <td class="text-start">{{ $template['title'] }}</td>
+          <td>{{ $template['receiver'] }}</td>
+          <td class="text-start">{{ $template['created_at'] }}</td>
+          <td>
+            <button class="btn btn-sm btn-info" onclick="showTemplate({{ json_encode($template) }})" title="View">
+              <i class="bi bi-eye">View</i>
+            </button>
+            <button class="btn btn-sm btn-warning" title="Edit">
+              <i class="bi bi-pencil-square">Edit</i>
+            </button>
+            <button class="btn btn-sm btn-danger" title="Delete">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="viewModalLabel">SMS Template Preview</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Title:</strong> <span id="modalTitle"></span></p>
+        <p><strong>Receiver:</strong> <span id="modalReceiver"></span></p>
+        <p><strong>Content:</strong></p>
+        <div class="border p-2 bg-light rounded" id="modalContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+@endsection
+
+@section('scripts')
+
 <script>
-    const messageInput = document.getElementById('message');
-    const charCount = document.getElementById('char-count');
-    const msgCount = document.getElementById('msg-count');
-    const recipientsInput = document.getElementById('recipients');
-    const recipientCountDisplay = document.getElementById('recipient-count');
+  $(document).ready(function () {
+    $('#smsTemplateTable').DataTable({
+      paging: true,
+      lengthChange: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      autoWidth: false,
+      responsive: true,
+      order: [[0, 'desc']],
+      columnDefs: [
+        { orderable: false, targets: 4 }
+      ],
+      language: {
+        search: "_INPUT_",
+        searchPlaceholder: "Search templates..."
+      }
+    });
+  });
 
-    messageInput.addEventListener('input', updateMessageCount);
-    recipientsInput.addEventListener('input', updateRecipientCount);
-
-    function updateMessageCount() {
-        const msg = messageInput.value;
-        const length = msg.length;
-        const remaining = 160 - length;
-        const messages = Math.ceil(length / 160);
-        charCount.innerText = `REMAINING: ${remaining >= 0 ? remaining : 0} / 160 (${length} CHARACTERS)`;
-        msgCount.innerText = `MESSAGE(S): ${messages}`;
-    }
-
-    function updateRecipientCount() {
-        const input = recipientsInput.value;
-        const split = input.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-        const count = split.length;
-        recipientCountDisplay.innerText = count > 100 ? "100 (Max)" : count;
-    }
+  function showTemplate(template) {
+    document.getElementById('modalTitle').textContent = template.title;
+    document.getElementById('modalReceiver').textContent = template.receiver;
+    document.getElementById('modalContent').textContent = template.content;
+    new bootstrap.Modal(document.getElementById('viewModal')).show();
+  }
 </script>
 @endsection

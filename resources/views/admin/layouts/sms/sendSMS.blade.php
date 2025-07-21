@@ -4,74 +4,118 @@
 
 @section('content')
 <style>
-  .sms-send-container {
-    max-width: 1100px;
-    margin: 2rem auto;
-    background: #fff;
-    padding: 2rem 2.5rem;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-  }
-  .sms-section-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-  }
-  textarea {
-    resize: vertical;
-  }
+    .quick-sms-container {
+        max-width: 1000px;
+        margin: 1rem auto;
+        background: #fff;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .quick-sms-header {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #0d6efd;
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.3rem;
+    }
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+    .char-count {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .badge-count {
+        font-size: 0.9rem;
+        margin-left: 0.5rem;
+    }
+    @media(max-width: 768px) {
+        .quick-sms-container {
+            padding: 1.5rem;
+        }
+    }
 </style>
 
-<div class="sms-send-container">
-  <form method="POST" action="#">
-    @csrf
-
-    <div class="row mb-4">
-      <div class="col-md-6">
-        <label class="form-label sms-section-title">ORIGINATOR</label>
-        <input type="text" class="form-control" value="SLHosting" readonly>
-      </div>
+<div class="quick-sms-container">
+    <div class="quick-sms-header">
+        <i class="bi bi-send-fill me-2"></i>Quick SMS Send
     </div>
 
-    <div class="row mb-4">
-      <div class="col-md-2">
-        <label class="form-label">Country Code</label>
-        <input type="text" class="form-control" value="+94" readonly>
-      </div>
-      <div class="col-md-10">
-        <label class="form-label">Recipients <small class="text-muted">(Max 100 numbers)</small></label>
-        <textarea class="form-control" rows="4" placeholder="Enter one number per line or paste numbers here (e.g., 771234567)"></textarea>
-      </div>
-    </div>
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
-    <div class="mb-3">
-      <p class="mb-1">TOTAL NUMBER OF RECIPIENTS: <strong>0</strong></p>
-    </div>
+    <form method="POST" action="{{ route('admin.sms.send') }}">
+        @csrf
 
-    <div class="row mb-4">
-      <div class="col-md-6">
-        <label class="form-label">SMS Template (Optional)</label>
-        <select class="form-select">
-          <option selected disabled>Select one</option>
-          <option>Welcome message</option>
-          <option>Promotion message</option>
-          <option>Reminder message</option>
-        </select>
-      </div>
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Originator</label>
+            <input type="text" class="form-control" name="originator" value="SLHosting" readonly>
+        </div>
 
-    <div class="mb-4">
-      <label class="form-label">Message</label>
-      <textarea class="form-control" rows="5" maxlength="160" placeholder='You can use spintax. Example: "{Hi|Hello} {John|Jane}"'></textarea>
-      <div class="form-text mt-1">
-        REMAINING: <strong>160 / 160</strong> (0 CHARACTERS)
-        &nbsp;&nbsp; MESSAGE(S): 0
-        &nbsp;&nbsp; (ENCODING: GSM_7BIT)
-      </div>
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Country Code</label>
+            <input type="text" class="form-control" name="country_code" value="+94" readonly>
+        </div>
 
-    <button type="submit" class="btn btn-primary px-4">Send SMS</button>
-  </form>
+        <div class="mb-3">
+            <label class="form-label">Recipients:</label>
+            <textarea class="form-control" name="recipients" id="recipients" rows="3" placeholder="Enter up to 100 phone numbers, one per line or comma-separated"></textarea>
+            <div class="form-text">Note: You can send a maximum of 100 rows by copy-pasting.</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Total Number of Recipients:</label>
+            <div class="form-control bg-light" id="recipient-count">0</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">SMS Template (Required)</label>
+            <select name="message_template_slug" class="form-select" required>
+                <option value="">Select one</option>
+                @foreach($templates as $slug => $content)
+                    <option value="{{ $slug }}">{{ $slug }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Message Preview</label>
+            <textarea class="form-control" id="message-preview" rows="4" readonly placeholder="Message preview will appear here..."></textarea>
+        </div>
+
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-send me-1"></i>Send SMS
+            </button>
+        </div>
+    </form>
 </div>
+
+<script>
+    const recipientsInput = document.getElementById('recipients');
+    const recipientCountDisplay = document.getElementById('recipient-count');
+    const templateSelect = document.querySelector('select[name="message_template_slug"]');
+    const messagePreview = document.getElementById('message-preview');
+
+    // Count recipients and update
+    recipientsInput.addEventListener('input', () => {
+        const input = recipientsInput.value;
+        const split = input.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+        const count = split.length;
+        recipientCountDisplay.innerText = count > 100 ? "100 (Max)" : count;
+    });
+
+    // Show template preview on select change
+    templateSelect.addEventListener('change', () => {
+        const selected = templateSelect.value;
+        const templates = @json($templates);
+        messagePreview.value = templates[selected] || '';
+    });
+</script>
 @endsection

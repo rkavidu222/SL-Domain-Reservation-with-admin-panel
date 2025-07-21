@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\SmsTemplates;
 use Illuminate\Http\Request;
 
 class SmsController extends Controller
@@ -20,30 +20,40 @@ class SmsController extends Controller
     }
 
     // Handle sending SMS (dummy logic)
+
     public function sendSms(Request $request)
     {
-        // Validate required inputs (simple example)
         $request->validate([
             'originator' => 'required|string|max:11',
             'country_code' => 'required|string',
             'recipients' => 'required|string',
-            'message' => 'required|string|max:160',
+            'message_template_slug' => 'required|string',
         ]);
 
-        // Extract data (dummy)
-        $originator = $request->input('originator');
-        $countryCode = $request->input('country_code');
-        $recipients = explode("\n", $request->input('recipients'));
-        $message = $request->input('message');
+        // Fetch the selected SMS template from DB by slug
+        $sms_template = SmsTemplates::where('slug', $request->message_template_slug)->first();
 
-        // Count recipients (max 100 allowed)
+        if (!$sms_template) {
+            return back()->with('error', 'SMS template not found.');
+        }
+
+        // Use the template content as the message directly (no replacements)
+        $message = $sms_template->content;
+
+        // Split recipients by new line, comma, or space and trim
+        $recipients = preg_split('/[\s,]+/', trim($request->recipients));
+
+        // Limit to max 100 recipients
         $totalRecipients = min(count($recipients), 100);
 
-        // Here you would integrate actual SMS sending API.
-        // For now, just pretend it sent successfully.
+        // Loop through recipients and send SMS (replace with real SMS gateway call)
+        foreach (array_slice($recipients, 0, 100) as $recipient) {
+            $this->smsSend(trim($recipient), $message, $request->originator);
+        }
 
         return back()->with('success', "SMS sent to {$totalRecipients} recipient(s) successfully!");
     }
+
 
     // Dummy handler for sender ID request
     public function requestSenderId(Request $request)
