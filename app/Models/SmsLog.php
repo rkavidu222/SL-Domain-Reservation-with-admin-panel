@@ -9,11 +9,6 @@ class SmsLog extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-    'phone',
-    'message',
-    'status',
-    'sent_at'
-];
+     protected $fillable = ['recipient', 'message', 'status', 'response'];
 
 }

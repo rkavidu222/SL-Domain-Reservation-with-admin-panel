@@ -38,10 +38,10 @@ class SmsController extends Controller
         return $number;
     }
 
-    // Send SMS using cURL to ensure consistency with your OTP function
+
     private function sendSmsCurl(array $data)
     {
-        $url = 'https://sms.serverclub.lk/api/http/sms/send'; // Use your actual API endpoint here
+        $url = 'https://sms.serverclub.lk/api/http/sms/send';
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -155,7 +155,8 @@ class SmsController extends Controller
     // SMS report view
     public function report()
     {
-        $logs = \App\Models\SmsLog::latest()->paginate(50);
+        $logs = \App\Models\SmsLog::latest()->get();
         return view('admin.layouts.sms.report', compact('logs'));
     }
+
 }

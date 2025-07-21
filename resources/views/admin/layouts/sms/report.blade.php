@@ -3,47 +3,99 @@
 @section('title', 'SMS Report')
 
 @section('content')
-<div class="container mt-4">
-    <div class="card shadow rounded-4 border-0">
-        <div class="card-header bg-purple text-white rounded-top-4">
-            <h4 class="mb-0">SMS Report</h4>
-        </div>
-        <div class="card-body p-4">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>#</th>
-                            <th>Receiver</th>
-                            <th>Phone</th>
-                            <th>Message</th>
-                            <th>Status</th>
-                            <th>Sent At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Sample row -->
-                        <tr>
-                            <td>1</td>
-                            <td>John Doe</td>
-                            <td>+94 77 123 4567</td>
-                            <td>Your job has been created. Ref: 1223</td>
-                            <td><span class="badge bg-success">Delivered</span></td>
-                            <td>2025-07-19 10:30 AM</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Jane Smith</td>
-                            <td>+94 77 555 9876</td>
-                            <td>Domain reminder: abc.lk will expire soon.</td>
-                            <td><span class="badge bg-warning text-dark">Pending</span></td>
-                            <td>2025-07-19 10:35 AM</td>
-                        </tr>
-                        <!-- End sample -->
-                    </tbody>
-                </table>
+<div class="admin-management-container">
+    <h2 class="mb-4 text-primary fw-bold">
+        <i class="bi bi-card-text"></i> SMS Report
+    </h2>
+
+    @if(session('success'))
+        <div class="toast-notification toast-success" role="alert" aria-live="polite" aria-atomic="true">
+            <div class="toast-icon">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6L9 17l-5-5"/>
+                </svg>
             </div>
+            <div class="toast-message">{!! session('success') !!}</div>
+            <button class="toast-close" aria-label="Close notification">&times;</button>
         </div>
+    @endif
+
+    <div class="table-responsive">
+        <table id="smsTemplateTable" class="table table-bordered table-hover align-middle table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th class="text-start">Phone</th>
+                    <th class="text-start">Message</th>
+                    <th>Status</th>
+                    <th>Sent At</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($logs as $log)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td class="text-start">{{ $log->recipient }}</td>
+                    <td class="text-start" style="max-width: 350px; white-space: normal;">{{ $log->message }}</td>
+                    <td>
+                        @if($log->status === 'success')
+                            <span class="badge bg-success">Delivered</span>
+                        @elseif($log->status === 'pending')
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        @else
+                            <span class="badge bg-danger">Failed</span>
+                        @endif
+                    </td>
+                    <td>{{ $log->created_at->format('Y-m-d h:i A') }}</td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="6" class="text-center text-muted">No SMS logs found.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+  $(document).ready(function () {
+    $('#smsTemplateTable').DataTable({
+      paging: true,
+      lengthChange: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      autoWidth: false,
+      responsive: true,
+      order: [[0, 'desc']],
+      language: {
+        search: "_INPUT_",
+        searchPlaceholder: "Search templates..."
+      }
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const toasts = document.querySelectorAll('.toast-notification');
+    toasts.forEach(toast => {
+      const timeoutId = setTimeout(() => {
+        hideToast(toast);
+      }, 4000);
+      const closeBtn = toast.querySelector('.toast-close');
+      closeBtn.addEventListener('click', () => {
+        clearTimeout(timeoutId);
+        hideToast(toast);
+      });
+    });
+    function hideToast(toast) {
+      toast.style.animation = 'slideOut 0.4s forwards';
+      toast.addEventListener('animationend', () => {
+        toast.remove();
+      });
+    }
+  });
+</script>
 @endsection
