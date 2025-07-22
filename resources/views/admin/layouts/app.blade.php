@@ -5,6 +5,8 @@
   <title>@yield('title', 'Admin | Dashboard')</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <link rel="shortcut icon" href="https://www.srilankahosting.lk/assets/images/icons/favicon.png">
+
   <!-- Fonts and your CSS -->
   <link
     rel="stylesheet"
