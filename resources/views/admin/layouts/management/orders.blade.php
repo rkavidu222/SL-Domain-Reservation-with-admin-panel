@@ -89,7 +89,7 @@
       max-width: 100%;
     }
   }
-	
+
 .toast-notification {
   position: fixed;
   top: 20px;
@@ -117,7 +117,7 @@
 }
 
 .toast-error {
-  background-color: #dc3545; 
+  background-color: #dc3545;
 }
 
 .toast-icon svg {
@@ -169,7 +169,7 @@
 
 <div class="admin-management-container">
   <h2 class="mb-4 text-primary fw-bold text-center">Order Management</h2>
-	
+
 	{{-- Flash Messages --}}
 @if (session('success'))
   <div class="toast-notification toast-success" role="alert" aria-live="polite" aria-atomic="true">
@@ -383,24 +383,22 @@
 
 {{-- Order Details Modal --}}
 <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header bg-primary text-white">
         <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <dl class="row mb-0">
-          <dt class="col-sm-4">Order ID</dt><dd class="col-sm-8" id="modal-order-id"></dd>
-          <dt class="col-sm-4">Customer Name</dt><dd class="col-sm-8" id="modal-customer-name"></dd>
-          <dt class="col-sm-4">Email</dt><dd class="col-sm-8" id="modal-email"></dd>
-          <dt class="col-sm-4">Phone</dt><dd class="col-sm-8" id="modal-phone"></dd>
-          <dt class="col-sm-4">Domain</dt><dd class="col-sm-8" id="modal-domain"></dd>
-          <dt class="col-sm-4">Category</dt><dd class="col-sm-8" id="modal-category"></dd>
-          <dt class="col-sm-4">Price</dt><dd class="col-sm-8" id="modal-price"></dd>
-          <dt class="col-sm-4">Order Date</dt><dd class="col-sm-8" id="modal-order-date"></dd>
-          <dt class="col-sm-4">Payment Status</dt><dd class="col-sm-8" id="modal-payment-status"></dd>
-        </dl>
+        <p><strong>Order ID:</strong> <span id="modal-order-id"></span></p>
+        <p><strong>Customer Name:</strong> <span id="modal-customer-name"></span></p>
+        <p><strong>Email:</strong> <span id="modal-email"></span></p>
+        <p><strong>Phone:</strong> <span id="modal-phone"></span></p>
+        <p><strong>Domain:</strong> <span id="modal-domain"></span></p>
+        <p><strong>Category:</strong> <span id="modal-category"></span></p>
+        <p><strong>Price:</strong> <span id="modal-price"></span></p>
+        <p><strong>Order Date:</strong> <span id="modal-order-date"></span></p>
+        <p><strong>Payment Status:</strong> <span id="modal-payment-status"></span></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -408,9 +406,10 @@
     </div>
   </div>
 </div>
+
 @endsection
 
-@section('scripts')
+
 
 
 @section('scripts')
@@ -506,6 +505,4 @@
     }
   });
 </script>
-@endsection
-
 @endsection
