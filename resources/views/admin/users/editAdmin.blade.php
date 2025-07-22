@@ -2,39 +2,14 @@
 
 @section('title', 'Edit Admin')
 
+@push('styles')
+  <link rel="stylesheet" href="{{ asset('admin/css/createAdmin.css') }}">
+@endpush
+
+
 @section('content')
-<style>
-    .edit-admin-container {
-        max-width: 580px;
-        margin: 1rem auto;
-        padding: 2rem 2rem 3rem;
-        background: #fff;
-        border-radius: 1rem;
-        border: 1px solid #dee2e6;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
 
-    .password-rules {
-        font-size: 0.75rem;
-        margin-top: 6px;
-        line-height: 1.4;
-    }
 
-    .password-rules .valid {
-        color: green;
-    }
-
-    .password-rules .invalid {
-        color: red;
-    }
-
-    #passwordMismatch {
-        font-size: 0.8rem;
-        color: red;
-        margin-top: 4px;
-        display: none;
-    }
-</style>
 
 <div class="edit-admin-container">
     <h4 class="text-center text-primary fw-bold mb-4">

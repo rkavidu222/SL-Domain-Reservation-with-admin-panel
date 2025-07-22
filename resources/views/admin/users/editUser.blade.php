@@ -2,6 +2,11 @@
 
 @section('title', 'Edit User')
 
+@push('styles')
+  <link rel="stylesheet" href="{{ asset('admin/css/createAdmin.css') }}">
+@endpush
+
+
 @section('content')
 <div class="container py-4">
     <h2>Edit User</h2>

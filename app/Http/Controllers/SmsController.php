@@ -178,5 +178,29 @@ class SmsController extends Controller
         return redirect()->back()->with('success', 'SMS template deleted successfully.');
     }
 
+    // Show the edit form with the selected template data
+    public function editTemplate($id)
+    {
+        $template = SmsTemplate::findOrFail($id);
+        return view('admin.layouts.sms.editTemplate', compact('template'));
+    }
+
+    // Handle update form submission
+    public function updateTemplate(Request $request, $id)
+    {
+        $template = SmsTemplate::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|unique:sms_templates,slug,' . $id,
+            'content' => 'required|string',
+        ]);
+
+        $template->update($request->only('name', 'slug', 'content'));
+
+        return redirect()->route('admin.sms.template')->with('success', 'SMS template updated successfully.');
+    }
+
+
 
 }

@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DomainPriceController;
-use App\Http\Controllers\Admin\DashboardController; // Added
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\RegisterController;
 use App\Http\Controllers\SmsController;
@@ -30,8 +30,8 @@ Route::get('/otp-verification', [OtpController::class, 'showVerificationForm'])-
 Route::post('/otp-resend', [OtpController::class, 'resendOtp'])->name('otp.resend');  // Added this route for resend AJAX
 
 // Contact form routes (separate from domain order contact info)
-Route::get('/contact-information', [ContactController::class, 'showForm'])->name('contact.page');
-Route::post('/contact-information', [ContactController::class, 'submit'])->name('contact.submit');
+//Route::get('/contact-information', [ContactController::class, 'showForm'])->name('contact.page');
+//Route::post('/contact-information', [ContactController::class, 'submit'])->name('contact.submit');
 
 // Payment routes
 Route::post('/payment-details', [OtpController::class, 'paymentDetails'])->name('payment.details');
@@ -103,10 +103,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/template', [SmsController::class, 'createTemplate'])->name('template');
             Route::post('/template', [SmsController::class, 'storeTemplate'])->name('template.store');
 
-
             Route::get('/template/{id}/edit', [SmsController::class, 'editTemplate'])->name('template.edit');
-            Route::delete('/template/{id}', [SmsController::class, 'destroyTemplate'])->name('template.destroy');
+            Route::put('/template/{id}', [SmsController::class, 'updateTemplate'])->name('template.update');
 
+            Route::delete('/template/{id}', [SmsController::class, 'destroyTemplate'])->name('template.destroy');
 
             Route::get('/report', [SmsController::class, 'report'])->name('report');
 
@@ -115,6 +115,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::post('/request-sender-id', [SmsController::class, 'requestSenderId'])->name('request_sender_id');
         });
+
 
 
 
