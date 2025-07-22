@@ -123,7 +123,6 @@
 @section('content')
 
 @php
-    // Only for display purpose
     $old_price = request()->query('old_price');
 @endphp
 

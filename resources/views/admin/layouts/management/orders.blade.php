@@ -13,35 +13,35 @@
   <h2 class="mb-4 text-primary fw-bold text-center">Order Management</h2>
 
 	{{-- Flash Messages --}}
-@if (session('success'))
-  <div class="toast-notification toast-success" role="alert" aria-live="polite" aria-atomic="true">
-    <div class="toast-icon">
-      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 6L9 17l-5-5"/>
-      </svg>
+    @if (session('success'))
+    <div class="toast-notification toast-success" role="alert" aria-live="polite" aria-atomic="true">
+        <div class="toast-icon">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        </div>
+        <div class="toast-message">
+        <strong>Success:</strong> {{ session('success') }}
+        </div>
+        <button class="toast-close" aria-label="Close notification">&times;</button>
     </div>
-    <div class="toast-message">
-      <strong>Success:</strong> {{ session('success') }}
-    </div>
-    <button class="toast-close" aria-label="Close notification">&times;</button>
-  </div>
-@endif
+    @endif
 
-@if (session('error'))
-  <div class="toast-notification toast-error" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="toast-icon">
-      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="12" y1="8" x2="12" y2="12"/>
-        <line x1="12" y1="16" x2="12" y2="16"/>
-      </svg>
+    @if (session('error'))
+    <div class="toast-notification toast-error" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-icon">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12" y2="16"/>
+        </svg>
+        </div>
+        <div class="toast-message">
+        <strong>Error:</strong> {{ session('error') }}
+        </div>
+        <button class="toast-close" aria-label="Close notification">&times;</button>
     </div>
-    <div class="toast-message">
-      <strong>Error:</strong> {{ session('error') }}
-    </div>
-    <button class="toast-close" aria-label="Close notification">&times;</button>
-  </div>
-@endif
+    @endif
 
 
 
