@@ -212,19 +212,21 @@
           <td class="text-start">{{ $template->created_at->format('Y-m-d') }}</td>
           <td>
             <button class="btn btn-sm btn-info" onclick="showTemplate({{ json_encode(['title' => $template->name, 'slug' => $template->slug, 'content' => $template->content]) }})">
-              <i class="bi bi-eye"> View</i>
+                <i class="bi bi-eye"> View</i>
             </button>
             <a href="{{ route('admin.sms.template.edit', $template->id) }}" class="btn btn-sm btn-warning">
-              <i class="bi bi-pencil-square"> Edit</i>
+                <i class="bi bi-pencil-square"> Edit</i>
             </a>
+            @if(auth('admin')->user()->role === 'super_admin')
             <form action="{{ route('admin.sms.template.destroy', $template->id) }}" method="POST" class="d-inline">
-              @csrf
-              @method('DELETE')
-              <button class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
+                @csrf
+                @method('DELETE')
+                <button class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
                 <i class="bi bi-trash"></i>
-              </button>
+                </button>
             </form>
-          </td>
+            @endif
+            </td>
         </tr>
         @endforeach
       </tbody>

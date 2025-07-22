@@ -163,8 +163,6 @@
   }
 }
 
-
-
 </style>
 
 <div class="admin-management-container">

@@ -138,8 +138,14 @@
 
       <div class="mb-4">
         <label for="password" class="form-label"><i class="bi bi-lock-fill"></i>Password</label>
-        <input type="password" name="password" id="password" class="form-control" required />
-      </div>
+        <div class="input-group">
+            <input type="password" name="password" id="password" class="form-control" required />
+            <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
+            <i class="bi bi-eye-fill" id="eyeIcon"></i>
+            </span>
+        </div>
+        </div>
+
 
       <button type="submit" class="btn btn-login" id="loginBtn">
         <span id="btnText">
@@ -154,7 +160,7 @@
       </button>
     </form>
 
-    {{-- 
+    {{--
 	  <div class="form-footer">
 		Don't have an account? <a href="{{ route('admin.register') }}">Register here</a>
 	  </div>
@@ -171,10 +177,23 @@
     const btnSpinner = document.getElementById('btnSpinner');
 
     form.addEventListener('submit', function () {
-      loginBtn.disabled = true;
-      btnText.textContent = 'Logging in...';
-      btnSpinner.classList.remove('d-none');
+        loginBtn.disabled = true;
+        btnText.textContent = 'Logging in...';
+        btnSpinner.classList.remove('d-none');
     });
-  </script>
+
+    // Password toggle logic
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    togglePassword.addEventListener('click', function () {
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+        eyeIcon.classList.toggle('bi-eye-fill');
+        eyeIcon.classList.toggle('bi-eye-slash-fill');
+    });
+</script>
+
 </body>
 </html>

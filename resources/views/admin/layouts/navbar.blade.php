@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Navbar Friendly Colors</title>
+  <title>Admin Navbar</title>
   <!-- Bootstrap CSS CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous" />
   <!-- Bootstrap Icons CDN -->
@@ -12,7 +12,7 @@
   <style>
     .navbar-custom-bg {
       background-color: #3a5068;
-      z-index: 1050; 
+      z-index: 1050;
     }
 
     .navbar-custom-bg .nav-link,
@@ -59,14 +59,14 @@
       background: transparent;
       border: none;
       padding: 0.5rem 1rem;
-      color: #2c3e50; 
+      color: #2c3e50;
       cursor: pointer;
       font-weight: 600;
       transition: color 0.3s ease;
     }
 
     .btn-flat:hover {
-      color: #1a252f; 
+      color: #1a252f;
       text-decoration: underline;
     }
 
@@ -74,7 +74,7 @@
       padding-top: 56px;
     }
 
-   
+
     .dropdown-menu {
       background-color: #ffffff;
       border: 1px solid #2c3e50;
@@ -99,17 +99,17 @@
       </ul>
 
       <ul class="navbar-nav ms-auto">
-        
+
         <!-- User Menu Dropdown -->
         <li class="nav-item dropdown user-menu">
           <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            <img src="{{ asset(auth()->guard('admin')->user()->profile_image ?? 'admin/assets/img/user2-160x160.jpg') }}" class="user-image rounded-circle shadow" alt="{{ auth()->guard('admin')->user()->name }} Profile Image" onerror="this.src='https://via.placeholder.com/80';" />
+            <img src="{{ asset(auth()->guard('admin')->user()->profile_image ?? 'admin/assets/img/user.png') }}" class="user-image rounded-circle shadow" alt="{{ auth()->guard('admin')->user()->name }} Profile Image" onerror="this.src='https://via.placeholder.com/80';" />
             <span>{{ auth()->guard('admin')->user()->name }}</span>
           </a>
 
           <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end" aria-labelledby="userDropdown">
             <li class="user-header text-bg-primary">
-              <img src="{{ asset(auth()->guard('admin')->user()->profile_image ?? 'admin/assets/img/user2-160x160.jpg') }}" class="rounded-circle shadow" alt="{{ auth()->guard('admin')->user()->name }} Profile Image" onerror="this.src='https://via.placeholder.com/80';" />
+              <img src="{{ asset(auth()->guard('admin')->user()->profile_image ?? 'admin/assets/img/user.png') }}" class="rounded-circle shadow" alt="{{ auth()->guard('admin')->user()->name }} Profile Image" onerror="this.src='https://via.placeholder.com/80';" />
               <p>
                 {{ auth()->guard('admin')->user()->name }} – Admin
                 <small>Member since {{ auth()->guard('admin')->user()->created_at->format('M. Y') }}</small>

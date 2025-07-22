@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\SmsTemplate;
 use App\Models\SmsLog;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+
 
 class SmsController extends Controller
 {
@@ -158,5 +160,23 @@ class SmsController extends Controller
         $logs = \App\Models\SmsLog::latest()->get();
         return view('admin.layouts.sms.report', compact('logs'));
     }
+
+
+
+
+    public function destroyTemplate($id)
+    {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin->role !== 'super_admin') {
+            abort(403, 'Only Super Admins can delete templates.');
+        }
+
+        $template = SmsTemplate::findOrFail($id);
+        $template->delete();
+
+        return redirect()->back()->with('success', 'SMS template deleted successfully.');
+    }
+
 
 }

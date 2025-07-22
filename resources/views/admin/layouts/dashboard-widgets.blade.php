@@ -67,6 +67,48 @@
         </div>
       </div>
 
+      <!-- Box 6: All Templates -->
+        <div class="col-lg-3 col-12 mb-3">
+        <div class="small-box text-bg-secondary">
+            <div class="inner">
+            <h3>{{ $smsTemplatesCount }}</h3>
+            <p>All Templates</p>
+            </div>
+            <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v14a1 1 0 01-1 1H6.414L3 21V4z"/>
+            </svg>
+        </div>
+        </div>
+
+      <!-- Box 7: Success SMS -->
+        <div class="col-lg-3 col-12 mb-3">
+        <div class="small-box text-bg-success">
+            <div class="inner">
+            <h3>{{ $successSmsCount }}</h3>
+            <p>Success SMS</p>
+            </div>
+            <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 4h16v2H4V4zm0 4h10v2H4V8zm0 4h7v2H4v-2zm14.293 2.293L16 17.586V20h2.414l2.293-2.293a1 1 0 000-1.414l-2-2a1 1 0 00-1.414 0z"/>
+            </svg>
+        </div>
+        </div>
+
+        <!-- Box 8: Failed SMS -->
+        <div class="col-lg-3 col-12 mb-3">
+        <div class="small-box text-bg-danger">
+            <div class="inner">
+            <h3>{{ $failedSmsCount }}</h3>
+            <p>Failed SMS</p>
+            </div>
+            <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v2h-2v-2zm0-8h2v6h-2V8z"/>
+            </svg>
+        </div>
+        </div>
+
+
+
+
     </div>
   </div>
 </div>
