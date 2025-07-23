@@ -320,10 +320,17 @@
             <div class="section-header">CAT2 - Top Level Domain Only</div>
             ${renderRow(fullDomain, 'CAT2')}
           </div>
-          <div class="card-animate">
-            <div class="section-header">CAT1 - Full Package</div>
-            ${renderRow(fullDomain, 'CAT1')}
-          </div>
+         <div class="card-animate">
+		  <div class="section-header">CAT1 - Full Package</div>
+		  ${renderRow(fullDomain, 'CAT1')}
+		  <div class="text-center text-muted small mt-3">
+			<p class="mb-2">You automatically reserve the following names</p>
+			<ul class="list-unstyled text-center d-inline-block">
+			  ${reservedSLDs.map(sld => `<li>${baseDomain}.${sld}.lk</li>`).join('')}
+			</ul>
+		  </div>
+		</div>
+
           <div class="card-animate">
             <div class="section-header">Other Options - Second Level Domains</div>
             ${cat3Domains.map(ext => renderRow(`${baseDomain}${ext}`, 'CAT3')).join('')}
