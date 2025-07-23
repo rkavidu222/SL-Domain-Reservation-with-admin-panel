@@ -6,142 +6,111 @@
   <title>Domain Search - .LK Domains</title>
   <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
 
   <style>
     body {
-		  background-color: #f3f6fa;
-		  margin: 0;
-		  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-			"Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
-			"Segoe UI Emoji", "Segoe UI Symbol";
-		}
+      background-color: #f3f6fa;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
 
-		.card-animate {
-		  background: #fff;
-		  border-radius: 1rem;
-		  padding: 1.5rem;
-		  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
-		  animation: fadeIn 0.3s ease-in-out;
-		  margin-bottom: 1.5rem;
-		}
-		@keyframes fadeIn {
-		  from {
-			opacity: 0;
-			transform: translateY(20px);
-		  }
-		  to {
-			opacity: 1;
-			transform: translateY(0);
-		  }
-		}
+    .card-animate {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+      animation: fadeIn 0.3s ease-in-out;
+      margin-bottom: 1.5rem;
+    }
 
-		.section-header {
-		  border-left: 6px solid #2563EB;
-		  padding-left: 12px;
-		  font-size: 1.25rem;
-		  font-weight: 600;
-		  margin-bottom: 1rem;
-		  color: #1F2937;
-		  background-color: #F3F4F6;
-		  padding: 10px;
-		  border-radius: 0.25rem;
-		}
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-		/* Result rows styling */
-		.result-row {
-		  background-color: #f8f9fa;
-		  border: 1px solid #dee2e6;
-		  border-radius: 0.5rem;
-		  padding: 0.75rem 1rem;
-		  margin-bottom: 1rem; /* space between rows */
-		  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-		  display: flex;
-		  flex-direction: column;
-		  gap: 0.5rem;
-		}
+    .section-header {
+      border-left: 6px solid #2563EB;
+      padding-left: 12px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #1F2937;
+      background-color: #F3F4F6;
+      padding: 10px;
+      border-radius: 0.25rem;
+    }
 
-		/* line1 and line2 flex container */
-		.line1,
-		.line2 {
-		  display: flex;
-		  justify-content: space-between; /* left and right aligned */
-		  align-items: center;
-		  gap: 1rem;
-		  flex-wrap: wrap;
-		  white-space: nowrap;
-		}
+    .result-row {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
 
-		/* domain name */
-		.line1 .domain-name {
-		  display: flex;
-		  align-items: center;
-		  gap: 0.5rem;
-		  color: #0d6efd;
-		  font-weight: 600;
-		  font-size: 1rem;
-		}
-		.line1 .domain-name i {
-		  font-size: 1.25rem;
-		  color: #0d6efd;
-		}
+    .line1, .line2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      white-space: nowrap;
+    }
 
-		/* old price */
-		.line1 .old-price {
-		  text-decoration: line-through;
-		  color: #6c757d;
-		  font-size: 0.95rem;
-		}
+    .line1 .domain-name {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #0d6efd;
+      font-weight: 600;
+      font-size: 1rem;
+    }
 
-		/* new price */
-		.line2 .new-price {
-		  color: #dc3545;
-		  font-weight: 700;
-		  font-size: 1rem;
-		  white-space: nowrap;
-		}
+    .line1 .old-price {
+      text-decoration: line-through;
+      color: #6c757d;
+      font-size: 0.95rem;
+    }
 
-		/* buy button */
-		.line2 .btn-buy {
-		  padding: 0.35rem 0.75rem;
-		  font-size: 0.9rem;
-		  white-space: nowrap;
-		  min-width: 100px;
-		  text-align: center;
-		}
+    .line2 .new-price {
+      color: #dc3545;
+      font-weight: 700;
+      font-size: 1rem;
+    }
 
-		/* Responsive Search Bar and Form */
+    .line2 .btn-buy {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.9rem;
+      min-width: 100px;
+    }
 
-		/* The container of search bar inputs */
-		.input-group {
-		  max-width: 600px;
-		  margin: 0 auto;
-		  display: flex;
-		  gap: 0.5rem;
-		}
+    .input-group {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      gap: 0.5rem;
+    }
 
-		/* Input field takes remaining space */
-		#domainInput {
-		  flex-grow: 1;
-		  min-width: 0; /* prevent overflow */
-		}
+    #domainInput {
+      flex-grow: 1;
+    }
 
-		/* Select field fixed width */
-		#domainExtension {
-		  max-width: 100px;
-		  flex-shrink: 0;
-		}
+    #domainExtension {
+      max-width: 100px;
+      flex-shrink: 0;
+    }
 
-		/* Button styling */
-		#searchBtn {
-		  flex-shrink: 0;
-		  min-width: 100px;
-		}
+    #searchBtn {
+      flex-shrink: 0;
+      min-width: 100px;
+    }
 
-		/* Mobile responsive adjustments */
-		@media (max-width: 575.98px) {
+    @media (max-width: 575.98px) {
 		  .line1,
 		  .line2 {
 			flex-direction: column;
@@ -156,14 +125,14 @@
 			text-align: center;
 		  }
 
-		  /* Stack search input group vertically on mobile */
+
 		  .input-group {
 			flex-direction: column !important;
 			gap: 0.5rem;
 			max-width: 100%;
 		  }
 
-		  /* Input and select full width */
+
 		  #domainInput,
 		  #domainExtension,
 		  #searchBtn {
@@ -171,13 +140,11 @@
 			max-width: 100% !important;
 		  }
 		}
-
   </style>
 </head>
 <body>
 
 <div id="step1" class="my-4">
-  {{-- Show CAT2 price initially --}}
   @php $cat2Price = $allPrices->get('CAT2'); @endphp
   @if($cat2Price)
     <div class="price-info text-center mt-2">
@@ -191,9 +158,9 @@
 
     <div class="mb-4 text-center">
       <div class="mb-4 d-flex justify-content-center">
-        <div class="input-group w-100" style="max-width: 600px;">
+        <div class="input-group w-100">
           <input type="text" id="domainInput" class="form-control" placeholder="Enter your domain name" />
-          <select id="domainExtension" class="form-select" style="max-width: 110px;">
+          <select id="domainExtension" class="form-select">
             <option value=".lk">.lk</option>
             <option value=".com.lk">.com.lk</option>
             <option value=".org.lk">.org.lk</option>
@@ -204,6 +171,7 @@
           <button id="searchBtn" class="btn btn-primary">Search</button>
         </div>
       </div>
+      <small class="text-muted">Please enter a domain name without "www", symbols, or spaces</small>
     </div>
 
     <div id="resultContainer"></div>
@@ -211,10 +179,8 @@
 </div>
 
 <script>
-  // Prices passed from backend as JSON object
   const prices = @json($allPrices);
 
-  // Build Buy Now URL with query params
   function buyNowUrl(domainName, newPrice, category, oldPrice = 0) {
     return "{{ route('domain.contact.info') }}" +
       `?domain_name=${encodeURIComponent(domainName)}` +
@@ -223,10 +189,12 @@
       `&old_price=${encodeURIComponent(oldPrice)}`;
   }
 
-  // Extract base domain from full input (remove known extensions)
   function getBaseDomain(input) {
     const knownExts = ['.lk', '.com.lk', '.org.lk', '.edu.lk', '.hotel.lk', '.web.lk'];
-    let cleaned = input;
+    let cleaned = input.trim().toLowerCase();
+
+    if (cleaned.startsWith('www.')) cleaned = cleaned.slice(4);
+    cleaned = cleaned.replace(/^\.+|\.+$/g, '');
 
     for (const ext of knownExts) {
       if (cleaned.endsWith(ext)) {
@@ -235,12 +203,12 @@
       }
     }
 
-    // Remove partial suffixes that might remain
     cleaned = cleaned.replace(/\.(com|org|hotel|edu|web)$/, '');
+    cleaned = cleaned.replace(/[^a-z0-9\-]/g, '');
+
     return cleaned;
   }
 
-  // Render a result row card with prices and buy button
   function renderRow(domain, cat) {
     const oldPrice = prices[cat]?.old_price || 0;
     const newPrice = prices[cat]?.new_price || 0;
@@ -267,8 +235,8 @@
     const resultContainer = document.getElementById('resultContainer');
     const btn = this;
 
-    if (!domainInputRaw) {
-      alert('Please enter a domain name.');
+    if (!domainInputRaw || domainInputRaw.length < 2) {
+      alert('Please enter at least 2 characters. Single-letter domains are not allowed.');
       return;
     }
 
@@ -294,11 +262,6 @@
       btn.disabled = false;
       btn.textContent = 'Search';
 
-      if (!json.success) {
-        resultContainer.innerHTML = `<div class="alert alert-danger">${json.error || 'Domain check failed.'}</div>`;
-        return;
-      }
-
       const apiData = json.data;
       const category = json.category;
       const message = (apiData?.Message || '').toLowerCase();
@@ -306,12 +269,10 @@
 
       const reservedSLDs = ['edu', 'com', 'hotel', 'org', 'web'];
       const cat3Domains = ['.edu.lk', '.com.lk', '.hotel.lk', '.org.lk', '.web.lk'];
-      const isCat3Search = cat3Domains.includes(extension);
-      const finalDomain = fullDomain;
 
       let html = `
         <div class="alert ${isAvailable ? 'alert-success' : 'alert-danger'}">
-          <strong>${finalDomain}</strong> Domain is ${isAvailable ? 'available' : 'not available'} for registration.
+          <strong>${fullDomain}</strong> Domain is ${isAvailable ? 'available' : 'not available'} for registration.
         </div>
       `;
 
@@ -320,18 +281,18 @@
         return;
       }
 
-      if (isCat3Search) {
+      if (cat3Domains.includes(extension)) {
         html += `
           <div class="card-animate">
             <div class="section-header">CAT3 - Second Level Domain Only</div>
-            ${renderRow(finalDomain, 'CAT3')}
+            ${renderRow(fullDomain, 'CAT3')}
           </div>
         `;
       } else if (category === 'CAT4') {
         html += `
           <div class="card-animate">
             <div class="section-header">CAT4 - Premium Domain</div>
-            ${renderRow(finalDomain, 'CAT4')}
+            ${renderRow(fullDomain, 'CAT4')}
             <div class="text-center text-muted small mt-3">
               <p class="mb-2">You automatically reserve the following names</p>
               <ul class="list-unstyled text-center d-inline-block">
@@ -344,7 +305,7 @@
         html += `
           <div class="card-animate">
             <div class="section-header">CAT5 - Special Domain</div>
-            ${renderRow(finalDomain, 'CAT5')}
+            ${renderRow(fullDomain, 'CAT5')}
             <div class="text-center text-muted small mt-3">
               <p class="mb-2">You automatically reserve the following names</p>
               <ul class="list-unstyled text-center d-inline-block">
@@ -354,18 +315,15 @@
           </div>
         `;
       } else {
-        // Default: show CAT2, CAT1 and other CAT3 domains options
         html += `
           <div class="card-animate">
             <div class="section-header">CAT2 - Top Level Domain Only</div>
-            ${renderRow(finalDomain, 'CAT2')}
+            ${renderRow(fullDomain, 'CAT2')}
           </div>
-
           <div class="card-animate">
             <div class="section-header">CAT1 - Full Package</div>
-            ${renderRow(finalDomain, 'CAT1')}
+            ${renderRow(fullDomain, 'CAT1')}
           </div>
-
           <div class="card-animate">
             <div class="section-header">Other Options - Second Level Domains</div>
             ${cat3Domains.map(ext => renderRow(`${baseDomain}${ext}`, 'CAT3')).join('')}
@@ -389,6 +347,15 @@
       btn.textContent = 'Search';
       resultContainer.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
     }
+  });
+
+  // Input Sanitizer
+  document.getElementById('domainInput').addEventListener('input', function () {
+    this.value = this.value
+      .replace(/[^a-z0-9\-]/gi, '')
+      .replace(/--+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
   });
 </script>
 

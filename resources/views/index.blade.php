@@ -90,7 +90,7 @@
 
   <hr>
 
-  @include('partials.price')
+  @include('partials.domainSearch')
   @include('partials.trust')
   @include('partials.whyUs')
 
