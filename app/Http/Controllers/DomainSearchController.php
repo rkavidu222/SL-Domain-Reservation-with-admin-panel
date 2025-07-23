@@ -7,7 +7,13 @@ use App\Models\DomainPrice;
 
 class DomainSearchController extends Controller
 {
-    private $companyKey = 'OFQnVNJe8XAqh3sxSYiWrTDLZR6Jfw';
+    private $companyKey;
+
+    public function __construct()
+    {
+        // Load the API key from the environment file
+        $this->companyKey = env('DOMAIN_API_COMPANY_KEY');
+    }
 
     private function callDomainAPI(string $domainName): ?array
     {
@@ -70,13 +76,12 @@ class DomainSearchController extends Controller
 
         $suggested = [];
         if (!empty($apiResponse['AlsoAvailable'])) {
-			foreach ($apiResponse['AlsoAvailable'] as $suggestion) {
-				if (isset($suggestion['DomainName'])) {
-					$suggested[] = $suggestion['DomainName'] . '.lk';
-				}
-			}
-		}
-
+            foreach ($apiResponse['AlsoAvailable'] as $suggestion) {
+                if (isset($suggestion['DomainName'])) {
+                    $suggested[] = $suggestion['DomainName'] . '.lk';
+                }
+            }
+        }
 
         return response()->json([
             'success' => true,

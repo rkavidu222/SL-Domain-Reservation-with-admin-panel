@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\DomainOrder;
 use Illuminate\Support\Facades\Session;
+use App\Helpers\OtpHelper;
 
 class DomainOrderController extends Controller
 {
@@ -16,26 +17,6 @@ class DomainOrderController extends Controller
         $category = $request->query('category', '');
 
         return view('layouts.contactInfomation', compact('domain_name', 'price', 'category'));
-    }
-
-    // Normalize mobile number to "94xxxxxxxxx" format
-    private function normalizeSriLankanMobile($number)
-    {
-        $number = trim($number);
-
-        if (substr($number, 0, 1) === '+') {
-            $number = substr($number, 1);
-        }
-
-        if (substr($number, 0, 1) === '0') {
-            $number = '94' . substr($number, 1);
-        }
-
-        if (substr($number, 0, 2) !== '94') {
-            $number = '94' . $number;
-        }
-
-        return $number;
     }
 
     // Store submitted data to DB and redirect to OTP verification page
@@ -54,7 +35,9 @@ class DomainOrderController extends Controller
         session(['domain_order_data' => $validated]);
 
         $otp = rand(100000, 999999);
-        $normalizedMobile = $this->normalizeSriLankanMobile($validated['mobile']);
+
+        // Normalize the mobile number using OtpHelper method
+        $normalizedMobile = OtpHelper::normalizeSriLankanMobile($validated['mobile']);
 
         session([
             'otp' => $otp,
@@ -63,72 +46,46 @@ class DomainOrderController extends Controller
             'otp_expires_at' => now()->addMinutes(5),
         ]);
 
-        $smsData = [
-            'api_token' => '10|BJcXe3w1SVIpoJKYLm6cpgCaWMIMkCyiCfq4NHFU97b97a43',
-            'recipient' => $normalizedMobile,
-            'sender_id' => 'SLHosting',
-            'type' => 'plain',
-            'message' => "Your OTP code is: {$otp}",
-        ];
-
-        $this->sendOtpSms($smsData);
+        // Send OTP SMS using the OtpHelper
+        OtpHelper::sendOtpSms($normalizedMobile, (string) $otp);
 
         return redirect()->route('otp.verification.page')->with('success', 'OTP sent to your mobile number.');
     }
 
-    // Send OTP SMS using cURL
-    private function sendOtpSms(array $data)
-    {
-        $url = 'https://sms.serverclub.lk/api/http/sms/send';
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Accept: application/json'
-        ]);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
-        $response = curl_exec($ch);
-        curl_close($ch);
-    }
-
-    // Admin: List all domain orders 
+    // Admin: List all domain orders
     public function adminIndex(Request $request)
-{
-    $queryAll = DomainOrder::orderBy('created_at', 'desc');
-    $queryPaid = DomainOrder::where('payment_status', 'paid')->orderBy('created_at', 'desc');
-    $queryPending = DomainOrder::where('payment_status', 'pending')->orderBy('created_at', 'desc');
+    {
+        $queryAll = DomainOrder::orderBy('created_at', 'desc');
+        $queryPaid = DomainOrder::where('payment_status', 'paid')->orderBy('created_at', 'desc');
+        $queryPending = DomainOrder::where('payment_status', 'pending')->orderBy('created_at', 'desc');
 
-    if ($request->has('date_range') && !empty($request->date_range)) {
-        $dates = explode(' - ', $request->date_range);
+        if ($request->has('date_range') && !empty($request->date_range)) {
+            $dates = explode(' - ', $request->date_range);
 
-        if (count($dates) === 2) {
-            $startDate = $dates[0];
-            $endDate = $dates[1];
+            if (count($dates) === 2) {
+                $startDate = $dates[0];
+                $endDate = $dates[1];
 
-            $startDateTime = $startDate . ' 00:00:00';
-            $endDateTime = $endDate . ' 23:59:59';
+                $startDateTime = $startDate . ' 00:00:00';
+                $endDateTime = $endDate . ' 23:59:59';
 
-            $queryAll->whereBetween('created_at', [$startDateTime, $endDateTime]);
-            $queryPaid->whereBetween('created_at', [$startDateTime, $endDateTime]);
-            $queryPending->whereBetween('created_at', [$startDateTime, $endDateTime]);
+                $queryAll->whereBetween('created_at', [$startDateTime, $endDateTime]);
+                $queryPaid->whereBetween('created_at', [$startDateTime, $endDateTime]);
+                $queryPending->whereBetween('created_at', [$startDateTime, $endDateTime]);
+            }
         }
+
+        // Return full datasets
+        $allOrders = $queryAll->get();
+        $paidOrders = $queryPaid->get();
+        $pendingOrders = $queryPending->get();
+
+        return view('admin.layouts.management.orders', [
+            'orders' => $allOrders,
+            'paidOrders' => $paidOrders,
+            'pendingOrders' => $pendingOrders,
+        ]);
     }
-
-    // Return full datasets 
-    $allOrders = $queryAll->get();
-    $paidOrders = $queryPaid->get();
-    $pendingOrders = $queryPending->get();
-
-    return view('admin.layouts.management.orders', [
-        'orders' => $allOrders,
-        'paidOrders' => $paidOrders,
-        'pendingOrders' => $pendingOrders,
-    ]);
-}
-
 
     // Admin: Show details of a single order
     public function show($id)
@@ -185,7 +142,4 @@ class DomainOrderController extends Controller
         $order = DomainOrder::findOrFail($orderId);
         return view('layouts.paymentDetails', compact('order'));
     }
-
-
-
 }
