@@ -13,23 +13,29 @@ class DomainOrderController extends Controller
 {
     // Show contact info form with prefilled domain data
     public function showContactForm(Request $request)
-    {
-        $domain_name = $request->query('domain_name', '');
-        $price = $request->query('price', '');
-        $category = $request->query('category', '');
+{
+    $domain_name = $request->query('domain_name', session('domain_name', ''));
+    $price = $request->query('price', session('price', ''));
+    $category = $request->query('category', session('category', ''));
 
-        return view('layouts.contactInfomation', compact('domain_name', 'price', 'category'));
-    }
+    // Save domain info into session so that it persists across requests
+    session([
+        'domain_name' => $domain_name,
+        'price' => $price,
+        'category' => $category,
+    ]);
+
+    return view('layouts.contactInfomation', compact('domain_name', 'price', 'category'));
+}
+
 
     // Store submitted data to DB and redirect to OTP verification page
-
-
-
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'domain_name' => 'required|string|min:3|max:255|regex:/^[a-z0-9-]+\.[a-z]{2,}$/i',
+            'domain_name' => 'required|string|min:3|max:255|regex:/^([a-z0-9-]+\.)+[a-z]{2,}$/i',
+
             'price' => 'required|numeric|min:0',
             'category' => 'required|string|max:50',
             'first_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',

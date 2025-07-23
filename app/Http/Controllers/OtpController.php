@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\DomainOrder;
 use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
+use App\Helpers\OtpHelper;
+
 
 class OtpController extends Controller
 {
@@ -80,21 +82,19 @@ class OtpController extends Controller
             return response()->json(['message' => 'Mobile number missing from session.'], 422);
         }
 
-        $smsData = [
-            'api_token' => '10|BJcXe3w1SVIpoJKYLm6cpgCaWMIMkCyiCfq4NHFU97b97a43',
-            'recipient' => $mobile,
-            'sender_id' => 'SLHosting',
-            'type' => 'plain',
-            'message' => "Your OTP code is: {$otp}",
-        ];
+        // Use helper instead of inline cURL logic
+        $sent = OtpHelper::sendOtpSms($mobile, $otp);
 
-        $this->sendOtpSms($smsData);
+        if (!$sent) {
+            return response()->json(['message' => 'Failed to send OTP. Please try again later.'], 500);
+        }
 
         return response()->json([
             'message' => 'OTP resent successfully.',
             'expiresAt' => $expiresAt->toDateTimeString(),
         ]);
     }
+
 
     // Send OTP SMS using cURL with the Serverclub SMS API
     private function sendOtpSms(array $data)
