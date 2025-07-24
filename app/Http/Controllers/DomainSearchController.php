@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DomainPrice;
+use Illuminate\Support\Facades\Log;
 
 class DomainSearchController extends Controller
 {
@@ -11,10 +12,16 @@ class DomainSearchController extends Controller
 
     public function __construct()
     {
-        // Load the API key from the environment file
         $this->companyKey = env('DOMAIN_API_COMPANY_KEY');
+
+        if (!$this->companyKey) {
+            Log::error('DOMAIN_API_COMPANY_KEY not set in .env file!');
+        }
     }
 
+    /**
+     * Call external domain API to check availability.
+     */
     private function callDomainAPI(string $domainName): ?array
     {
         $ch = curl_init("https://api.domains.lk/searchdomain");
@@ -28,22 +35,45 @@ class DomainSearchController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+
         curl_close($ch);
+
+        if ($error) {
+            Log::error('cURL error during domain API call: ' . $error);
+            return null;
+        }
+
+        if ($httpCode !== 200) {
+            Log::error("API responded with status $httpCode", ['response' => $response]);
+            return null;
+        }
 
         return $response ? json_decode($response, true) : null;
     }
 
+    /**
+     * Show the domain search page with pricing data.
+     */
     public function index()
     {
         $allPrices = DomainPrice::all()->keyBy('category');
         return view('domain.search', compact('allPrices'));
     }
 
+    /**
+     * Perform the domain availability search.
+     */
     public function search(Request $request)
     {
-        $request->validate(['domainname' => 'required|string|max:255']);
+        $request->validate([
+            'domainname' => 'required|string|max:255'
+        ]);
 
         $inputDomain = strtolower(trim($request->input('domainname')));
+        Log::info('Search initiated for domain', ['input' => $inputDomain]);
+
         if (!str_ends_with($inputDomain, '.lk')) {
             $inputDomain .= '.lk';
         }
@@ -52,12 +82,18 @@ class DomainSearchController extends Controller
         $apiResponse = $this->callDomainAPI($inputDomain);
 
         if (!$apiResponse || !isset($apiResponse['Message'])) {
-            return response()->json(['success' => false, 'error' => 'Invalid API response']);
+            Log::warning('Domain API call failed or invalid response', ['input' => $inputDomain]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Invalid API response from domains.lk'
+            ]);
         }
+
+        Log::info('API response received', ['domain' => $inputDomain, 'response' => $apiResponse]);
 
         $mainCategory = $apiResponse['DomainCategory'] ?? $this->classifyDomainCategory($baseDomain);
 
-        // Always show CAT1 and CAT2 unless domain is CAT4 or CAT5
+        // CAT1 and CAT2 are shown unless CAT4 or CAT5
         $showCat1 = !in_array($mainCategory, ['CAT4', 'CAT5']);
         $showCat2 = !in_array($mainCategory, ['CAT4', 'CAT5']);
 
@@ -70,6 +106,7 @@ class DomainSearchController extends Controller
 
         $reservedSLDs = ['edu', 'com', 'hotel', 'org', 'web'];
         $secondLevelDomains = [];
+
         foreach ($reservedSLDs as $sld) {
             $secondLevelDomains[] = $baseDomain . '.' . $sld . '.lk';
         }
@@ -94,10 +131,16 @@ class DomainSearchController extends Controller
             'prices' => $allPrices,
             'showCat1' => $showCat1,
             'showCat2' => $showCat2,
-            'showCat3' => true, // always show for SLD options
+            'showCat3' => true // Always show CAT3 (for SLD options)
         ]);
     }
 
+    /**
+     * Classify domain based on length and numeric nature.
+     * CAT4: 2-char or short numeric
+     * CAT5: 3-char or medium-length numeric
+     * Default: CAT1
+     */
     private function classifyDomainCategory(string $base): string
     {
         $len = strlen($base);

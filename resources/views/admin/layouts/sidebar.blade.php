@@ -177,11 +177,12 @@
         </li>
 
         <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="nav-icon bi bi-receipt"></i>
-            <span>Invoice Management</span>
-          </a>
-        </li>
+            <a href="{{ route('admin.invoices.index') }}" class="nav-link {{ request()->routeIs('admin.invoices.*') ? 'active' : '' }}">
+                <i class="nav-icon bi bi-receipt"></i>
+                <span>Invoice Management</span>
+            </a>
+            </li>
+
 
         <li class="nav-item has-treeview {{ request()->routeIs('admin.sms.*') ? 'menu-open' : '' }}">
             <a href="#" class="nav-link {{ request()->routeIs('admin.sms.*') ? 'active' : '' }}">

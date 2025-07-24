@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DomainPriceController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\RegisterController;
 use App\Http\Controllers\SmsController;
@@ -117,7 +118,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
 
-
+         Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
 
     });
 });
