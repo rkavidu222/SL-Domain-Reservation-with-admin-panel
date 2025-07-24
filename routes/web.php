@@ -15,6 +15,8 @@ use App\Http\Controllers\PaymentController;
 use App\Models\DomainPrice;
 use Illuminate\Support\Facades\Route;
 
+use Illuminate\Support\Facades\Artisan;
+
 // Public domain search page and API
 Route::get('/', function () {
     $allPrices = DomainPrice::all()->keyBy('category');
@@ -42,6 +44,9 @@ Route::get('/skip-payment', [PaymentController::class, 'skipPayment'])->name('pa
 Route::get('/confirmation', function () {
     return view('layouts.confirmation');
 });
+
+
+
 
 // Admin routes group
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -121,5 +126,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
          Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
 
+
+
     });
 });
+
+
+
+
+
+//Route::get('/clear-cache', function () {
+   // Artisan::call('cache:clear');
+   // Artisan::call('route:clear');
+   // Artisan::call('config:clear');
+   // Artisan::call('view:clear');
+   // return 'Caches cleared!';
+//});

@@ -3,58 +3,137 @@
 @section('title', 'Invoice Details')
 
 @push('styles')
-  <link rel="stylesheet" href="{{ asset('admin/css/order.css') }}">
+  <style>
+    .invoice-container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+      border: 1px solid #ddd;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #fff;
+      color: #333;
+    }
+    .header-title {
+      font-weight: 700;
+      font-size: 1.6rem;
+      color: #2f3e6e;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #2f3e6e;
+      padding-bottom: 0.5rem;
+    }
+    .section-label {
+      font-weight: 600;
+      color: #444;
+      width: 180px;
+      display: inline-block;
+    }
+    .section-value {
+      font-weight: 500;
+    }
+    .amount-due {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #d9534f;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+    .info-row {
+      margin-bottom: 0.8rem;
+    }
+    .footer-text {
+      margin-top: 2rem;
+      font-size: 0.85rem;
+      color: #777;
+      text-align: center;
+      border-top: 1px solid #ddd;
+      padding-top: 1rem;
+    }
+    .powered-by {
+      margin-top: 1rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #555;
+      text-align: center;
+    }
+  </style>
 @endpush
 
 @section('content')
-<div class="admin-management-container p-4">
-  <h2 class="mb-4 text-primary fw-bold">Invoice #{{ $order->id }}</h2>
-  <hr>
+<div class="invoice-container">
 
-  <div class="row gy-3">
-    <div class="col-md-6 d-flex">
-      <strong class="me-2" style="min-width: 120px;">Domain:</strong>
-      <span>{{ $order->domain_name }}</span>
-    </div>
-    <div class="col-md-6 d-flex">
-      <strong class="me-2" style="min-width: 120px;">Customer:</strong>
-      <span>{{ $order->first_name }} {{ $order->last_name }}</span>
-    </div>
-    <div class="col-md-6 d-flex">
-      <strong class="me-2" style="min-width: 120px;">Email:</strong>
-      <span>{{ $order->email }}</span>
-    </div>
-    <div class="col-md-6 d-flex">
-      <strong class="me-2" style="min-width: 120px;">Mobile:</strong>
-      <span>{{ $order->mobile }}</span>
-    </div>
-    <div class="col-md-6 d-flex align-items-center">
-      <strong class="me-2" style="min-width: 120px;">Status:</strong>
-      <span>
-        <span class="badge
-		  @if($order->payment_status === 'paid') bg-success
-		  @elseif($order->payment_status === 'pending') bg-warning text-dark
-		  @else bg-secondary @endif"
-		  style="padding: 0.5em 0.75em; font-size: 1rem;">
-		  {{ ucfirst($order->payment_status ?? 'Unknown') }}
-		</span>
+  <div class="header-title">SriLankaHosting Invoice</div>
 
-      </span>
-    </div>
-    <div class="col-md-6 d-flex">
-      <strong class="me-2" style="min-width: 120px;">Price:</strong>
-      <span>Rs. {{ number_format($order->price, 2) }}</span>
-    </div>
-    <div class="col-md-6 d-flex">
-      <strong class="me-2" style="min-width: 120px;">Date:</strong>
-      <span>{{ $order->created_at->format('Y-m-d H:i') }}</span>
-    </div>
+  <div class="info-row">
+    <span class="section-label">Order Number :</span>
+    <span class="section-value">{{ $order->id }}</span>
   </div>
 
-	<div class="mt-4 text-end">
-	  <a href="{{ route('admin.invoices.index') }}" class="btn btn-primary px-4">Back</a>
-	</div>
+  <div class="info-row">
+    <span class="section-label">Customer Name :</span>
+    <span class="section-value">{{ $order->first_name }} {{ $order->last_name }}</span>
+  </div>
 
+  <div class="info-row">
+    <span class="section-label">Domain Name :</span>
+    <span class="section-value">{{ $order->domain_name }}</span>
+  </div>
+
+  <div class="info-row">
+    <span class="section-label">Email :</span>
+    <span class="section-value">{{ $order->email }}</span>
+  </div>
+
+  <div class="info-row">
+    <span class="section-label">Mobile :</span>
+    <span class="section-value">{{ $order->mobile }}</span>
+  </div>
+
+  <div class="info-row">
+    <span class="section-label">Billing Month :</span>
+    <span class="section-value">{{ optional($order->created_at)->format('Y-F') ?? 'N/A' }}</span>
+  </div>
+
+  <div class="info-row">
+    <span class="section-label">Billing Date :</span>
+    <span class="section-value">{{ optional($order->created_at)->format('Y-m-d') ?? 'N/A' }}</span>
+  </div>
+
+  <div class="info-row">
+    <span class="section-label">Payment Status :</span>
+    <span class="section-value">
+      @if(($order->payment_status ?? '') === 'paid')
+        <span style="color: green; font-weight: 700;">PAID</span>
+      @elseif(($order->payment_status ?? '') === 'pending')
+        <span style="color: orange; font-weight: 700;">PENDING</span>
+      @else
+        <span style="color: grey; font-weight: 700;">UNKNOWN</span>
+      @endif
+    </span>
+  </div>
+
+  <div class="info-row amount-due">
+    Total Amount Due: Rs. {{ number_format($order->price, 2) }}
+  </div>
+
+  <div class="info-row">
+    <span class="section-label">Outstanding :</span>
+    <span class="section-value">Rs. {{ number_format(($order->outstanding ?? 0), 2) }}</span>
+  </div>
+
+  <div class="info-row" style="font-size: 0.9rem; font-style: italic; margin-top: 1rem;">
+    (Full or partial payments accepted)
+  </div>
+
+  <hr>
+
+  <div style="margin-top: 1rem; font-size: 0.9rem;">
+    To receive invoices monthly via email, register <a href="mailto:{{ $order->email }}" style="color:#2f3e6e;">here</a>.
+  </div>
+
+  <div class="powered-by">
+    Powered by<br>
+    <strong>SriLankaHosting.lk © 2025</strong>
+  </div>
 
 </div>
 @endsection
