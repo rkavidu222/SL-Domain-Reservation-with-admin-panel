@@ -11,13 +11,13 @@ class InvoiceController extends Controller
     public function index()
     {
         $orders = DomainOrder::orderBy('created_at', 'desc')->paginate(15);
-        return view('admin.invoices.index', compact('orders'));
+        return view('admin.layouts.invoices.index', compact('orders'));
     }
 
     // Show a single invoice
     public function show($id)
     {
         $order = DomainOrder::findOrFail($id);
-        return view('admin.invoices.show', compact('order'));
+        return view('admin.layouts.invoices.show', compact('order'));
     }
 }
