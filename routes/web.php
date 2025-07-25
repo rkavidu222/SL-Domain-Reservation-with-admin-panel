@@ -45,7 +45,7 @@ Route::get('/confirmation', function () {
     return view('layouts.confirmation');
 });
 
-
+Route::get('/invoice/view/{unique_code}', [DomainOrderController::class, 'viewInvoiceByCode'])->name('invoice.view');
 
 
 // Admin routes group

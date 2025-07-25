@@ -10,7 +10,7 @@ class DomainOrder extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'domain_name', 'price', 'category', 'first_name', 'last_name', 'email', 'mobile',
+        'domain_name', 'price', 'category', 'first_name', 'last_name', 'email', 'mobile','unique_code',
     ];
 
     protected $dates = ['deleted_at'];

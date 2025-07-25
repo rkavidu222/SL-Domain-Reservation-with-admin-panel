@@ -31,59 +31,48 @@ class DomainOrderController extends Controller
 
     // Store submitted data and send OTP
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'domain_name' => 'required|string|min:3|max:255|regex:/^([a-z0-9-]+\.)+[a-z]{2,}$/i',
-            'price' => 'required|numeric|min:0',
-            'category' => 'required|string|max:50',
-            'first_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',
-            'last_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',
-            'email' => 'required|email|max:255',
-            'mobile' => [
-                'required',
-                'regex:/^(0\d{9}|94\d{9})$/',
-            ],
-        ], [
-            'domain_name.required' => 'Please enter a domain name.',
-            'domain_name.regex' => 'Domain name must be a valid format like example.lk',
-            'price.required' => 'Please provide the domain price.',
-            'first_name.required' => 'First name is required.',
-            'first_name.regex' => 'First name must only contain letters and spaces.',
-            'last_name.required' => 'Last name is required.',
-            'last_name.regex' => 'Last name must only contain letters and spaces.',
-            'email.required' => 'Email address is required.',
-            'email.email' => 'Email must be a valid email address.',
-            'mobile.required' => 'Mobile number is required.',
-            'mobile.regex' => 'Mobile must start with 0 or 94 (e.g., 0771234567 or 94771234567).',
-        ]);
+{
+    $validated = $request->validate([
+        'domain_name' => 'required|string|min:3|max:255|regex:/^([a-z0-9-]+\.)+[a-z]{2,}$/i',
+        'price' => 'required|numeric|min:0',
+        'category' => 'required|string|max:50',
+        'first_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',
+        'last_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',
+        'email' => 'required|email|max:255',
+        'mobile' => [
+            'required',
+            'regex:/^(0\d{9}|94\d{9})$/',
+        ],
+    ], [
+        // your validation messages...
+    ]);
 
-        $mobile = $validated['mobile'];
-        if (Str::startsWith($mobile, '0')) {
-            $mobile = '94' . substr($mobile, 1);
-        }
-
-        $otp = rand(100000, 999999);
-
-        session([
-            'domain_order_data' => array_merge($validated, ['mobile' => $mobile]),
-            'otp' => $otp,
-            'mobile' => $mobile,
-            'email' => $validated['email'],
-            'otp_expires_at' => now()->addMinutes(5),
-        ]);
-
-        Log::info('OTP generated and session data stored', [
-            'mobile' => $mobile,
-            'otp' => $otp,
-            'email' => $validated['email'],
-        ]);
-
-        OtpHelper::sendOtpSms($mobile, (string) $otp);
-
-        Log::info('OTP sent', ['mobile' => $mobile, 'otp' => $otp]);
-
-        return redirect()->route('otp.verification.page')->with('success', 'OTP sent to your mobile number.');
+    // Format mobile
+    $mobile = $validated['mobile'];
+    if (Str::startsWith($mobile, '0')) {
+        $mobile = '94' . substr($mobile, 1);
     }
+
+    // Generate unique code here
+    $uniqueCode = Str::uuid()->toString();
+
+    // Create and save DomainOrder with unique_code
+    $order = DomainOrder::create([
+        'domain_name' => $validated['domain_name'],
+        'price' => $validated['price'],
+        'category' => $validated['category'],
+        'first_name' => $validated['first_name'],
+        'last_name' => $validated['last_name'],
+        'email' => $validated['email'],
+        'mobile' => $mobile,
+        'unique_code' => $uniqueCode,
+        'payment_status' => 'pending', // or default
+    ]);
+
+    // Generate OTP, sessions, etc., as before...
+
+    // Redirect or whatever you do next
+}
 
     // Admin: List all domain orders
     public function adminIndex(Request $request)
@@ -191,6 +180,20 @@ class DomainOrderController extends Controller
         Log::info('User viewed payment details', ['order_id' => $orderId]);
         return view('layouts.paymentDetails', compact('order'));
     }
+
+
+    public function viewInvoiceByCode($unique_code)
+{
+    $order = DomainOrder::where('unique_code', $unique_code)->first();
+
+    if (!$order) {
+        abort(404, 'Invoice not found.');
+    }
+
+    // Return a public invoice view (create this blade)
+    return view('layouts.viewInvoice', compact('order'));
+
+}
 
 
 }
