@@ -38,7 +38,8 @@ Route::post('/otp-resend', [OtpController::class, 'resendOtp'])->name('otp.resen
 
 // Payment routes
 Route::post('/payment-details', [OtpController::class, 'paymentDetails'])->name('payment.details');
-Route::get('/skip-payment', [PaymentController::class, 'skipPayment'])->name('payment.skip');
+Route::post('/skip-payment', [PaymentController::class, 'skipPayment'])->name('payment.skip');
+
 
 // Confirmation page
 Route::get('/confirmation', function () {
