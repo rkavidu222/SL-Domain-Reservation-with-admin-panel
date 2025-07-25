@@ -28,42 +28,51 @@ class OtpController extends Controller
 
     // Verify OTP and proceed with order saving and payment details view
    public function paymentDetails(Request $request)
-	{
-		$sessionOtp = session('otp');
-		$expiresAt = session('otp_expires_at');
-		$enteredOtp = $request->input('otp');
+{
+    $sessionOtp = session('otp');
+    $expiresAt = session('otp_expires_at');
+    $enteredOtp = $request->input('otp');
 
-		if (!$expiresAt || now()->gt($expiresAt)) {
-			return redirect()->back()->withErrors(['otp' => 'OTP expired. Please request a new one.']);
-		}
+    if (!$expiresAt || now()->gt($expiresAt)) {
+        return redirect()->back()->withErrors(['otp' => 'OTP expired. Please request a new one.']);
+    }
 
-		if ($enteredOtp == $sessionOtp) {
-			$data = session('domain_order_data');
+    if ($enteredOtp == $sessionOtp) {
+        // Retrieve order ID or unique_code from session
+        $orderId = session('order_id');
+        $uniqueCode = session('unique_code');
 
-			if ($data) {
-				$order = DomainOrder::create([
-					'domain_name' => $data['domain_name'],
-					'price'       => $data['price'],
-					'category'    => $data['category'],
-					'first_name'  => $data['first_name'],
-					'last_name'   => $data['last_name'],
-					'email'       => $data['email'],
-					'mobile'      => $data['mobile'],
-				]);
+        if ($orderId) {
+            // Fetch existing order by ID
+            $order = DomainOrder::find($orderId);
+        } elseif ($uniqueCode) {
+            // Or fallback to find by unique_code
+            $order = DomainOrder::where('unique_code', $uniqueCode)->first();
+        } else {
+            $order = null;
+        }
 
-				session()->forget(['otp', 'otp_expires_at', 'domain_order_data', 'email', 'mobile']);
+        if ($order) {
+            // Optional: update payment_status here if needed
+            // For example, keep it 'pending' until actual payment is confirmed
+            // $order->payment_status = 'pending';
+            // $order->save();
 
-				return view('layouts.paymentDetails', [
-					'success' => 'OTP verified. Order saved successfully.',
-					'order' => $order,
-				]);
-			} else {
-				return redirect()->route('contact.form')->withErrors(['session' => 'Session expired. Please try again.']);
-			}
-		} else {
-			return redirect()->back()->withErrors(['otp' => 'Invalid OTP. Please try again.']);
-		}
-	}
+            // Clear session related to OTP and order data
+            session()->forget(['otp', 'otp_expires_at', 'domain_order_data', 'email', 'mobile', 'order_id', 'unique_code']);
+
+            return view('layouts.paymentDetails', [
+                'success' => 'OTP verified. Order confirmed successfully.',
+                'order' => $order,
+            ]);
+        } else {
+            return redirect()->route('contact.form')->withErrors(['session' => 'Order not found or session expired. Please try again.']);
+        }
+    } else {
+        return redirect()->back()->withErrors(['otp' => 'Invalid OTP. Please try again.']);
+    }
+}
+
 
     // Resend OTP and reset timer, send SMS again
     public function resendOtp(Request $request)
@@ -117,6 +126,4 @@ class OtpController extends Controller
         //}
         //curl_close($ch);
     }
-
-
 }
