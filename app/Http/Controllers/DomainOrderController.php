@@ -69,9 +69,28 @@ class DomainOrderController extends Controller
         'payment_status' => 'pending', // or default
     ]);
 
-    // Generate OTP, sessions, etc., as before...
+     $otp = rand(100000, 999999);
 
-    // Redirect or whatever you do next
+        session([
+            'domain_order_data' => array_merge($validated, ['mobile' => $mobile]),
+            'otp' => $otp,
+            'mobile' => $mobile,
+            'email' => $validated['email'],
+            'otp_expires_at' => now()->addMinutes(5),
+        ]);
+
+        Log::info('OTP generated and session data stored', [
+            'mobile' => $mobile,
+            'otp' => $otp,
+            'email' => $validated['email'],
+        ]);
+
+        OtpHelper::sendOtpSms($mobile, (string) $otp);
+
+        Log::info('OTP sent', ['mobile' => $mobile, 'otp' => $otp]);
+
+        return redirect()->route('otp.verification.page')->with('success', 'OTP sent to your mobile number.');
+
 }
 
     // Admin: List all domain orders
