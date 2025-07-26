@@ -75,6 +75,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('domain-prices', [DomainPriceController::class, 'update'])->name('domain_prices.update');
         Route::put('/domain-prices/{id}/update', [DomainPriceController::class, 'updateSingle'])->name('domain_prices.update.single');
 
+        Route::get('/admin/invoice/send-sms/{id}', [InvoiceController::class, 'sendSms'])->name('admin.invoices.sendSms');
+
+
+
         // User management routes for all admins
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::get('users/create', [UserController::class, 'create'])->name('users.create');

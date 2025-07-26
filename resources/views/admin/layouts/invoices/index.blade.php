@@ -50,10 +50,19 @@
                         <td class="text-end">{{ number_format($order->price, 2) }}</td>
                         <td>{{ $order->created_at->format('d M Y') }}</td>
                         <td>
-                            <a href="{{ route('admin.invoices.show', $order->id) }}" class="btn btn-sm btn-primary mb-1">
-                                <i class="bi bi-eye"></i> View
-                            </a>
-                        </td>
+							<a href="{{ route('admin.invoices.show', $order->id) }}" class="btn btn-sm btn-primary mb-1">
+								<i class="bi bi-eye"></i> View
+							</a>
+
+							<a href="{{ route('admin.invoices.sendSms', $order->id) }}"
+							   class="btn btn-sm btn-success mb-1"
+							   onclick="return confirm('Are you sure you want to send this invoice via SMS?')">
+								<i class="bi bi-send"></i> Send SMS
+							</a>
+						</td>
+
+
+
                     </tr>
                 @endforeach
             </tbody>
