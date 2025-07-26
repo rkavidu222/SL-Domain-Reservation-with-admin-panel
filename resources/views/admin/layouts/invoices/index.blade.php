@@ -17,7 +17,37 @@
         All Invoices
     </h2>
 
-    {{-- Flash messages (same) --}}
+    {{-- Flash messages --}}
+
+	@if (session('success'))
+    <div class="toast-notification toast-success" role="alert" aria-live="polite" aria-atomic="true">
+        <div class="toast-icon">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        </div>
+        <div class="toast-message">
+        <strong>Success:</strong> {{ session('success') }}
+        </div>
+        <button class="toast-close" aria-label="Close notification">&times;</button>
+    </div>
+    @endif
+
+    @if (session('error'))
+    <div class="toast-notification toast-error" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-icon">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12" y2="16"/>
+        </svg>
+        </div>
+        <div class="toast-message">
+        <strong>Error:</strong> {{ session('error') }}
+        </div>
+        <button class="toast-close" aria-label="Close notification">&times;</button>
+    </div>
+    @endif
 
     <div class="table-responsive">
         <table id="invoicesTable" class="table table-bordered table-hover table-striped align-middle text-center" style="width:100%">
@@ -54,11 +84,18 @@
 								<i class="bi bi-eye"></i> View
 							</a>
 
-							<a href="{{ route('admin.invoices.sendSms', $order->id) }}"
-							   class="btn btn-sm btn-success mb-1"
-							   onclick="return confirm('Are you sure you want to send this invoice via SMS?')">
-								<i class="bi bi-send"></i> Send SMS
-							</a>
+							<!-- Send SMS Button -->
+<button class="btn btn-sm btn-success mb-1"
+        onclick="sendSms({{ $order->id }})">
+    <i class="bi bi-send"></i> Send SMS
+</button>
+
+<!-- Hidden form for POST -->
+<form id="smsForm-{{ $order->id }}" action="{{ route('admin.invoices.sendSms', $order->id) }}"
+      method="POST" style="display: none;">
+    @csrf
+</form>
+
 						</td>
 
 
@@ -108,5 +145,13 @@
       responsive: true,
     });
   });
+
+
+  function sendSms(orderId) {
+    if (confirm('Are you sure you want to send this invoice via SMS?')) {
+      document.getElementById(`smsForm-${orderId}`).submit();
+    }
+  }
 </script>
 @endsection
+

@@ -5,7 +5,6 @@
 @section('head')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <style>
-  /* Your CSS from before */
   body {
     background: #f9fafb;
     font-family: 'Inter', sans-serif;
@@ -142,10 +141,10 @@
 
   <div class="section-title">Payment Details</div>
 
- <form method="POST" action="{{ route('payment.details') }}" onsubmit="showLoading()">
+  <!-- Payment Form -->
+  <form method="POST" action="{{ route('payment.details') }}" onsubmit="showLoading()">
 
     @csrf
-
     <input type="hidden" name="order_id" value="{{ $order->id }}">
 
     <label for="domain">Domain Name</label>
@@ -175,12 +174,20 @@
       <button id="submitBtn" type="submit" class="btn-action btn-primary">
         <i class="fa-solid fa-lock me-1"></i> Pay Securely
       </button>
-
-      <button type="button" class="btn-action btn-secondary" id="skipBtn" onclick="handleSkip()">
-        <i class="fa-solid fa-forward me-1"></i> Skip Payment
-      </button>
     </div>
   </form>
+
+  <!-- Hidden Skip Payment Form -->
+  <form method="POST" action="{{ route('payment.skip') }}" id="skipForm" style="margin-top: 1rem;">
+    @csrf
+    <input type="hidden" name="order_id" value="{{ $order->id }}">
+  </form>
+
+  <div class="btn-row" style="margin-top: 1rem;">
+    <button type="button" class="btn-action btn-secondary" id="skipBtn" onclick="handleSkip()">
+      <i class="fa-solid fa-forward me-1"></i> Skip Payment
+    </button>
+  </div>
 </div>
 
 <script>
@@ -195,9 +202,8 @@
     skipBtn.disabled = true;
     skipBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Redirecting...`;
 
-    setTimeout(() => {
-      window.location.href = "{{ route('payment.skip') }}";
-    }, 500);
+    // Submit the hidden skip payment form via POST
+    document.getElementById('skipForm').submit();
   }
 </script>
 @endsection

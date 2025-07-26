@@ -41,6 +41,8 @@ Route::post('/payment-details', [OtpController::class, 'paymentDetails'])->name(
 Route::post('/skip-payment', [PaymentController::class, 'skipPayment'])->name('payment.skip');
 
 
+
+
 // Confirmation page
 Route::get('/confirmation', function () {
     return view('layouts.confirmation');
@@ -75,7 +77,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('domain-prices', [DomainPriceController::class, 'update'])->name('domain_prices.update');
         Route::put('/domain-prices/{id}/update', [DomainPriceController::class, 'updateSingle'])->name('domain_prices.update.single');
 
-        Route::get('/admin/invoice/send-sms/{id}', [InvoiceController::class, 'sendSms'])->name('admin.invoices.sendSms');
+        Route::post('invoices/{id}/sms', [InvoiceController::class, 'sendSms'])->name('invoices.sendSms');
+
 
 
 
