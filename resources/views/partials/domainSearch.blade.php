@@ -1,148 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Domain Search - .LK Domains</title>
-  <meta name="csrf-token" content="{{ csrf_token() }}" />
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
-
-  <style>
-    body {
-      background-color: #f3f6fa;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
-
-    .card-animate {
-      background: #fff;
-      border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
-      animation: fadeIn 0.3s ease-in-out;
-      margin-bottom: 1.5rem;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .section-header {
-      border-left: 6px solid #2563EB;
-      padding-left: 12px;
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: #1F2937;
-      background-color: #F3F4F6;
-      padding: 10px;
-      border-radius: 0.25rem;
-    }
-
-    .result-row {
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 0.5rem;
-      padding: 0.75rem 1rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .line1, .line2 {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-      white-space: nowrap;
-    }
-
-    .line1 .domain-name {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: #0d6efd;
-      font-weight: 600;
-      font-size: 1rem;
-    }
-
-    .line1 .old-price {
-      text-decoration: line-through;
-      color: #6c757d;
-      font-size: 0.95rem;
-    }
-
-    .line2 .new-price {
-      color: #dc3545;
-      font-weight: 700;
-      font-size: 1rem;
-    }
-
-    .line2 .btn-buy {
-      padding: 0.35rem 0.75rem;
-      font-size: 0.9rem;
-      min-width: 100px;
-    }
-
-    .input-group {
-      max-width: 600px;
-      margin: 0 auto;
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    #domainInput {
-      flex-grow: 1;
-    }
-
-    #domainExtension {
-      max-width: 100px;
-      flex-shrink: 0;
-    }
-
-    #searchBtn {
-      flex-shrink: 0;
-      min-width: 100px;
-    }
-
-    @media (max-width: 575.98px) {
-		  .line1,
-		  .line2 {
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			gap: 0.25rem;
-			white-space: normal;
-			text-align: center;
-		  }
-		  .line2 .btn-buy {
-			width: 100%;
-			text-align: center;
-		  }
+@section('title', 'Domain Search - .LK Domains')
 
 
-		  .input-group {
-			flex-direction: column !important;
-			gap: 0.5rem;
-			max-width: 100%;
-		  }
+@push('styles')
+  <link href="{{ asset('/resources/css/domain-search.css') }}" rel="stylesheet">
+@endpush
 
 
-		  #domainInput,
-		  #domainExtension,
-		  #searchBtn {
-			width: 100% !important;
-			max-width: 100% !important;
-		  }
-		}
-  </style>
-</head>
-<body>
 
 <div id="step1" class="my-4">
   @php $cat2Price = $allPrices->get('CAT2'); @endphp
@@ -182,12 +45,13 @@
   const prices = @json($allPrices);
 
   function buyNowUrl(domainName, newPrice, category, oldPrice = 0) {
-    return "{{ route('domain.contact.info') }}" +
-      `?domain_name=${encodeURIComponent(domainName)}` +
-      `&price=${encodeURIComponent(newPrice)}` +
-      `&category=${encodeURIComponent(category)}` +
-      `&old_price=${encodeURIComponent(oldPrice)}`;
-  }
+	  return "{{ route('domain.contact.info') }}" +
+		`?domain_name=${encodeURIComponent(domainName)}` +
+		`&price=${encodeURIComponent(newPrice)}` +
+		`&category=${encodeURIComponent(category)}` +
+		`&old_price=${encodeURIComponent(oldPrice)}`;
+	}
+
 
   function getBaseDomain(input) {
     const knownExts = ['.lk', '.com.lk', '.org.lk', '.edu.lk', '.hotel.lk', '.web.lk'];
@@ -365,6 +229,3 @@
       .replace(/-+$/, '');
   });
 </script>
-
-</body>
-</html>

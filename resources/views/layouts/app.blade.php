@@ -22,6 +22,8 @@
     footer { background-color: #003f91; color: white; text-align: center; padding: 15px; font-size: 14px; }
     .whatsapp-float { position: fixed; bottom: 20px; right: 20px; z-index: 999; }
   </style>
+
+  @stack('styles')
 </head>
 
 <body>

@@ -2,6 +2,10 @@
 
 @section('title', 'SMS Report')
 
+@push('styles')
+  <link rel="stylesheet" href="{{ asset('admin/css/order.css') }}">
+@endpush
+
 @section('content')
 <div class="admin-management-container">
     <h2 class="mb-4 text-primary fw-bold">

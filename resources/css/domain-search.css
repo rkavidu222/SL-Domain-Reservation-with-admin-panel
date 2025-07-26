@@ -1,0 +1,131 @@
+
+    body {
+      background-color: #f3f6fa;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .card-animate {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+      animation: fadeIn 0.3s ease-in-out;
+      margin-bottom: 1.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-header {
+      border-left: 6px solid #2563EB;
+      padding-left: 12px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #1F2937;
+      background-color: #F3F4F6;
+      padding: 10px;
+      border-radius: 0.25rem;
+    }
+
+    .result-row {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .line1, .line2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      white-space: nowrap;
+    }
+
+    .line1 .domain-name {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #0d6efd;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .line1 .old-price {
+      text-decoration: line-through;
+      color: #6c757d;
+      font-size: 0.95rem;
+    }
+
+    .line2 .new-price {
+      color: #dc3545;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .line2 .btn-buy {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.9rem;
+      min-width: 100px;
+    }
+
+    .input-group {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    #domainInput {
+      flex-grow: 1;
+    }
+
+    #domainExtension {
+      max-width: 100px;
+      flex-shrink: 0;
+    }
+
+    #searchBtn {
+      flex-shrink: 0;
+      min-width: 100px;
+    }
+
+    @media (max-width: 575.98px) {
+		  .line1,
+		  .line2 {
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 0.25rem;
+			white-space: normal;
+			text-align: center;
+		  }
+		  .line2 .btn-buy {
+			width: 100%;
+			text-align: center;
+		  }
+
+
+		  .input-group {
+			flex-direction: column !important;
+			gap: 0.5rem;
+			max-width: 100%;
+		  }
+
+
+		  #domainInput,
+		  #domainExtension,
+		  #searchBtn {
+			width: 100% !important;
+			max-width: 100% !important;
+		  }
+		}
