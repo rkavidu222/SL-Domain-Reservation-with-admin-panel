@@ -131,8 +131,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
 
-         Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('invoices/report', [InvoiceController::class, 'report'])->name('invoices.report');
         Route::get('invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
+
 
 
 

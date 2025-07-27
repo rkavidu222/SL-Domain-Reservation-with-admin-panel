@@ -62,4 +62,11 @@ class InvoiceController extends Controller
 
 		return redirect()->back()->with('success', 'Invoice SMS sent successfully.');
 	}
+
+public function report()
+{
+    return view('admin.layouts.invoices.report');
+}
+
+
 }
