@@ -8,6 +8,9 @@ use App\Models\DomainOrder;
 use App\Models\SmsTemplate;
 use App\Models\SmsReport;
 use App\Models\SmsLog;
+use App\Models\InvoiceSmsLog;
+
+
 class DashboardController extends Controller
 {
     public function index()
@@ -23,6 +26,10 @@ class DashboardController extends Controller
             'smsTemplatesCount' => SmsTemplate::count(),
             'successSmsCount' => SmsLog::where('status', 'success')->count(),
             'failedSmsCount' => SmsLog::where('status', 'failed')->count(),
+
+
+           'invoiceSuccessSmsCount' => InvoiceSmsLog::where('status', 'Success')->count(),
+           'invoiceFailedSmsCount' => InvoiceSmsLog::where('status', 'Failed')->count(),
         ]);
     }
 

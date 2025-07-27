@@ -7,6 +7,7 @@ use App\Models\DomainOrder;
 use App\Helpers\OtpHelper;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+	use App\Models\InvoiceSmsLog;
 class InvoiceController extends Controller
 {
     // Show all invoices
@@ -23,49 +24,81 @@ class InvoiceController extends Controller
         return view('admin.layouts.invoices.show', compact('order'));
     }
 
-	public function sendSms($id)
-	{
-		$invoice = DomainOrder::findOrFail($id);
 
-		$mobile = $invoice->mobile;
-		$code = $invoice->unique_code;
 
-		// build full invoice link
-		$url = "https://buydomains.srilankahosting.lk/invoice/view/{$code}";
-		$message = "Hello {$invoice->first_name}, Thank you for connecting with us. Here is your invoice: {$url}";
+    public function sendSms($id)
+{
+    $invoice = DomainOrder::findOrFail($id);
+    $mobile = $invoice->mobile;
+    $code = $invoice->unique_code;
 
-		$data = [
-			'api_token' => env('SMS_API_TOKEN'),
-			'recipient' => OtpHelper::normalizeSriLankanMobile($mobile),
-			'sender_id' => 'SLHosting',
-			'type' => 'plain',
-			'message' => $message,
-		];
+    // build full invoice link
+    $url = "https://buydomains.srilankahosting.lk/invoice/view/{$code}";
+    $message = "Hello {$invoice->first_name}, Thank you for connecting with us. Here is your invoice: {$url}";
 
-		$ch = curl_init('https://sms.serverclub.lk/api/http/sms/send');
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_POST, true);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, [
-			'Content-Type: application/json',
-			'Accept: application/json'
-		]);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    $data = [
+        'api_token' => env('SMS_API_TOKEN'),
+        'recipient' => OtpHelper::normalizeSriLankanMobile($mobile),
+        'sender_id' => 'SLHosting',
+        'type' => 'plain',
+        'message' => $message,
+    ];
 
-		$response = curl_exec($ch);
-		curl_close($ch);
+    $ch = curl_init('https://sms.serverclub.lk/api/http/sms/send');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Accept: application/json'
+    ]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
-		Log::info('Invoice SMS sent', [
-			'invoice_id' => $invoice->id,
-			'mobile' => $mobile,
-			'response' => $response
-		]);
+    $response = curl_exec($ch);
 
-		return redirect()->back()->with('success', 'Invoice SMS sent successfully.');
-	}
+    if ($response === false) {
+        $error = curl_error($ch);
+        curl_close($ch);
+        Log::error("SMS sending failed for invoice #{$invoice->id}: $error");
+
+        $status = 'Failed';
+    } else {
+        curl_close($ch);
+        $responseData = json_decode($response, true);
+
+
+        if (isset($responseData['status'])) {
+            $apiStatus = strtoupper($responseData['status']);
+            if ($apiStatus === 'SUCCESS' || $apiStatus === 'SENT') {
+                $status = 'Success';
+            } elseif ($apiStatus === 'PENDING') {
+                $status = 'Pending';
+            } else {
+                $status = 'Failed';
+            }
+        } else {
+            // If no status returned, mark as Failed (or you can store raw response)
+            $status = 'Failed';
+            Log::warning("Unexpected SMS API response for invoice #{$invoice->id}: " . $response);
+        }
+    }
+
+    // Save SMS log to DB
+    InvoiceSmsLog::create([
+        'invoice_id' => $invoice->id,
+        'phone' => $mobile,
+        'message' => $message,
+        'status' => $status,
+    ]);
+
+    return redirect()->back()->with('success', 'Invoice SMS sent and logged successfully.');
+}
+
+
 
 public function report()
 {
-    return view('admin.layouts.invoices.report');
+    $logs = InvoiceSmsLog::with('invoice')->latest()->get();
+    return view('admin.layouts.invoices.report', compact('logs'));
 }
 
 

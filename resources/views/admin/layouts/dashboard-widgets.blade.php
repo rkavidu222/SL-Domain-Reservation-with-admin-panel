@@ -107,6 +107,36 @@
         </div>
 
 
+   <!-- Box 9: Success Invoice SMS -->
+    <div class="col-lg-3 col-12 mb-3">
+    <div class="small-box text-bg-success">
+        <div class="inner">
+        <h3>{{ $invoiceSuccessSmsCount }}</h3>
+        <p>Success Invoice SMS</p>
+        </div>
+        <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 4h16v2H4V4zm0 4h10v2H4V8zm0 4h7v2H4v-2zm14.293 2.293L16 17.586V20h2.414l2.293-2.293a1 1 0 000-1.414l-2-2a1 1 0 00-1.414 0z"/>
+        </svg>
+    </div>
+    </div>
+
+
+
+    <!-- Box 10: Failed Invoice SMS -->
+    <div class="col-lg-3 col-12 mb-3">
+    <div class="small-box text-bg-danger">
+        <div class="inner">
+        <h3>{{ $invoiceFailedSmsCount }}</h3>
+        <p>Failed Invoice SMS</p>
+        </div>
+        <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14h-2v2h2v-2zm0-8h-2v6h2V8z"/>
+        </svg>
+    </div>
+    </div>
+
+
+</div>
 
 
     </div>
