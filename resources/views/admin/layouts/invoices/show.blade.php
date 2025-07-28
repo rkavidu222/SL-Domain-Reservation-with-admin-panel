@@ -11,7 +11,7 @@
 
     <div class="header-title">
       <img src="https://www.srilankahosting.lk/logo.svg" alt="SriLankaHosting Logo" /><br>
-      <span>SriLankaHosting Invoice</span>
+      <span>SriLanka Hosting Invoice</span>
     </div>
 
     <div class="info-row">
@@ -39,10 +39,15 @@
       <span class="section-value">{{ $order->mobile }}</span>
     </div>
 
-    <div class="info-row">
-      <span class="section-label">Billing Month :</span>
-      <span class="section-value">{{ optional($order->created_at)->format('Y-F') ?? 'N/A' }}</span>
+   <div class="info-row">
+    <span class="section-label">Duration:</span>
+    <span class="section-value">
+        {{ optional($order->created_at)->format('Y-F') ?? 'N/A' }}
+        to
+        {{ optional($order->created_at)->addMonths(12)->subDay()->format('Y-F') ?? 'N/A' }}
+    </span>
     </div>
+
 
     <div class="info-row">
       <span class="section-label">Billing Date :</span>

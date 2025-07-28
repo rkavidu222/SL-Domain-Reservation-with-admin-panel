@@ -105,8 +105,13 @@
             @foreach ($orders as $order)
             <tr>
               <td class="text-center">{{ $order->id }}</td>
-              <td>{{ $order->first_name }}</td>
-              <td>{{ $order->mobile }}</td>
+              <td>{{ $order->first_name }} {{ $order->last_name }}</td>
+              <td>
+				  <a href="https://wa.me/{{ ltrim($order->mobile, '0') }}" target="_blank">
+					{{ $order->mobile }}
+				  </a>
+			  </td>
+
               <td>{{ $order->domain_name }}</td>
               <td>{{ $order->category ?? '-' }}</td>
               <td class="text-end">{{ number_format($order->price, 2) }}</td>
@@ -152,8 +157,13 @@
             @foreach ($paidOrders as $order)
             <tr>
               <td class="text-center">{{ $order->id }}</td>
-              <td>{{ $order->first_name }}</td>
-              <td>{{ $order->mobile }}</td>
+              <td>{{ $order->first_name }} {{ $order->last_name }}</td>
+              <td>
+				  <a href="https://wa.me/{{ ltrim($order->mobile, '0') }}" target="_blank">
+					{{ $order->mobile }}
+				  </a>
+			  </td>
+
               <td>{{ $order->domain_name }}</td>
               <td>{{ $order->category ?? '-' }}</td>
               <td class="text-end">{{ number_format($order->price, 2) }}</td>
@@ -197,8 +207,13 @@
             @foreach ($pendingOrders as $order)
             <tr>
               <td class="text-center">{{ $order->id }}</td>
-              <td>{{ $order->first_name }}</td>
-              <td>{{ $order->mobile }}</td>
+              <td>{{ $order->first_name }} {{ $order->last_name }}</td>
+              <td>
+				  <a href="https://wa.me/{{ ltrim($order->mobile, '0') }}" target="_blank">
+					{{ $order->mobile }}
+				  </a>
+			  </td>
+
               <td>{{ $order->domain_name }}</td>
               <td>{{ $order->category ?? '-' }}</td>
               <td class="text-end">{{ number_format($order->price, 2) }}</td>

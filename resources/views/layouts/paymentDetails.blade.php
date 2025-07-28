@@ -50,7 +50,6 @@
     </div>
   </form>
 
-  <!-- Hidden Skip Payment Form -->
   <form method="POST" action="{{ route('payment.skip') }}" id="skipForm" style="margin-top: 1rem;">
     @csrf
     <input type="hidden" name="order_id" value="{{ $order->id }}">

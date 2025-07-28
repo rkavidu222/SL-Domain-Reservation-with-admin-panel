@@ -17,7 +17,7 @@ class InvoiceController extends Controller
         return view('admin.layouts.invoices.index', compact('orders'));
     }
 
-    // Show a single invoice
+
     public function show($id)
     {
         $order = DomainOrder::findOrFail($id);
@@ -32,7 +32,7 @@ class InvoiceController extends Controller
     $mobile = $invoice->mobile;
     $code = $invoice->unique_code;
 
-    // build full invoice link
+
     $url = "https://buydomains.srilankahosting.lk/invoice/view/{$code}";
     $message = "Hello {$invoice->first_name}, Thank you for connecting with us. Here is your invoice: {$url}";
 
@@ -76,7 +76,7 @@ class InvoiceController extends Controller
                 $status = 'Failed';
             }
         } else {
-            // If no status returned, mark as Failed (or you can store raw response)
+
             $status = 'Failed';
             Log::warning("Unexpected SMS API response for invoice #{$invoice->id}: " . $response);
         }

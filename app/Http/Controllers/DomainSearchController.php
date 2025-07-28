@@ -68,9 +68,13 @@ class DomainSearchController extends Controller
     public function search(Request $request)
     {
         $request->validate([
-            'domainname' => 'required|string|max:255'
-        ]);
-
+        'domainname' => [
+        'required',
+        'string',
+        'max:255',
+        'regex:/^([a-z0-9]+(-[a-z0-9]+)*\.)*([a-z0-9]+(-[a-z0-9]+)*)$/i'
+    ]
+]);
         $inputDomain = strtolower(trim($request->input('domainname')));
         Log::info('Search initiated for domain', ['input' => $inputDomain]);
 
@@ -131,7 +135,7 @@ class DomainSearchController extends Controller
             'prices' => $allPrices,
             'showCat1' => $showCat1,
             'showCat2' => $showCat2,
-            'showCat3' => true // Always show CAT3 (for SLD options)
+            'showCat3' => true
         ]);
     }
 

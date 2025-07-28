@@ -6,13 +6,13 @@ use Illuminate\Http\Request;
 use App\Models\DomainOrder;
 use App\Helpers\OtpHelper;
 use Illuminate\Support\Facades\Log;
+use App\Models\InvoiceSmsLog;
 
 class PaymentController extends Controller
 {
     public function skipPayment(Request $request)
     {
-        // Get the domain order using session or a passed ID
-        $orderId = session('domain_order_id'); // <- you MUST store this before
+        $orderId = session('domain_order_id');
         $invoice = DomainOrder::find($orderId);
 
         if (!$invoice) {
@@ -42,12 +42,47 @@ class PaymentController extends Controller
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
         $response = curl_exec($ch);
+
+        if ($response === false) {
+            $status = 'Failed';
+            $responseContent = curl_error($ch);
+        } else {
+            $responseContent = $response;
+
+            // Optionally parse JSON response to detect success/failure status
+            $responseData = json_decode($response, true);
+            if (isset($responseData['status'])) {
+                $apiStatus = strtoupper($responseData['status']);
+                if ($apiStatus === 'SUCCESS' || $apiStatus === 'SENT') {
+                    $status = 'Success';
+                } elseif ($apiStatus === 'PENDING') {
+                    $status = 'Pending';
+                } else {
+                    $status = 'Failed';
+                }
+            } else {
+                // If API response format unexpected
+                $status = 'Failed';
+                Log::warning("Unexpected SMS API response: " . $response);
+            }
+        }
+
         curl_close($ch);
 
         Log::info('Skip Payment SMS sent', [
             'invoice_id' => $invoice->id,
             'mobile' => $mobile,
-            'response' => $response
+            'response' => $responseContent,
+            'status' => $status,
+        ]);
+
+
+        InvoiceSmsLog::create([
+            'invoice_id' => $invoice->id,
+            'phone' => $mobile,
+            'message' => $message,
+            'status' => $status,
+            'response' => $responseContent,
         ]);
 
         return redirect('/confirmation')->with('success', 'Payment skipped and SMS sent.');

@@ -53,7 +53,7 @@
 	}
 
 
-  function getBaseDomain(input) {
+    function getBaseDomain(input) {
     const knownExts = ['.lk', '.com.lk', '.org.lk', '.edu.lk', '.hotel.lk', '.web.lk'];
     let cleaned = input.trim().toLowerCase();
 
@@ -61,17 +61,18 @@
     cleaned = cleaned.replace(/^\.+|\.+$/g, '');
 
     for (const ext of knownExts) {
-      if (cleaned.endsWith(ext)) {
+        if (cleaned.endsWith(ext)) {
         cleaned = cleaned.slice(0, -ext.length);
         break;
-      }
+        }
     }
 
     cleaned = cleaned.replace(/\.(com|org|hotel|edu|web)$/, '');
     cleaned = cleaned.replace(/[^a-z0-9\-]/g, '');
 
     return cleaned;
-  }
+    }
+
 
   function renderRow(domain, cat) {
     const oldPrice = prices[cat]?.old_price || 0;
@@ -220,12 +221,7 @@
     }
   });
 
-  // Input Sanitizer
-  document.getElementById('domainInput').addEventListener('input', function () {
-    this.value = this.value
-      .replace(/[^a-z0-9\-]/gi, '')
-      .replace(/--+/g, '-')
-      .replace(/^-+/, '')
-      .replace(/-+$/, '');
-  });
+
+
+
 </script>

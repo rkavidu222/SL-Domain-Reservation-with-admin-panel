@@ -56,7 +56,7 @@
                     <th>#ID</th>
                     <th>Domain</th>
                     <th class="text-start">Customer</th>
-                    <th>Status</th>
+                    <th>Payment Status</th>
                     <th class="text-end">Price (Rs.)</th>
                     <th>Date</th>
                     <th>Actions</th>

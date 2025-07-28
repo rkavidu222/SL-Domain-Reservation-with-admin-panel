@@ -29,69 +29,99 @@ class DomainOrderController extends Controller
         return view('layouts.contactInfomation', compact('domain_name', 'price', 'category'));
     }
 
-    // Store submitted data and send OTP
-    public function store(Request $request)
-{
-    $validated = $request->validate([
-        'domain_name' => 'required|string|min:3|max:255|regex:/^([a-z0-9-]+\.)+[a-z]{2,}$/i',
-        'price' => 'required|numeric|min:0',
-        'category' => 'required|string|max:50',
-        'first_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',
-        'last_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',
-        'email' => 'required|email|max:255',
-        'mobile' => [
-            'required',
-            'regex:/^(0\d{9}|94\d{9})$/',
-        ],
-    ], [
-        // your validation messages...
-    ]);
+	public function store(Request $request)
+	{
 
-    // Format mobile
-    $mobile = $validated['mobile'];
-    if (Str::startsWith($mobile, '0')) {
-        $mobile = '94' . substr($mobile, 1);
-    }
+		$validated = $request->validate([
+			'domain_name' => 'required|string|min:3|max:255|regex:/^([a-z0-9-]+\.)+[a-z]{2,}$/i',
+			'price' => 'required|numeric|min:0',
+			'category' => 'required|string|max:50',
+			'first_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',
+			'last_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',
+			'email' => 'required|email|max:255',
+			'mobile' => [
+				'required',
+				'regex:/^(0\d{9}|94\d{9})$/',
+			],
+		]);
 
-    // Generate unique code here
-    $uniqueCode = Str::uuid()->toString();
 
-    // Create and save DomainOrder with unique_code
-    $order = DomainOrder::create([
-        'domain_name' => $validated['domain_name'],
-        'price' => $validated['price'],
-        'category' => $validated['category'],
-        'first_name' => $validated['first_name'],
-        'last_name' => $validated['last_name'],
-        'email' => $validated['email'],
-        'mobile' => $mobile,
-        'unique_code' => $uniqueCode,
-        'payment_status' => 'pending', // or default
-    ]);
+		$mobile = $validated['mobile'];
+		if (Str::startsWith($mobile, '0')) {
+			$mobile = '94' . substr($mobile, 1);
+		}
 
-     $otp = rand(100000, 999999);
 
-        session([
-            'domain_order_data' => array_merge($validated, ['mobile' => $mobile]),
-            'otp' => $otp,
-            'mobile' => $mobile,
-            'email' => $validated['email'],
-            'otp_expires_at' => now()->addMinutes(5),
-        ]);
+		$existingOrder = DomainOrder::where('domain_name', $validated['domain_name'])
+			->where('mobile', $mobile)
+			->where('payment_status', 'pending')
+			->first();
 
-        Log::info('OTP generated and session data stored', [
-            'mobile' => $mobile,
-            'otp' => $otp,
-            'email' => $validated['email'],
-        ]);
+		if ($existingOrder) {
 
-        OtpHelper::sendOtpSms($mobile, (string) $otp);
+			$existingOrder->update([
+				'price' => $validated['price'],
+				'category' => $validated['category'],
+				'first_name' => $validated['first_name'],
+				'last_name' => $validated['last_name'],
+				'email' => $validated['email'],
+			]);
 
-        Log::info('OTP sent', ['mobile' => $mobile, 'otp' => $otp]);
+			$order = $existingOrder;
+			$uniqueCode = $order->unique_code;
+		} else {
 
-        return redirect()->route('otp.verification.page')->with('success', 'OTP sent to your mobile number.');
+			do {
+				$uniqueCode = strtoupper(Str::random(8));
+			} while (DomainOrder::where('unique_code', $uniqueCode)->exists());
 
-}
+
+			$order = DomainOrder::create([
+				'domain_name' => $validated['domain_name'],
+				'price' => $validated['price'],
+				'category' => $validated['category'],
+				'first_name' => $validated['first_name'],
+				'last_name' => $validated['last_name'],
+				'email' => $validated['email'],
+				'mobile' => $mobile,
+				'unique_code' => $uniqueCode,
+				'payment_status' => 'pending',
+			]);
+		}
+
+
+		$otp = rand(100000, 999999);
+
+
+		session([
+			'domain_order_id' => $order->id,
+			'unique_code' => $uniqueCode,
+			'domain_order_data' => array_merge($validated, ['mobile' => $mobile]),
+			'otp' => $otp,
+			'mobile' => $mobile,
+			'email' => $validated['email'],
+			'otp_expires_at' => now()->addMinutes(5),
+		]);
+
+
+		Log::info('OTP generated and session data stored', [
+			'mobile' => $mobile,
+			'otp' => $otp,
+			'email' => $validated['email'],
+			'unique_code' => $uniqueCode,
+		]);
+
+
+		OtpHelper::sendOtpSms($mobile, (string) $otp);
+
+		Log::info('OTP sent', ['mobile' => $mobile, 'otp' => $otp]);
+
+		return redirect()->route('otp.verification.page')->with('success', 'OTP sent to your mobile number.');
+	}
+
+
+
+
 
     // Admin: List all domain orders
     public function adminIndex(Request $request)
@@ -216,3 +246,4 @@ class DomainOrderController extends Controller
 
 
 }
+
