@@ -6,8 +6,6 @@
   <link href="{{ asset('/resources/css/confirmation.css') }}" rel="stylesheet">
 @endpush
 
-
-
 @section('content')
 <div class="card-animate">
 
@@ -19,18 +17,35 @@
     <i class="fa-solid fa-circle-check"></i>
   </div>
 
-
   <h2 class="confirmation-title">Reservation Confirmed!</h2>
-  <p class="confirmation-subtitle">Your domain reservation was successful.</p>
 
-  <p class="confirmation-message">
-    Thank you for reserving your <strong>.lk domain</strong> with <strong>SriLanka Hosting</strong>.
-  </p>
+  @if(session('paymentMethod') === 'skip')
+    <p class="confirmation-subtitle">Your domain reservation was successful.</p>
 
-  <p class="confirmation-message text-muted">
-    You've chosen to <strong>skip payment</strong> for now.<br>
-    Our team will contact you within <strong>24 hours</strong> to help complete your order and activate your domain.
-  </p>
+    <p class="confirmation-message">
+      Thank you for reserving your <strong>.lk domain</strong> with <strong>SriLanka Hosting</strong>.
+    </p>
+
+    <p class="confirmation-message text-muted">
+      You've chosen to <strong>skip payment</strong> for now.<br>
+      Our team will contact you within <strong>24 hours</strong> to help complete your order and activate your domain.
+    </p>
+
+  @elseif(session('paymentMethod') === 'paysecurely')
+    <p class="confirmation-subtitle">Thank you for your payment submission.</p>
+
+    <p class="confirmation-message">
+      We have received your payment details for <strong>.lk domain</strong> registration.<br>
+      Our team will review your payment proof and activate your domain shortly.<br>
+      If there are any issues, we will contact you via email or phone.
+    </p>
+  @else
+    <p class="confirmation-subtitle">Your domain reservation is being processed.</p>
+
+    <p class="confirmation-message">
+      Our team will contact you shortly with further information.
+    </p>
+  @endif
 
   <div class="support-info">
     <p class="fw-semibold">Need help sooner?</p>
@@ -53,4 +68,26 @@
   </a>
 
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        if (!form) return; // Safety check if form not present
+        const submitBtn = document.getElementById('submitBtn');
+        if (!submitBtn) return; // Safety check if button not present
+        const btnSpinner = document.getElementById('btnSpinner');
+        const btnText = submitBtn.querySelector('.btn-text');
+
+        form.addEventListener('submit', function () {
+            // Disable the button to prevent multiple clicks
+            submitBtn.disabled = true;
+
+            // Hide button text and show spinner
+            if (btnText) btnText.textContent = 'Please wait...';
+            if (btnSpinner) btnSpinner.classList.remove('d-none');
+        });
+    });
+</script>
 @endsection

@@ -15,8 +15,7 @@
   <div class="section-title">Payment Details</div>
 
   <!-- Payment Form -->
-  <form method="POST" action="{{ route('payment.details') }}" onsubmit="showLoading()">
-
+  <form method="POST" action="{{ route('payment.paysecurely') }}" onsubmit="showLoading()">
     @csrf
     <input type="hidden" name="order_id" value="{{ $order->id }}">
 
@@ -30,26 +29,42 @@
     <div class="select-icon">
       <select name="payment_method" id="payment_method" class="select" required>
         <option value="" disabled selected>-- Select Payment Method --</option>
-        <option value="visa">💳 Visa / MasterCard</option>
         <option value="bank">🏦 Bank Transfer</option>
-        <option value="payhere">🌐 PayHere / WebXPay</option>
+        {{-- Add more payment methods here if needed --}}
       </select>
     </div>
 
-    <div class="payment-icons">
-      <img src="https://img.icons8.com/color/48/visa.png" alt="Visa" />
-      <img src="https://img.icons8.com/color/48/mastercard.png" alt="Mastercard" />
-      <img src="https://img.icons8.com/color/48/bank-building.png" alt="Bank Transfer" />
-      <img src="https://img.icons8.com/color/48/stripe.png" alt="Stripe" />
+    <!-- Bank Details (Shown only if "Bank Transfer" selected) -->
+    <div id="bankDetails" class="bank-info" style="display: none;">
+      <div class="bank-card">
+        <strong>BANK 01 -</strong><br>
+        Bank Name: <strong>SAMPATH BANK</strong><br>
+        Branch Name and Code: <strong>BIBILE / 161</strong><br>
+        Account Holder: <strong>ServerClub.LK (Private) Limited</strong><br>
+        Account Number: <strong>116114023727</strong><br><br>
+        <span class="text-success">
+          After making the payment, please upload the proof via WhatsApp:<br>
+          <a href="https://wa.me/94774233244" target="_blank" class="btn btn-sm btn-success mt-2">
+            <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp Us
+          </a>
+        </span>
+      </div>
     </div>
 
-    <div class="btn-row">
+    <!-- Payment Icons -->
+    <div class="payment-icons mt-3">
+      <img src="https://img.icons8.com/color/48/bank-building.png" alt="Bank Transfer" />
+    </div>
+
+    <!-- Submit Button -->
+    <div class="btn-row mt-3">
       <button id="submitBtn" type="submit" class="btn-action btn-primary">
         <i class="fa-solid fa-lock me-1"></i> Pay Securely
       </button>
     </div>
   </form>
 
+  <!-- Skip Payment Form -->
   <form method="POST" action="{{ route('payment.skip') }}" id="skipForm" style="margin-top: 1rem;">
     @csrf
     <input type="hidden" name="order_id" value="{{ $order->id }}">
@@ -73,9 +88,13 @@
     const skipBtn = document.getElementById('skipBtn');
     skipBtn.disabled = true;
     skipBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Redirecting...`;
-
-    // Submit the hidden skip payment form via POST
     document.getElementById('skipForm').submit();
   }
+
+  // Show bank info when 'Bank Transfer' is selected
+  document.getElementById('payment_method').addEventListener('change', function () {
+    const bankInfo = document.getElementById('bankDetails');
+    bankInfo.style.display = this.value === 'bank' ? 'block' : 'none';
+  });
 </script>
 @endsection

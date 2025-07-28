@@ -32,15 +32,18 @@ Route::post('/domain/contact-submit', [DomainOrderController::class, 'store'])->
 Route::get('/otp-verification', [OtpController::class, 'showVerificationForm'])->name('otp.verification.page');
 Route::post('/otp-resend', [OtpController::class, 'resendOtp'])->name('otp.resend');  // Added this route for resend AJAX
 
+
+Route::post('/payment-details', [OtpController::class, 'paymentDetails'])->name('payment.details');
+
+
 // Contact form routes (separate from domain order contact info)
 //Route::get('/contact-information', [ContactController::class, 'showForm'])->name('contact.page');
 //Route::post('/contact-information', [ContactController::class, 'submit'])->name('contact.submit');
 
-// Payment routes
-Route::post('/payment-details', [OtpController::class, 'paymentDetails'])->name('payment.details');
+
+
+Route::post('/pay-securely', [PaymentController::class, 'paySecurely'])->name('payment.paysecurely');
 Route::post('/skip-payment', [PaymentController::class, 'skipPayment'])->name('payment.skip');
-
-
 
 
 // Confirmation page

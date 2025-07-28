@@ -15,9 +15,25 @@
     <h5 class="text-primary fw-semibold mt-2">OTP Verification</h5>
   </div>
 
+  <!--
   <p class="info-text">
     Enter the 6-digit code we sent to your mobile number to continue.
   </p>
+-->
+
+<!--  temp otp-->
+
+<p class="info-text">
+  Enter the 6-digit code we sent to your mobile number to continue.
+</p>
+
+@if(session('otp'))
+  <div class="alert alert-info text-center">
+    <strong>Testing Only:</strong> Your OTP is <code>{{ session('otp') }}</code>
+  </div>
+@endif
+
+<!-- end-->
 
   @if ($errors->has('otp'))
     <div class="alert alert-danger mb-3">

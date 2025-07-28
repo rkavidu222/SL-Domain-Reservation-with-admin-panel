@@ -124,3 +124,42 @@
   .payment-icons img {
     height: 48px;
   }
+
+
+  .bank-card {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.text-success a {
+  text-decoration: none;
+  color: white;
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+
+@media (max-width: 576px) {
+  .bank-card {
+    font-size: 0.9rem;
+    padding: 0.8rem;
+  }
+
+  .bank-card strong,
+  .bank-card span {
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .btn-sm.btn-success {
+    width: 100%;
+    text-align: center;
+  }
+}
+
