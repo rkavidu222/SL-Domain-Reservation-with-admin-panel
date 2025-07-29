@@ -7,64 +7,66 @@
 @endpush
 
 @section('content')
-
-
 <div class="admin-management-container">
   <h2 class="mb-4 text-primary fw-bold text-center">Order Management</h2>
 
-	{{-- Flash Messages --}}
-    @if (session('success'))
+  {{-- Flash Messages --}}
+  @if (session('success'))
     <div class="toast-notification toast-success" role="alert" aria-live="polite" aria-atomic="true">
-        <div class="toast-icon">
+      <div class="toast-icon">
         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 6L9 17l-5-5"/>
+          <path d="M20 6L9 17l-5-5"/>
         </svg>
-        </div>
-        <div class="toast-message">
+      </div>
+      <div class="toast-message">
         <strong>Success:</strong> {{ session('success') }}
-        </div>
-        <button class="toast-close" aria-label="Close notification">&times;</button>
+      </div>
+      <button class="toast-close" aria-label="Close notification">&times;</button>
     </div>
-    @endif
+  @endif
 
-    @if (session('error'))
+  @if (session('error'))
     <div class="toast-notification toast-error" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-icon">
+      <div class="toast-icon">
         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12" y2="16"/>
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12" y2="16"/>
         </svg>
-        </div>
-        <div class="toast-message">
+      </div>
+      <div class="toast-message">
         <strong>Error:</strong> {{ session('error') }}
-        </div>
-        <button class="toast-close" aria-label="Close notification">&times;</button>
+      </div>
+      <button class="toast-close" aria-label="Close notification">&times;</button>
     </div>
-    @endif
-
-
-
-
+  @endif
 
   <div class="tab-filter-container">
     {{-- Tabs --}}
     <ul class="nav nav-tabs mb-0" id="ordersTab" role="tablist" style="flex: 1;">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">
-          All Orders ({{ $orders->count() }})
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="paid-tab" data-bs-toggle="tab" data-bs-target="#paid" type="button" role="tab" aria-controls="paid" aria-selected="false">
-          Paid Orders ({{ $paidOrders->count() }})
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="false">
-          Pending Orders ({{ $pendingOrders->count() }})
-        </button>
-      </li>
+      @foreach ([
+        ['id' => 'all', 'label' => 'All Orders', 'count' => $orders->count(), 'active' => true],
+        ['id' => 'paid', 'label' => 'Paid Orders', 'count' => $paidOrders->count()],
+        ['id' => 'pending', 'label' => 'Pending Orders', 'count' => $pendingOrders->count()],
+        ['id' => 'await', 'label' => 'Awaiting Proof', 'count' => $awaitingProofOrders->count()],
+        ['id' => 'client-acc-created', 'label' => 'Client Acc Created', 'count' => $clientAccCreatedOrders->count()],
+        ['id' => 'actived', 'label' => 'Actived', 'count' => $activedOrders->count()]
+      ] as $tab)
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link {{ $tab['active'] ?? false ? 'active' : '' }}"
+            id="{{ $tab['id'] }}-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#{{ $tab['id'] }}"
+            type="button"
+            role="tab"
+            aria-controls="{{ $tab['id'] }}"
+            aria-selected="{{ $tab['active'] ?? false ? 'true' : 'false' }}"
+          >
+            {{ $tab['label'] }} ({{ $tab['count'] }})
+          </button>
+        </li>
+      @endforeach
     </ul>
 
     {{-- Date Range Filter --}}
@@ -82,216 +84,128 @@
     </div>
   </div>
 
-  {{-- Tab contents --}}
+  {{-- Tab Contents --}}
   <div class="tab-content" id="ordersTabContent">
-    {{-- All Orders --}}
-    <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
-      <div class="table-responsive">
-        <table id="ordersTable" class="table table-bordered table-hover table-striped" style="width:100%">
-          <thead class="bg-primary text-white text-center align-middle">
-            <tr>
-              <th>#</th>
-              <th>Customer Name</th>
-              <th>Mobile</th>
-              <th>Domain</th>
-              <th>Category</th>
-              <th>Price (Rs.)</th>
-              <th>Payment</th>
-              <th>Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach ($orders as $order)
-            <tr>
-              <td class="text-center">{{ $order->id }}</td>
-              <td>{{ $order->first_name }} {{ $order->last_name }}</td>
-              <td>
-				  <a href="https://wa.me/{{ ltrim($order->mobile, '0') }}" target="_blank">
-					{{ $order->mobile }}
-				  </a>
-			  </td>
-
-              <td>{{ $order->domain_name }}</td>
-              <td>{{ $order->category ?? '-' }}</td>
-              <td class="text-end">{{ number_format($order->price, 2) }}</td>
-              <td class="text-center">
-                <span class="badge bg-{{ $order->payment_status === 'paid' ? 'success' : 'warning' }}">
-                  {{ ucfirst($order->payment_status) }}
-                </span>
-              </td>
-              <td class="text-center">{{ $order->created_at->format('Y-m-d') }}</td>
-              <td class="text-center">
-                <button class="btn btn-sm btn-info btn-view-order" data-order='@json($order)'>View</button>
-                <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure to delete this order?');">
-                  @csrf
-                  @method('DELETE')
-                  <button type="submit" class="btn btn-sm btn-danger ms-1">Delete</button>
-                </form>
-              </td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
+    @foreach ([
+      'all' => ['data' => $orders, 'tableId' => 'ordersTable'],
+      'paid' => ['data' => $paidOrders, 'tableId' => 'paidOrdersTable'],
+      'pending' => ['data' => $pendingOrders, 'tableId' => 'pendingOrdersTable'],
+      'await' => ['data' => $awaitingProofOrders, 'tableId' => 'awaitOrdersTable'],
+      'client-acc-created' => ['data' => $clientAccCreatedOrders, 'tableId' => 'clientAccCreatedOrdersTable'],
+      'actived' => ['data' => $activedOrders, 'tableId' => 'activedOrdersTable']
+    ] as $tabId => $tab)
+      <div class="tab-pane fade {{ $tabId === 'all' ? 'show active' : '' }}" id="{{ $tabId }}" role="tabpanel" aria-labelledby="{{ $tabId }}-tab">
+        <div class="table-responsive">
+          <table id="{{ $tab['tableId'] }}" class="table table-bordered table-hover table-striped" style="width:100%">
+            <thead class="bg-primary text-white text-center align-middle">
+              <tr>
+                <th>#</th>
+                <th>Customer Name</th>
+                <th>Mobile</th>
+                <th>Domain</th>
+                <th>Category</th>
+                <th>Price (Rs.)</th>
+                <th>Payment</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach ($tab['data'] as $order)
+                <tr>
+                  <td class="text-center">{{ $order->id }}</td>
+                  <td>{{ $order->first_name }} {{ $order->last_name }}</td>
+                  <td>
+                    <a href="https://wa.me/{{ ltrim($order->mobile, '0') }}" target="_blank">
+                      {{ $order->mobile }}
+                    </a>
+                  </td>
+                  <td>{{ $order->domain_name }}</td>
+                  <td>{{ $order->category ?? '-' }}</td>
+                  <td class="text-end">{{ number_format($order->price, 2) }}</td>
+                  <td class="text-center">
+                    @php
+                      $status = $order->payment_status;
+                      $statusClass = match ($status) {
+                        'paid' => 'success',
+                        'pending' => 'warning',
+                        'awaiting_proof' => 'info',
+                        'client_acc_created' => 'primary',
+                        'actived' => 'success',
+                        default => 'secondary',
+                      };
+                    @endphp
+                    <span class="badge bg-{{ $statusClass }}">
+                      {{ ucwords(str_replace('_', ' ', $status)) }}
+                    </span>
+                  </td>
+                  <td class="text-center">{{ $order->created_at->format('Y-m-d') }}</td>
+                  <td class="text-center">
+                    <button class="btn btn-sm btn-info btn-view-order" data-order='@json($order)'>View</button>
+                    <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure to delete this order?');">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit" class="btn btn-sm btn-danger ms-1">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    @endforeach
+  </div>
 
-    {{-- Paid Orders --}}
-    <div class="tab-pane fade" id="paid" role="tabpanel" aria-labelledby="paid-tab">
-      <div class="table-responsive">
-        <table id="paidOrdersTable" class="table table-bordered table-hover table-striped" style="width:100%">
-          <thead class="bg-primary text-white text-center align-middle">
-            <tr>
-              <th>#</th>
-              <th>Customer Name</th>
-              <th>Mobile</th>
-              <th>Domain</th>
-              <th>Category</th>
-              <th>Price (Rs.)</th>
-              <th>Payment</th>
-              <th>Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach ($paidOrders as $order)
-            <tr>
-              <td class="text-center">{{ $order->id }}</td>
-              <td>{{ $order->first_name }} {{ $order->last_name }}</td>
-              <td>
-				  <a href="https://wa.me/{{ ltrim($order->mobile, '0') }}" target="_blank">
-					{{ $order->mobile }}
-				  </a>
-			  </td>
-
-              <td>{{ $order->domain_name }}</td>
-              <td>{{ $order->category ?? '-' }}</td>
-              <td class="text-end">{{ number_format($order->price, 2) }}</td>
-              <td class="text-center">
-                <span class="badge bg-success">Paid</span>
-              </td>
-              <td class="text-center">{{ $order->created_at->format('Y-m-d') }}</td>
-              <td class="text-center">
-                <button class="btn btn-sm btn-info btn-view-order" data-order='@json($order)'>View</button>
-                <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure to delete this order?');">
-                  @csrf
-                  @method('DELETE')
-                  <button type="submit" class="btn btn-sm btn-danger ms-1">Delete</button>
-                </form>
-              </td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    {{-- Pending Orders --}}
-    <div class="tab-pane fade" id="pending" role="tabpanel" aria-labelledby="pending-tab">
-      <div class="table-responsive">
-        <table id="pendingOrdersTable" class="table table-bordered table-hover table-striped" style="width:100%">
-          <thead class="bg-primary text-white text-center align-middle">
-            <tr>
-              <th>#</th>
-              <th>Customer Name</th>
-              <th>Mobile</th>
-              <th>Domain</th>
-              <th>Category</th>
-              <th>Price (Rs.)</th>
-              <th>Payment</th>
-              <th>Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach ($pendingOrders as $order)
-            <tr>
-              <td class="text-center">{{ $order->id }}</td>
-              <td>{{ $order->first_name }} {{ $order->last_name }}</td>
-              <td>
-				  <a href="https://wa.me/{{ ltrim($order->mobile, '0') }}" target="_blank">
-					{{ $order->mobile }}
-				  </a>
-			  </td>
-
-              <td>{{ $order->domain_name }}</td>
-              <td>{{ $order->category ?? '-' }}</td>
-              <td class="text-end">{{ number_format($order->price, 2) }}</td>
-              <td class="text-center">
-                <span class="badge bg-warning">Pending</span>
-              </td>
-              <td class="text-center">{{ $order->created_at->format('Y-m-d') }}</td>
-              <td class="text-center">
-                <button class="btn btn-sm btn-info btn-view-order" data-order='@json($order)'>View</button>
-                <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure to delete this order?');">
-                  @csrf
-                  @method('DELETE')
-                  <button type="submit" class="btn btn-sm btn-danger ms-1">Delete</button>
-                </form>
-              </td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
+  {{-- Order Details Modal --}}
+  <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Order ID:</strong> <span id="modal-order-id"></span></p>
+          <p><strong>Customer Name:</strong> <span id="modal-customer-name"></span></p>
+          <p><strong>Email:</strong> <span id="modal-email"></span></p>
+          <p><strong>Phone:</strong> <span id="modal-phone"></span></p>
+          <p><strong>Domain:</strong> <span id="modal-domain"></span></p>
+          <p><strong>Category:</strong> <span id="modal-category"></span></p>
+          <p><strong>Price:</strong> <span id="modal-price"></span></p>
+          <p><strong>Order Date:</strong> <span id="modal-order-date"></span></p>
+          <p><strong>Payment Status:</strong> <span id="modal-payment-status"></span></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
-{{-- Order Details Modal --}}
-<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p><strong>Order ID:</strong> <span id="modal-order-id"></span></p>
-        <p><strong>Customer Name:</strong> <span id="modal-customer-name"></span></p>
-        <p><strong>Email:</strong> <span id="modal-email"></span></p>
-        <p><strong>Phone:</strong> <span id="modal-phone"></span></p>
-        <p><strong>Domain:</strong> <span id="modal-domain"></span></p>
-        <p><strong>Category:</strong> <span id="modal-category"></span></p>
-        <p><strong>Price:</strong> <span id="modal-price"></span></p>
-        <p><strong>Order Date:</strong> <span id="modal-order-date"></span></p>
-        <p><strong>Payment Status:</strong> <span id="modal-payment-status"></span></p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 @endsection
-
-
-
 
 @section('scripts')
 <script>
   $(function () {
     // Initialize DataTables
-    ['#ordersTable', '#paidOrdersTable', '#pendingOrdersTable'].forEach(tableId => {
-	  $(tableId).DataTable({
-		responsive: true,
-		paging: true,
-		lengthChange: true,
-		searching: true,
-		ordering: true,
-		info: true,
-		autoWidth: false,
-	  });
-	});
-
+    ['#ordersTable', '#paidOrdersTable', '#pendingOrdersTable', '#awaitOrdersTable', '#clientAccCreatedOrdersTable', '#activedOrdersTable'].forEach(tableId => {
+      $(tableId).DataTable({
+        responsive: true,
+        paging: true,
+        lengthChange: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        autoWidth: false,
+      });
+    });
 
     const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
 
-    // Delegated click handler to support dynamic/responsive elements
+    // Delegated click handler for view order buttons
     $(document).on('click', '.btn-view-order', function () {
       const order = $(this).data('order');
-
       $('#modal-order-id').text(order.id ?? '-');
       $('#modal-customer-name').text(`${order.first_name ?? ''} ${order.last_name ?? ''}`.trim() || '-');
       $('#modal-email').text(order.email ?? '-');
@@ -301,7 +215,6 @@
       $('#modal-price').text(order.price !== undefined ? 'Rs.' + parseFloat(order.price).toFixed(2) : '-');
       $('#modal-order-date').text(order.created_at ? new Date(order.created_at).toLocaleDateString() : '-');
       $('#modal-payment-status').text(order.payment_status ? order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1) : '-');
-
       modal.show();
     });
 
@@ -309,10 +222,7 @@
     $('#dateRangeInput').daterangepicker({
       autoUpdateInput: false,
       opens: 'left',
-      locale: {
-        format: 'YYYY-MM-DD',
-        cancelLabel: 'Clear'
-      },
+      locale: { format: 'YYYY-MM-DD', cancelLabel: 'Clear' }
     });
 
     $('#dateRangeInput').on('apply.daterangepicker', function(ev, picker) {
@@ -320,13 +230,12 @@
       const end = picker.endDate.format('YYYY-MM-DD');
       const dateRange = `${start} - ${end}`;
       $(this).val(dateRange);
-
       const url = new URL(window.location.href);
       url.searchParams.set('date_range', dateRange);
       window.location.href = url.toString();
     });
 
-    $('#dateRangeInput').on('cancel.daterangepicker', function(ev, picker) {
+    $('#dateRangeInput').on('cancel.daterangepicker', function() {
       $(this).val('');
       const url = new URL(window.location.href);
       url.searchParams.delete('date_range');
@@ -345,10 +254,8 @@
   // Toast auto-hide and close
   document.addEventListener('DOMContentLoaded', () => {
     const toasts = document.querySelectorAll('.toast-notification');
-
     toasts.forEach(toast => {
       const timeoutId = setTimeout(() => hideToast(toast), 4000);
-
       const closeBtn = toast.querySelector('.toast-close');
       closeBtn.addEventListener('click', () => {
         clearTimeout(timeoutId);

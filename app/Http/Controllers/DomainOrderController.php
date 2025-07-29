@@ -129,41 +129,39 @@ class DomainOrderController extends Controller
         $queryAll = DomainOrder::orderBy('created_at', 'desc');
         $queryPaid = DomainOrder::where('payment_status', 'paid')->orderBy('created_at', 'desc');
         $queryPending = DomainOrder::where('payment_status', 'pending')->orderBy('created_at', 'desc');
+        $queryAwaitingProof = DomainOrder::where('payment_status', 'awaiting_proof')->orderBy('created_at', 'desc');
+        $queryClientAccCreated = DomainOrder::where('payment_status', 'client_acc_created')->orderBy('created_at', 'desc');
+        $queryActived = DomainOrder::where('payment_status', 'actived')->orderBy('created_at', 'desc');
 
         if ($request->has('date_range') && !empty($request->date_range)) {
             $dates = explode(' - ', $request->date_range);
 
             if (count($dates) === 2) {
-                $startDate = $dates[0];
-                $endDate = $dates[1];
-
-                $startDateTime = $startDate . ' 00:00:00';
-                $endDateTime = $endDate . ' 23:59:59';
+                $startDateTime = $dates[0] . ' 00:00:00';
+                $endDateTime = $dates[1] . ' 23:59:59';
 
                 $queryAll->whereBetween('created_at', [$startDateTime, $endDateTime]);
                 $queryPaid->whereBetween('created_at', [$startDateTime, $endDateTime]);
                 $queryPending->whereBetween('created_at', [$startDateTime, $endDateTime]);
+                $queryAwaitingProof->whereBetween('created_at', [$startDateTime, $endDateTime]);
+                $queryClientAccCreated->whereBetween('created_at', [$startDateTime, $endDateTime]);
+                $queryActived->whereBetween('created_at', [$startDateTime, $endDateTime]);
 
                 Log::info('Admin filtered orders by date range', compact('startDateTime', 'endDateTime'));
             }
         }
 
-        $allOrders = $queryAll->get();
-        $paidOrders = $queryPaid->get();
-        $pendingOrders = $queryPending->get();
-
-        Log::info('Admin viewed orders', [
-            'total' => count($allOrders),
-            'paid' => count($paidOrders),
-            'pending' => count($pendingOrders),
-        ]);
-
         return view('admin.layouts.management.orders', [
-            'orders' => $allOrders,
-            'paidOrders' => $paidOrders,
-            'pendingOrders' => $pendingOrders,
+            'orders' => $queryAll->get(),
+            'paidOrders' => $queryPaid->get(),
+            'pendingOrders' => $queryPending->get(),
+            'awaitingProofOrders' => $queryAwaitingProof->get(),
+            'clientAccCreatedOrders' => $queryClientAccCreated->get(),
+            'activedOrders' => $queryActived->get(),
         ]);
     }
+
+
 
     // Admin: Show a single order
     public function show($id)
@@ -183,16 +181,38 @@ class DomainOrderController extends Controller
     }
 
     // Admin: View trashed orders
-    public function trashed()
-    {
-        $all = DomainOrder::onlyTrashed()->orderBy('deleted_at', 'desc')->get();
-        $paid = DomainOrder::onlyTrashed()->where('payment_status', 'paid')->orderBy('deleted_at', 'desc')->get();
-        $pending = DomainOrder::onlyTrashed()->where('payment_status', 'pending')->orderBy('deleted_at', 'desc')->get();
+    public function trashed(Request $request)
+	{
+		$query = DomainOrder::onlyTrashed()->orderBy('deleted_at', 'desc');
 
-        Log::info('Admin accessed trashed orders');
+		// Date range filter applied on 'deleted_at'
+		if ($request->has('date_range') && !empty($request->date_range)) {
+			$dates = explode(' - ', $request->date_range);
 
-        return view('admin.layouts.management.orders_trashed', compact('all', 'paid', 'pending'));
-    }
+			if (count($dates) === 2) {
+				$startDateTime = $dates[0] . ' 00:00:00';
+				$endDateTime = $dates[1] . ' 23:59:59';
+
+				$query->whereBetween('deleted_at', [$startDateTime, $endDateTime]);
+			}
+		}
+
+		// Clone query for each payment_status group
+		$all = (clone $query)->get();
+		$paid = (clone $query)->where('payment_status', 'paid')->get();
+		$pending = (clone $query)->where('payment_status', 'pending')->get();
+		$awaitingProof = (clone $query)->where('payment_status', 'awaiting_proof')->get();
+		$clientAccCreated = (clone $query)->where('payment_status', 'client_acc_created')->get();
+		$actived = (clone $query)->where('payment_status', 'actived')->get();
+
+		Log::info('Admin filtered trashed orders', ['date_range' => $request->date_range ?? null]);
+
+		return view('admin.layouts.management.orders_trashed', compact(
+			'all', 'paid', 'pending', 'awaitingProof', 'clientAccCreated', 'actived'
+		));
+	}
+
+
 
     // Admin: Restore a trashed order
     public function restore($id)
