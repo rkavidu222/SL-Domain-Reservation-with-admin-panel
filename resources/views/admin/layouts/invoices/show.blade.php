@@ -4,6 +4,9 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('admin/css/invoiceShow.css') }}">
+<style>
+  /* Optional: add CSS classes for statuses instead of inline styles */
+</style>
 @endpush
 
 @section('content')
@@ -39,28 +42,38 @@
       <span class="section-value">{{ $order->mobile }}</span>
     </div>
 
-   <div class="info-row">
-    <span class="section-label">Duration:</span>
-    <span class="section-value">
+    <div class="info-row">
+      <span class="section-label">Duration:</span>
+      <span class="section-value">
         {{ optional($order->created_at)->format('Y-F') ?? 'N/A' }}
         to
         {{ optional($order->created_at)->addMonths(12)->subDay()->format('Y-F') ?? 'N/A' }}
-    </span>
+      </span>
     </div>
-
 
     <div class="info-row">
       <span class="section-label">Billing Date :</span>
       <span class="section-value">{{ optional($order->created_at)->format('Y-m-d') ?? 'N/A' }}</span>
     </div>
 
+    @php
+      $status = strtolower($order->payment_status ?? '');
+      $statusLabels = [
+        'paid' => ['label' => 'PAID', 'color' => 'green'],
+        'pending' => ['label' => 'PENDING', 'color' => 'orange'],
+        'awaiting_proof' => ['label' => 'AWAITING PROOF', 'color' => '#007bff'],  // Bootstrap blue
+        'client_acc_created' => ['label' => 'CLIENT ACC CREATED', 'color' => 'purple'],
+        'actived' => ['label' => 'ACTIVED', 'color' => 'darkgreen'],
+      ];
+    @endphp
+
     <div class="info-row">
       <span class="section-label">Payment Status :</span>
       <span class="section-value">
-        @if(($order->payment_status ?? '') === 'paid')
-          <span style="color: green; font-weight: 700;">PAID</span>
-        @elseif(($order->payment_status ?? '') === 'pending')
-          <span style="color: orange; font-weight: 700;">PENDING</span>
+        @if(array_key_exists($status, $statusLabels))
+          <span style="color: {{ $statusLabels[$status]['color'] }}; font-weight: 700;">
+            {{ $statusLabels[$status]['label'] }}
+          </span>
         @else
           <span style="color: grey; font-weight: 700;">UNKNOWN</span>
         @endif
@@ -68,7 +81,7 @@
     </div>
 
     <div class="info-row amount-due">
-      Total Amount Due: Rs. {{ number_format($order->price, 2) }}
+      Total Amount : Rs. {{ number_format($order->price, 2) }}
     </div>
 
     @if(($order->payment_status ?? '') === 'pending')

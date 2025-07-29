@@ -9,6 +9,9 @@ use App\Models\Verification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use App\Models\InvoiceSmsLog;
+use App\Helpers\OtpHelper;
 
 class VerificationController extends Controller
 {
@@ -140,4 +143,79 @@ class VerificationController extends Controller
 
         return redirect()->back()->with('success', 'Verification deleted successfully.');
     }
+
+
+
+	public function sendSms($id)
+{
+    // Retrieve the order by ID or fail
+    $invoice = DomainOrder::findOrFail($id);
+    $mobile = $invoice->mobile;
+    $code = $invoice->unique_code;
+
+    // Construct the invoice URL and SMS message
+    $url = "https://buydomains.srilankahosting.lk/invoice/view/{$code}";
+    $message = "Hello {$invoice->first_name}, Thank you for connecting with us. Here is your invoice: {$url}";
+
+    // Prepare the payload for the SMS API
+    $data = [
+        'api_token' => env('SMS_API_TOKEN'),
+        'recipient' => OtpHelper::normalizeSriLankanMobile($mobile),
+        'sender_id' => 'SLHosting',
+        'type' => 'plain',
+        'message' => $message,
+    ];
+
+    // Initialize curl for SMS API call
+    $ch = curl_init('https://sms.serverclub.lk/api/http/sms/send');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Accept: application/json'
+    ]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+    // Execute curl request
+    $response = curl_exec($ch);
+
+    if ($response === false) {
+        $error = curl_error($ch);
+        curl_close($ch);
+        Log::error("SMS sending failed for invoice #{$invoice->id}: $error");
+
+        $status = 'Failed';
+    } else {
+        curl_close($ch);
+        $responseData = json_decode($response, true);
+
+        if (isset($responseData['status'])) {
+            $apiStatus = strtoupper($responseData['status']);
+
+            if (in_array($apiStatus, ['SUCCESS', 'SENT'])) {
+                $status = 'Success';
+            } elseif ($apiStatus === 'PENDING') {
+                $status = 'Pending';
+            } else {
+                $status = 'Failed';
+                Log::warning("SMS API returned unexpected status '{$apiStatus}' for invoice #{$invoice->id}");
+            }
+        } else {
+            $status = 'Failed';
+            Log::warning("Unexpected SMS API response for invoice #{$invoice->id}: " . $response);
+        }
+    }
+
+    // Log SMS attempt to database
+    InvoiceSmsLog::create([
+        'invoice_id' => $invoice->id,
+        'phone' => $mobile,
+        'message' => $message,
+        'status' => $status,
+    ]);
+
+    // Redirect back with a success message (or consider sending error message on failure)
+    return redirect()->back()->with('success', 'Invoice SMS sent and logged successfully.');
+}
+
 }

@@ -119,6 +119,13 @@
                 @method('DELETE')
                 <button type="submit" class="btn btn-sm btn-danger ms-1">Delete</button>
               </form>
+
+              {{-- Send SMS Button --}}
+              <form action="{{ route('admin.verification.sendSms', $verification->domain_order_id) }}" method="POST" class="d-inline ms-1">
+                @csrf
+                @method('PATCH')
+                <button type="submit" class="btn btn-sm btn-warning">Send SMS</button>
+              </form>
             </td>
           </tr>
         @endforeach
