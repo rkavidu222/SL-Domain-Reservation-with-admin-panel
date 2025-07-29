@@ -32,7 +32,7 @@ class VerificationController extends Controller
         ));
     }
 
-    public function store(Request $request)
+   public function store(Request $request)
 {
     $request->validate([
         'domain_order_id' => 'required|exists:domain_orders,id',
@@ -43,20 +43,16 @@ class VerificationController extends Controller
 
     $receipt = $request->file('receipt');
 
-    // Define destination path inside public
     $destinationPath = public_path('payment_slips/receipts');
 
     if (!file_exists($destinationPath)) {
         mkdir($destinationPath, 0755, true);
     }
 
-    // Generate unique file name
     $filename = time() . '_' . $receipt->getClientOriginalName();
 
-    // Move uploaded file to public/payment_slips/receipts
     $receipt->move($destinationPath, $filename);
 
-    // Store relative path from public folder (for URLs)
     $receiptPath = 'payment_slips/receipts/' . $filename;
 
     Verification::create([
@@ -64,7 +60,7 @@ class VerificationController extends Controller
         'reference_number' => $request->reference_number,
         'description' => $request->description,
         'receipt_path' => $receiptPath,
-        'status' => 'pending',
+        // Removed 'status' field here
     ]);
 
     DomainOrder::where('id', $request->domain_order_id)->update([
@@ -95,7 +91,8 @@ class VerificationController extends Controller
     {
         $verification = Verification::findOrFail($id);
 
-        $filePath = base_path($verification->receipt_path); // full path: payment_slips/receipts/filename.pdf
+        $filePath = public_path($verification->receipt_path);
+
 
         if (!File::exists($filePath)) {
             abort(404, 'File not found.');
@@ -109,18 +106,25 @@ class VerificationController extends Controller
         ]);
     }
 
-    public function updateStatus(Request $request, $id)
-    {
-        $request->validate([
-            'payment_status' => 'required|in:pending,verified,rejected',
-        ]);
+  public function updateStatus(Request $request, $id)
+{
+    $request->validate([
+    'payment_status' => 'required|in:pending,paid,awaiting_proof,client_acc_created,actived',
+]);
 
-        $verification = Verification::findOrFail($id);
-        $verification->payment_status = $request->payment_status;
-        $verification->save();
 
-        return redirect()->back()->with('success', 'Payment status updated successfully.');
+    $verification = Verification::with('domainOrder')->findOrFail($id);
+
+    // Update payment status on the related domainOrder
+    if ($verification->domainOrder) {
+        $verification->domainOrder->payment_status = $request->payment_status;
+        $verification->domainOrder->save();
     }
+
+    return redirect()->back()->with('success', 'Payment status updated successfully.');
+}
+
+
 
     public function destroy($id)
     {

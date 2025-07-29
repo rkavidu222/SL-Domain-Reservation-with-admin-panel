@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +12,6 @@ class Verification extends Model
         'reference_number',
         'description',
         'receipt_path',
-        'status',
     ];
 
     public function domainOrder()
@@ -19,5 +19,6 @@ class Verification extends Model
         return $this->belongsTo(DomainOrder::class);
     }
 }
+
 
 
