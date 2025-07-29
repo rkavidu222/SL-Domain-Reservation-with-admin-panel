@@ -140,8 +140,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
 
        // Payment Verification Routes
-        Route::get('verification/create', [VerificationController::class, 'create'])->name('verification.create');
-        Route::post('verification/store', [VerificationController::class, 'store'])->name('verification.store');
+        Route::get('verification', [VerificationController::class, 'index'])->name('verification.index');
+    Route::get('verification/create', [VerificationController::class, 'create'])->name('verification.create');
+    Route::post('verification/store', [VerificationController::class, 'store'])->name('verification.store');
+    Route::get('verification/{id}', [VerificationController::class, 'show'])->name('verification.show');
+    Route::patch('verification/{id}/update-status', [VerificationController::class, 'updateStatus'])->name('verification.updateStatus');
+    Route::delete('verification/{id}', [VerificationController::class, 'destroy'])->name('verification.destroy');
+
 
 
 

@@ -51,7 +51,7 @@
       flex-direction: column;
       padding-left: 0.5rem;
       border-left: 1px dashed #3b3b3b;
-      margin-top: 8px; /* added gap between parent link and dropdown */
+      margin-top: 8px; /* gap between parent link and dropdown */
     }
     .nav-item.menu-open > .nav-treeview {
       display: flex;
@@ -164,8 +164,8 @@
           </a>
         </li>
 
-        <li class="nav-item has-treeview {{ request()->routeIs('admin.invoices.*') || request()->routeIs('admin.verification.*') ? 'menu-open' : '' }}">
-          <a href="#" class="nav-link {{ request()->routeIs('admin.invoices.*') || request()->routeIs('admin.verification.*') ? 'active' : '' }}">
+        <li class="nav-item has-treeview {{ request()->routeIs('admin.invoices.*') ? 'menu-open' : '' }}">
+          <a href="#" class="nav-link {{ request()->routeIs('admin.invoices.*') ? 'active' : '' }}">
             <i class="nav-icon bi bi-receipt"></i>
             <span>Invoice Management</span>
             <i class="right bi bi-caret-down-fill"></i>
@@ -177,13 +177,6 @@
                 <span>All Invoices</span>
               </a>
             </li>
-            <li class="nav-item">
-              {{-- Replace 1 with dynamic order ID as needed --}}
-              <a href="{{ route('admin.verification.create', 1) }}" class="nav-link {{ request()->routeIs('admin.verification.create') ? 'active' : '' }}">
-                <i class="bi bi-file-earmark-check-fill nav-icon"></i>
-                <span>Payment Verification</span>
-              </a>
-            </li>
             @if($adminUser && $adminUser->role === 'super_admin')
               <li class="nav-item">
                 <a href="{{ route('admin.invoices.report')}}" class="nav-link {{ request()->routeIs('admin.invoices.report') ? 'active' : '' }}">
@@ -192,6 +185,24 @@
                 </a>
               </li>
             @endif
+          </ul>
+        </li>
+
+        <li class="nav-item has-treeview {{ request()->routeIs('admin.verification.*') ? 'menu-open' : '' }}">
+          <a href="#" class="nav-link {{ request()->routeIs('admin.verification.*') ? 'active' : '' }}">
+            <i class="nav-icon bi bi-file-earmark-check-fill"></i>
+            <span>Payment Verification</span>
+            <i class="right bi bi-caret-down-fill"></i>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              {{-- Replace 1 with dynamic order ID as needed --}}
+              <a href="{{ route('admin.verification.create') }}" class="nav-link {{ request()->routeIs('admin.verification.create') ? 'active' : '' }}">
+                <i class="bi bi-file-earmark-check-fill nav-icon"></i>
+                <span>Submit Verification</span>
+              </a>
+            </li>
+
           </ul>
         </li>
 
