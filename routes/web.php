@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\RegisterController;
+use App\Http\Controllers\Admin\VerificationController;
 use App\Http\Controllers\SmsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ContactController;
@@ -137,6 +138,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('invoices/report', [InvoiceController::class, 'report'])->name('invoices.report');
         Route::get('invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
+
+       // Payment Verification Routes
+        Route::get('verification/create', [VerificationController::class, 'create'])->name('verification.create');
+        Route::post('verification/store', [VerificationController::class, 'store'])->name('verification.store');
 
 
 

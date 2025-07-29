@@ -8,20 +8,17 @@
       display: flex;
       flex-direction: column;
     }
-
     .sidebar-brand a {
       color: #38bdf8;
       font-weight: 700;
       font-size: 1.15rem;
       text-decoration: none;
     }
-
     .sidebar-wrapper {
       flex: 1 1 auto;
       overflow-y: auto;
       padding-right: 0.5rem;
     }
-
     .nav-link {
       color: #cbd5e1;
       padding: 0.55rem 0.85rem;
@@ -34,24 +31,20 @@
       transition: background-color 0.25s ease, color 0.25s ease;
       text-decoration: none;
     }
-
     .nav-link:hover {
       background-color: #2563eb;
       color: #ffffff;
     }
-
     .nav-link.active {
       background-color: #2563eb !important;
       color: #ffffff !important;
       font-weight: 600;
       box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
     }
-
     .nav-link .nav-icon {
       font-size: 1rem;
       color: #60a5fa;
     }
-
     .nav-treeview {
       display: none;
       margin-left: 1.2rem;
@@ -60,27 +53,22 @@
       border-left: 1px dashed #3b3b3b;
       margin-top: 8px; /* added gap between parent link and dropdown */
     }
-
     .nav-item.menu-open > .nav-treeview {
       display: flex;
     }
-
     .nav-link i.right {
       margin-left: auto;
       font-size: 0.9rem;
       color: #94a3b8;
       transition: transform 0.3s ease;
     }
-
     .nav-item.menu-open > a > i.right {
       transform: rotate(180deg);
     }
-
     /* gap between main nav items */
     .nav > .nav-item {
       margin-bottom: 8px;
     }
-
     /* gap between dropdown links */
     .nav-treeview > .nav-item {
       margin-bottom: 6px;
@@ -170,14 +158,14 @@
         </li>
 
         <li class="nav-item">
-          <a href="{{ route('admin.domain_prices.index') }}" class="nav-link">
+          <a href="{{ route('admin.domain_prices.index') }}" class="nav-link {{ request()->routeIs('admin.domain_prices.*') ? 'active' : '' }}">
             <i class="nav-icon bi bi-currency-dollar"></i>
             <span>Domain Price Management</span>
           </a>
         </li>
 
-        <li class="nav-item has-treeview {{ request()->routeIs('admin.invoices.*') ? 'menu-open' : '' }}">
-          <a href="#" class="nav-link {{ request()->routeIs('admin.invoices.*') ? 'active' : '' }}">
+        <li class="nav-item has-treeview {{ request()->routeIs('admin.invoices.*') || request()->routeIs('admin.verification.*') ? 'menu-open' : '' }}">
+          <a href="#" class="nav-link {{ request()->routeIs('admin.invoices.*') || request()->routeIs('admin.verification.*') ? 'active' : '' }}">
             <i class="nav-icon bi bi-receipt"></i>
             <span>Invoice Management</span>
             <i class="right bi bi-caret-down-fill"></i>
@@ -187,6 +175,13 @@
               <a href="{{ route('admin.invoices.index') }}" class="nav-link {{ request()->routeIs('admin.invoices.index') ? 'active' : '' }}">
                 <i class="bi bi-card-list nav-icon"></i>
                 <span>All Invoices</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              {{-- Replace 1 with dynamic order ID as needed --}}
+              <a href="{{ route('admin.verification.create', 1) }}" class="nav-link {{ request()->routeIs('admin.verification.create') ? 'active' : '' }}">
+                <i class="bi bi-file-earmark-check-fill nav-icon"></i>
+                <span>Payment Verification</span>
               </a>
             </li>
             @if($adminUser && $adminUser->role === 'super_admin')
@@ -213,14 +208,12 @@
                 <span>SMS Template</span>
               </a>
             </li>
-
             <li class="nav-item">
               <a href="{{ route('admin.sms.send') }}" class="nav-link {{ request()->routeIs('admin.sms.send') ? 'active' : '' }}">
                 <i class="bi bi-send nav-icon"></i>
                 <span>Send SMS</span>
               </a>
             </li>
-
             @if($adminUser && $adminUser->role === 'super_admin')
               <li class="nav-item">
                 <a href="{{ route('admin.sms.report') }}" class="nav-link {{ request()->routeIs('admin.sms.report') ? 'active' : '' }}">

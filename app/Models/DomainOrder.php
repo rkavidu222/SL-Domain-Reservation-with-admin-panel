@@ -14,4 +14,9 @@ class DomainOrder extends Model
 ];
 
     protected $dates = ['deleted_at'];
+
+     public function verification()
+    {
+        return $this->hasOne(Verification::class);
+    }
 }
