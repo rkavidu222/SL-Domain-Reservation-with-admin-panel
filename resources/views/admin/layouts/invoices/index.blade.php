@@ -4,10 +4,9 @@
 
 @push('styles')
   <link rel="stylesheet" href="{{ asset('admin/css/order.css') }}">
-  {{-- Removed DataTables CSS to preserve your styles --}}
-  <style>
-    /* You can add custom styles for SMS badges here */
-  </style>
+  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+  {{-- daterangepicker CSS --}}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 @endpush
 
 @section('content')
@@ -51,6 +50,61 @@
     </div>
     @endif
 
+    {{-- Tabs + Date Range Filter --}}
+    <div class="tab-filter-container d-flex justify-content-between align-items-center mb-3 flex-wrap">
+      @php
+        $paymentStatus = request('payment_status', 'all');
+        $dateRange = request('date_range', '');
+
+        // Counts for tabs - calculate from $allOrders (unfiltered)
+        $countAll = $allOrders->count();
+        $countPaid = $allOrders->where('payment_status', 'paid')->count();
+        $countPending = $allOrders->where('payment_status', 'pending')->count();
+        $countAwait = $allOrders->where('payment_status', 'awaiting_proof')->count();
+        $countClientAccCreated = $allOrders->where('payment_status', 'client_acc_created')->count();
+        $countActived = $allOrders->where('payment_status', 'actived')->count();
+
+        $tabs = [
+          ['id' => 'all', 'label' => 'All Invoices', 'count' => $countAll],
+          ['id' => 'paid', 'label' => 'Paid Invoices', 'count' => $countPaid],
+          ['id' => 'pending', 'label' => 'Pending Invoices', 'count' => $countPending],
+          ['id' => 'awaiting_proof', 'label' => 'Awaiting Proof', 'count' => $countAwait],
+          ['id' => 'client_acc_created', 'label' => 'Client Acc Created', 'count' => $countClientAccCreated],
+          ['id' => 'actived', 'label' => 'Actived', 'count' => $countActived],
+        ];
+      @endphp
+
+      {{-- Tabs as links --}}
+      <ul class="nav nav-tabs mb-0" id="ordersTab" role="tablist" style="flex: 1;">
+        @foreach ($tabs as $tab)
+          <li class="nav-item" role="presentation">
+            <a href="{{ url()->current() . '?payment_status=' . $tab['id'] . ($dateRange ? '&date_range=' . urlencode($dateRange) : '') }}"
+               class="nav-link {{ $paymentStatus === $tab['id'] ? 'active' : '' }}"
+               role="tab"
+               aria-selected="{{ $paymentStatus === $tab['id'] ? 'true' : 'false' }}">
+               {{ $tab['label'] }} ({{ $tab['count'] }})
+            </a>
+          </li>
+        @endforeach
+      </ul>
+
+      {{-- Date Range Filter --}}
+      <div class="date-filter" style="max-width: 280px; position: relative; margin-left: 1rem;">
+        <input
+          type="text"
+          id="dateRangeInput"
+          placeholder="Filter by date range"
+          autocomplete="off"
+          value="{{ $dateRange }}"
+          readonly
+          aria-label="Date Range Filter"
+          class="form-control"
+          style="cursor: pointer; background-color: #f0f4ff; border: 1px solid #2563eb; border-radius: 0.375rem; padding: 0.375rem 0.75rem; font-weight: 500; color: #1e40af;"
+        />
+        <button type="button" class="clear-btn" aria-label="Clear date filter" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #2563eb; font-size: 1.1rem; cursor: pointer; {{ $dateRange ? '' : 'display: none;' }}">&times;</button>
+      </div>
+    </div>
+
     <div class="table-responsive">
         <table id="invoicesTable" class="table table-bordered table-hover table-striped align-middle text-center" style="width:100%">
             <thead class="bg-primary text-white text-center align-middle">
@@ -59,7 +113,7 @@
                     <th>Domain</th>
                     <th class="text-start">Customer</th>
                     <th>Payment Status</th>
-                    <th>SMS Status</th> {{-- New column --}}
+                    <th>SMS Status</th>
                     <th class="text-end">Price (Rs.)</th>
                     <th>Date</th>
                     <th>Actions</th>
@@ -97,7 +151,7 @@
                         <td>{{ $order->domain_name }}</td>
                         <td class="text-start">{{ $order->first_name }} {{ $order->last_name }}</td>
                         <td><span class="badge bg-{{ $class }}">{{ $label }}</span></td>
-                        <td><span class="badge bg-{{ $smsStatusClass }}">{{ ucfirst($smsStatus) }}</span></td> {{-- SMS Status --}}
+                        <td><span class="badge bg-{{ $smsStatusClass }}">{{ ucfirst($smsStatus) }}</span></td>
                         <td class="text-end">{{ number_format($order->price, 2) }}</td>
                         <td>{{ $order->created_at->format('d M Y') }}</td>
                         <td>
@@ -126,7 +180,13 @@
 
 @section('scripts')
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+{{-- Moment.js and daterangepicker --}}
+<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -161,6 +221,56 @@
       info: true,
       autoWidth: false,
       responsive: true,
+    });
+
+    // Initialize daterangepicker on the dateRangeInput
+    $('#dateRangeInput').daterangepicker({
+      autoUpdateInput: false,
+      opens: 'left',
+      locale: { format: 'YYYY-MM-DD', cancelLabel: 'Clear' }
+    });
+
+    // Set initial value on load if present
+    @if($dateRange)
+      $('#dateRangeInput').val("{{ $dateRange }}");
+      $('.clear-btn').show();
+    @endif
+
+    $('#dateRangeInput').on('apply.daterangepicker', function(ev, picker) {
+      const start = picker.startDate.format('YYYY-MM-DD');
+      const end = picker.endDate.format('YYYY-MM-DD');
+      const dateRange = `${start} - ${end}`;
+      $(this).val(dateRange);
+
+      const url = new URL(window.location.href);
+      url.searchParams.set('date_range', dateRange);
+
+      // Preserve payment_status param
+      const paymentStatus = url.searchParams.get('payment_status');
+      if (paymentStatus) {
+        url.searchParams.set('payment_status', paymentStatus);
+      }
+
+      window.location.href = url.toString();
+    });
+
+    $('#dateRangeInput').on('cancel.daterangepicker', function() {
+      $(this).val('');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('date_range');
+
+      // Preserve payment_status param
+      const paymentStatus = url.searchParams.get('payment_status');
+      if (paymentStatus) {
+        url.searchParams.set('payment_status', paymentStatus);
+      }
+
+      window.location.href = url.toString();
+    });
+
+    $('.clear-btn').on('click', function() {
+      $('#dateRangeInput').val('').trigger('cancel.daterangepicker');
+      $(this).hide();
     });
   });
 

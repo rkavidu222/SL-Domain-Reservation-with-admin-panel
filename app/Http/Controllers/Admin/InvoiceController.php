@@ -8,15 +8,63 @@ use App\Helpers\OtpHelper;
 use Illuminate\Support\Facades\Log;
 use App\Models\InvoiceSmsLog;
 use App\Models\ActivityLog;
+use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
     // Show all invoices
-    public function index()
-    {
-        $orders = DomainOrder::orderBy('created_at', 'desc')->paginate(15);
-        return view('admin.layouts.invoices.index', compact('orders'));
+    public function index(Request $request)
+{
+    $queryAll = DomainOrder::orderBy('created_at', 'desc');
+    $queryPaid = DomainOrder::where('payment_status', 'paid')->orderBy('created_at', 'desc');
+    $queryPending = DomainOrder::where('payment_status', 'pending')->orderBy('created_at', 'desc');
+    $queryAwaitingProof = DomainOrder::where('payment_status', 'awaiting_proof')->orderBy('created_at', 'desc');
+    $queryClientAccCreated = DomainOrder::where('payment_status', 'client_acc_created')->orderBy('created_at', 'desc');
+    $queryActived = DomainOrder::where('payment_status', 'actived')->orderBy('created_at', 'desc');
+
+    // Filter payment_status for main list
+    $paymentStatus = $request->input('payment_status', 'all');
+    if ($paymentStatus !== 'all') {
+        $queryAll->where('payment_status', $paymentStatus);
     }
+
+    if ($request->has('date_range') && !empty($request->date_range)) {
+        $dates = explode(' - ', $request->date_range);
+        if (count($dates) === 2) {
+            $startDate = $dates[0] . ' 00:00:00';
+            $endDate = $dates[1] . ' 23:59:59';
+
+            $queryAll->whereBetween('created_at', [$startDate, $endDate]);
+            $queryPaid->whereBetween('created_at', [$startDate, $endDate]);
+            $queryPending->whereBetween('created_at', [$startDate, $endDate]);
+            $queryAwaitingProof->whereBetween('created_at', [$startDate, $endDate]);
+            $queryClientAccCreated->whereBetween('created_at', [$startDate, $endDate]);
+            $queryActived->whereBetween('created_at', [$startDate, $endDate]);
+        }
+    }
+
+    $allOrders = $queryAll->get();
+
+    $orders = $queryAll->paginate(15)->appends($request->all());
+
+    $paidOrders = $queryPaid->get();
+    $pendingOrders = $queryPending->get();
+    $awaitingProofOrders = $queryAwaitingProof->get();
+    $clientAccCreatedOrders = $queryClientAccCreated->get();
+    $activedOrders = $queryActived->get();
+
+    return view('admin.layouts.invoices.index', compact(
+        'allOrders',
+        'orders',
+        'paidOrders',
+        'pendingOrders',
+        'awaitingProofOrders',
+        'clientAccCreatedOrders',
+        'activedOrders',
+        'request'
+    ));
+}
+
 
     public function show($id)
     {
