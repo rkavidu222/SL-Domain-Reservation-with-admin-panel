@@ -6,7 +6,6 @@
   <link rel="stylesheet" href="{{ asset('admin/css/order.css') }}">
 @endpush
 
-
 @section('content')
 <div class="admin-management-container">
     <h2 class="mb-4 d-flex justify-content-center align-items-center gap-2 text-primary fw-bold">
@@ -18,8 +17,7 @@
     </h2>
 
     {{-- Flash messages --}}
-
-	@if (session('success'))
+    @if (session('success'))
     <div class="toast-notification toast-success" role="alert" aria-live="polite" aria-atomic="true">
         <div class="toast-icon">
         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -64,42 +62,41 @@
             </thead>
             <tbody>
                 @foreach($orders as $order)
+                    @php
+                        $statusLabels = [
+                            'paid' => ['label' => 'Paid', 'class' => 'success'],
+                            'pending' => ['label' => 'Pending', 'class' => 'warning text-dark'],
+                            'awaiting_proof' => ['label' => 'Awaiting Proof', 'class' => 'info text-dark'],
+                            'client_acc_created' => ['label' => 'Client Acc Created', 'class' => 'secondary'],
+                            'actived' => ['label' => 'Actived', 'class' => 'primary'],
+                        ];
+                        $status = $order->payment_status;
+                        $label = $statusLabels[$status]['label'] ?? 'Unknown';
+                        $class = $statusLabels[$status]['class'] ?? 'dark';
+                    @endphp
                     <tr>
                         <td>{{ $order->id }}</td>
                         <td>{{ $order->domain_name }}</td>
                         <td class="text-start">{{ $order->first_name }} {{ $order->last_name }}</td>
-                        <td>
-                            @if($order->payment_status === 'paid')
-                                <span class="badge bg-success">{{ ucfirst($order->payment_status) }}</span>
-                            @elseif($order->payment_status === 'pending')
-                                <span class="badge bg-warning text-dark">{{ ucfirst($order->payment_status) }}</span>
-                            @else
-                                <span class="badge bg-secondary">Unknown</span>
-                            @endif
-                        </td>
+                        <td><span class="badge bg-{{ $class }}">{{ $label }}</span></td>
                         <td class="text-end">{{ number_format($order->price, 2) }}</td>
                         <td>{{ $order->created_at->format('d M Y') }}</td>
                         <td>
-							<a href="{{ route('admin.invoices.show', $order->id) }}" class="btn btn-sm btn-primary mb-1">
-								<i class="bi bi-eye"></i> View
-							</a>
+                            <a href="{{ route('admin.invoices.show', $order->id) }}" class="btn btn-sm btn-primary mb-1">
+                                <i class="bi bi-eye"></i> View
+                            </a>
 
-							<!-- Send SMS Button -->
-<button class="btn btn-sm btn-success mb-1"
-        onclick="sendSms({{ $order->id }})">
-    <i class="bi bi-send"></i> Send SMS
-</button>
+                            <!-- Send SMS Button -->
+                            <button class="btn btn-sm btn-success mb-1" onclick="sendSms({{ $order->id }})">
+                                <i class="bi bi-send"></i> Send SMS
+                            </button>
 
-<!-- Hidden form for POST -->
-<form id="smsForm-{{ $order->id }}" action="{{ route('admin.invoices.sendSms', $order->id) }}"
-      method="POST" style="display: none;">
-    @csrf
-</form>
-
-						</td>
-
-
-
+                            <!-- Hidden form for POST -->
+                            <form id="smsForm-{{ $order->id }}" action="{{ route('admin.invoices.sendSms', $order->id) }}"
+                                method="POST" style="display: none;">
+                                @csrf
+                            </form>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
@@ -107,7 +104,6 @@
     </div>
 </div>
 @endsection
-
 
 @section('scripts')
 <script>
@@ -146,7 +142,6 @@
     });
   });
 
-
   function sendSms(orderId) {
     if (confirm('Are you sure you want to send this invoice via SMS?')) {
       document.getElementById(`smsForm-${orderId}`).submit();
@@ -154,4 +149,3 @@
   }
 </script>
 @endsection
-

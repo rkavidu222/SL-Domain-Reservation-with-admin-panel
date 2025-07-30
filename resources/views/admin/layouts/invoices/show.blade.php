@@ -57,11 +57,13 @@
     </div>
 
     @php
-      $status = strtolower($order->payment_status ?? '');
+      // Trim to remove any accidental spaces, and lowercase for consistent matching
+      $status = strtolower(trim($order->payment_status ?? ''));
+
       $statusLabels = [
         'paid' => ['label' => 'PAID', 'color' => 'green'],
         'pending' => ['label' => 'PENDING', 'color' => 'orange'],
-        'awaiting_proof' => ['label' => 'AWAITING PROOF', 'color' => '#007bff'],  // Bootstrap blue
+        'awaiting_proof' => ['label' => 'AWAITING PROOF', 'color' => 'blue'],
         'client_acc_created' => ['label' => 'CLIENT ACC CREATED', 'color' => 'purple'],
         'actived' => ['label' => 'ACTIVED', 'color' => 'darkgreen'],
       ];
@@ -84,7 +86,7 @@
       Total Amount : Rs. {{ number_format($order->price, 2) }}
     </div>
 
-    @if(($order->payment_status ?? '') === 'pending')
+    @if($status === 'pending')
       <div class="info-row">
         <span class="section-label">Outstanding :</span>
         <span class="outstanding">Rs. {{ number_format($order->price, 2) }}</span>

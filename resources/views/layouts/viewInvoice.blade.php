@@ -8,6 +8,18 @@
   <link href="{{ asset('/resources/css/viewInvoice.css') }}" rel="stylesheet">
 @endpush
 
+@php
+  $status = strtolower(trim($order->payment_status ?? ''));
+
+  $statusLabels = [
+    'paid' => ['label' => 'PAID', 'color' => 'green'],
+    'pending' => ['label' => 'PENDING', 'color' => 'orange'],
+    'awaiting_proof' => ['label' => 'AWAITING PROOF', 'color' => 'blue'],
+    'client_acc_created' => ['label' => 'CLIENT ACC CREATED', 'color' => 'purple'],
+    'actived' => ['label' => 'ACTIVED', 'color' => 'darkgreen'],
+  ];
+@endphp
+
 <div class="invoice-container">
 
   <div class="header-title">
@@ -53,10 +65,10 @@
   <div class="info-row">
     <span class="section-label">Payment Status :</span>
     <span class="section-value">
-      @if(($order->payment_status ?? '') === 'paid')
-        <span style="color: green; font-weight: 700;">PAID</span>
-      @elseif(($order->payment_status ?? '') === 'pending')
-        <span style="color: orange; font-weight: 700;">PENDING</span>
+      @if(array_key_exists($status, $statusLabels))
+        <span style="color: {{ $statusLabels[$status]['color'] }}; font-weight: 700;">
+          {{ $statusLabels[$status]['label'] }}
+        </span>
       @else
         <span style="color: grey; font-weight: 700;">UNKNOWN</span>
       @endif
@@ -67,7 +79,7 @@
     Total Amount Due: Rs. {{ number_format($order->price, 2) }}
   </div>
 
-  @if(($order->payment_status ?? '') === 'pending')
+  @if($status === 'pending')
     <div class="info-row">
       <span class="section-label">Outstanding :</span>
       <span class="outstanding">Rs. {{ number_format($order->price, 2) }}</span>
@@ -82,6 +94,5 @@
   </div>
 
 </div>
-
 
 @endsection
