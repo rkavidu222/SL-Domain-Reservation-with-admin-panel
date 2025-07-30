@@ -4,11 +4,6 @@
 
 @push('styles')
   <link rel="stylesheet" href="{{ asset('admin/css/order.css') }}">
-  <!-- Bootstrap CSS for modal -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- DataTables CSS -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
-  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" />
 @endpush
 
 @section('content')
@@ -80,9 +75,15 @@
             <td class="text-end">{{ number_format($verification->domainOrder->price ?? 0, 2) }}</td>
             <td class="text-center">
               @if ($verification->receipt_path)
-                <a href="{{ url('public/' . $verification->receipt_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary btn-view-slip"
+                  data-receipt-path="{{ url('public/' . $verification->receipt_path) }}"
+                  data-domain-order="{{ json_encode($verification->domainOrder) }}"
+                  data-reference-number="{{ $verification->reference_number ?? '-' }}"
+                >
                   View Slip
-                </a>
+                </button>
               @else
                 <span class="text-muted">No Slip</span>
               @endif
@@ -119,13 +120,6 @@
                 @method('DELETE')
                 <button type="submit" class="btn btn-sm btn-danger ms-1">Delete</button>
               </form>
-
-              {{-- Send SMS Button --}}
-              <form action="{{ route('admin.verification.sendSms', $verification->domain_order_id) }}" method="POST" class="d-inline ms-1">
-                @csrf
-                @method('PATCH')
-                <button type="submit" class="btn btn-sm btn-warning">Send SMS</button>
-              </form>
             </td>
           </tr>
         @endforeach
@@ -146,6 +140,31 @@
         <!-- Content will be injected by JS -->
         <div id="modalContent">
           <p><strong>Loading details...</strong></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Viewing Slip -->
+<div class="modal fade" id="slipModal" tabindex="-1" aria-labelledby="slipModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="slipModalLabel">Payment Slip & Domain Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body d-flex flex-column flex-md-row gap-4">
+        <div id="slipContent" class="flex-fill text-center">
+          <!-- Slip image/pdf will be injected here -->
+          <p><strong>Loading slip...</strong></p>
+        </div>
+        <div id="slipDomainDetails" class="flex-fill">
+          <!-- Domain details will be injected here -->
+          <p><strong>Loading domain details...</strong></p>
         </div>
       </div>
       <div class="modal-footer">
@@ -207,12 +226,15 @@
       const verification = JSON.parse(button.getAttribute('data-verification'));
       const domainOrder = JSON.parse(button.getAttribute('data-domain-order'));
 
+      // Safely get status (check verification.status, fallback to domainOrder.payment_status)
+      const status = verification.status ?? domainOrder.payment_status ?? 'N/A';
+
       // Build modal HTML content
       let html = `
         <h6>Verification Info</h6>
         <table class="table table-bordered">
           <tr><th>ID</th><td>${verification.id}</td></tr>
-          <tr><th>Status</th><td>${verification.status}</td></tr>
+          <tr><th>Status</th><td>${status}</td></tr>
           <tr><th>Receipt Path</th><td>${verification.receipt_path ? '<a href="/public/' + verification.receipt_path + '" target="_blank">View Slip</a>' : 'No Slip'}</td></tr>
           <tr><th>Uploaded At</th><td>${new Date(verification.created_at).toLocaleString()}</td></tr>
         </table>
@@ -254,6 +276,48 @@
         // Revert select to previous value
         select.val(oldStatus);
       }
+    });
+
+    // Handle "View Slip" button click to open modal with slip + domain details
+    $(document).on('click', '.btn-view-slip', function() {
+      const receiptPath = $(this).data('receipt-path');
+      const domainOrder = $(this).data('domain-order');
+      const referenceNumber = $(this).data('reference-number');
+
+      // Detect file extension
+      const extension = receiptPath.split('.').pop().toLowerCase();
+
+      let slipHtml = '';
+
+      if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension)) {
+        slipHtml = `<img src="${receiptPath}" alt="Payment Slip" class="img-fluid rounded" style="max-height: 500px;">`;
+      } else if (extension === 'pdf') {
+        slipHtml = `<iframe src="${receiptPath}" style="width:100%; height:500px;" frameborder="0"></iframe>`;
+      } else {
+        slipHtml = `<p class="text-danger">Unsupported file format.</p>`;
+      }
+
+      $('#slipContent').html(slipHtml);
+
+      // Build domain details HTML
+      let domainDetailsHtml = `
+        <table class="table table-bordered">
+          <tr><th>Order ID</th><td>${domainOrder.id}</td></tr>
+          <tr><th>Reference Number</th><td>${referenceNumber}</td></tr>
+          <tr><th>Customer Name</th><td>${domainOrder.first_name ?? ''} ${domainOrder.last_name ?? ''}</td></tr>
+          <tr><th>Domain</th><td>${domainOrder.domain_name ?? '-'}</td></tr>
+          <tr><th>Domain Category</th><td>${domainOrder.category ?? '-'}</td></tr>
+          <tr><th>Price (Rs.)</th><td>${parseFloat(domainOrder.price).toFixed(2)}</td></tr>
+          <tr><th>Payment Status</th><td>${domainOrder.payment_status ?? 'N/A'}</td></tr>
+          <tr><th>Order Created At</th><td>${new Date(domainOrder.created_at).toLocaleString()}</td></tr>
+        </table>
+      `;
+
+      $('#slipDomainDetails').html(domainDetailsHtml);
+
+      // Show the modal
+      const slipModal = new bootstrap.Modal(document.getElementById('slipModal'));
+      slipModal.show();
     });
 
     // Helper function to capitalize words

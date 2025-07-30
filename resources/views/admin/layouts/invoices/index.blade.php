@@ -4,6 +4,10 @@
 
 @push('styles')
   <link rel="stylesheet" href="{{ asset('admin/css/order.css') }}">
+  {{-- Removed DataTables CSS to preserve your styles --}}
+  <style>
+    /* You can add custom styles for SMS badges here */
+  </style>
 @endpush
 
 @section('content')
@@ -55,6 +59,7 @@
                     <th>Domain</th>
                     <th class="text-start">Customer</th>
                     <th>Payment Status</th>
+                    <th>SMS Status</th> {{-- New column --}}
                     <th class="text-end">Price (Rs.)</th>
                     <th>Date</th>
                     <th>Actions</th>
@@ -63,6 +68,7 @@
             <tbody>
                 @foreach($orders as $order)
                     @php
+                        // Payment status labels
                         $statusLabels = [
                             'paid' => ['label' => 'Paid', 'class' => 'success'],
                             'pending' => ['label' => 'Pending', 'class' => 'warning text-dark'],
@@ -73,12 +79,25 @@
                         $status = $order->payment_status;
                         $label = $statusLabels[$status]['label'] ?? 'Unknown';
                         $class = $statusLabels[$status]['class'] ?? 'dark';
+
+                        // Latest SMS log status for this order (make sure to eager load smsLogs relationship)
+                        $latestSms = $order->smsLogs->first();
+                        $smsStatus = $latestSms->status ?? 'No SMS Sent';
+
+                        // Determine badge color class for SMS status
+                        switch(strtolower($smsStatus)) {
+                            case 'success': $smsStatusClass = 'success'; break;
+                            case 'pending': $smsStatusClass = 'warning text-dark'; break;
+                            case 'failed': $smsStatusClass = 'danger'; break;
+                            default: $smsStatusClass = 'secondary'; break;
+                        }
                     @endphp
                     <tr>
                         <td>{{ $order->id }}</td>
                         <td>{{ $order->domain_name }}</td>
                         <td class="text-start">{{ $order->first_name }} {{ $order->last_name }}</td>
                         <td><span class="badge bg-{{ $class }}">{{ $label }}</span></td>
+                        <td><span class="badge bg-{{ $smsStatusClass }}">{{ ucfirst($smsStatus) }}</span></td> {{-- SMS Status --}}
                         <td class="text-end">{{ number_format($order->price, 2) }}</td>
                         <td>{{ $order->created_at->format('d M Y') }}</td>
                         <td>
@@ -106,6 +125,9 @@
 @endsection
 
 @section('scripts')
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const toasts = document.querySelectorAll('.toast-notification');

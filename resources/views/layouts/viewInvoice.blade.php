@@ -24,7 +24,7 @@
 
   <div class="header-title">
     <img src="https://www.srilankahosting.lk/logo.svg" alt="SriLankaHosting Logo" />
-    <span>SriLankaHosting Invoice</span>
+    <span>SriLanka Hosting Invoice</span>
   </div>
 
   <div class="info-row">
@@ -76,7 +76,7 @@
   </div>
 
   <div class="info-row amount-due">
-    Total Amount Due: Rs. {{ number_format($order->price, 2) }}
+    Total Amount : Rs. {{ number_format($order->price, 2) }}
   </div>
 
   @if($status === 'pending')
@@ -89,9 +89,10 @@
   <hr>
 
   <div class="powered-by">
-    Powered by<br>
-    <strong>SriLankaHosting.lk © 2025</strong>
-  </div>
+	  Powered by<br>
+	  <strong>SriLankaHosting.lk © {{ date('Y') }}</strong>
+	</div>
+
 
 </div>
 

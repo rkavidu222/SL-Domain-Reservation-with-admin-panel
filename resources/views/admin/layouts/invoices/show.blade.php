@@ -96,9 +96,10 @@
     <hr>
 
     <div class="powered-by">
-      Powered by<br>
-      <strong>SriLankaHosting.lk © 2025</strong>
+        Powered by<br>
+    <strong>SriLankaHosting.lk © {{ date('Y') }}</strong>
     </div>
+
 
   </div>
 
