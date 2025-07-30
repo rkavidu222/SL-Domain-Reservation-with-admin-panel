@@ -26,102 +26,99 @@ class DomainOrderController extends Controller
 
         Log::info('Contact form opened', compact('domain_name', 'price', 'category'));
 
+        // Log activity
+        log_activity("Contact form opened with domain: {$domain_name}, price: {$price}, category: {$category}");
+
         return view('layouts.contactInfomation', compact('domain_name', 'price', 'category'));
     }
 
-	public function store(Request $request)
-	{
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'domain_name' => 'required|string|min:3|max:255|regex:/^([a-z0-9-]+\.)+[a-z]{2,}$/i',
+            'price' => 'required|numeric|min:0',
+            'category' => 'required|string|max:50',
+            'first_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',
+            'last_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',
+            'email' => 'required|email|max:255',
+            'mobile' => [
+                'required',
+                'regex:/^(0\d{9}|94\d{9})$/',
+            ],
+        ]);
 
-		$validated = $request->validate([
-			'domain_name' => 'required|string|min:3|max:255|regex:/^([a-z0-9-]+\.)+[a-z]{2,}$/i',
-			'price' => 'required|numeric|min:0',
-			'category' => 'required|string|max:50',
-			'first_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',
-			'last_name' => 'required|string|regex:/^[A-Za-z\s]+$/|max:100',
-			'email' => 'required|email|max:255',
-			'mobile' => [
-				'required',
-				'regex:/^(0\d{9}|94\d{9})$/',
-			],
-		]);
+        $mobile = $validated['mobile'];
+        if (Str::startsWith($mobile, '0')) {
+            $mobile = '94' . substr($mobile, 1);
+        }
 
+        $existingOrder = DomainOrder::where('domain_name', $validated['domain_name'])
+            ->where('mobile', $mobile)
+            ->where('payment_status', 'pending')
+            ->first();
 
-		$mobile = $validated['mobile'];
-		if (Str::startsWith($mobile, '0')) {
-			$mobile = '94' . substr($mobile, 1);
-		}
+        if ($existingOrder) {
+            $existingOrder->update([
+                'price' => $validated['price'],
+                'category' => $validated['category'],
+                'first_name' => $validated['first_name'],
+                'last_name' => $validated['last_name'],
+                'email' => $validated['email'],
+            ]);
 
+            $order = $existingOrder;
+            $uniqueCode = $order->unique_code;
 
-		$existingOrder = DomainOrder::where('domain_name', $validated['domain_name'])
-			->where('mobile', $mobile)
-			->where('payment_status', 'pending')
-			->first();
+            // Log update activity
+            log_activity("Existing domain order updated: order_id={$order->id}, domain={$order->domain_name}");
+        } else {
+            do {
+                $uniqueCode = strtoupper(Str::random(8));
+            } while (DomainOrder::where('unique_code', $uniqueCode)->exists());
 
-		if ($existingOrder) {
+            $order = DomainOrder::create([
+                'domain_name' => $validated['domain_name'],
+                'price' => $validated['price'],
+                'category' => $validated['category'],
+                'first_name' => $validated['first_name'],
+                'last_name' => $validated['last_name'],
+                'email' => $validated['email'],
+                'mobile' => $mobile,
+                'unique_code' => $uniqueCode,
+                'payment_status' => 'pending',
+            ]);
 
-			$existingOrder->update([
-				'price' => $validated['price'],
-				'category' => $validated['category'],
-				'first_name' => $validated['first_name'],
-				'last_name' => $validated['last_name'],
-				'email' => $validated['email'],
-			]);
+            // Log new order created
+            log_activity("New domain order created: order_id={$order->id}, domain={$order->domain_name}");
+        }
 
-			$order = $existingOrder;
-			$uniqueCode = $order->unique_code;
-		} else {
+        $otp = rand(100000, 999999);
 
-			do {
-				$uniqueCode = strtoupper(Str::random(8));
-			} while (DomainOrder::where('unique_code', $uniqueCode)->exists());
+        session([
+            'domain_order_id' => $order->id,
+            'unique_code' => $uniqueCode,
+            'domain_order_data' => array_merge($validated, ['mobile' => $mobile]),
+            'otp' => $otp,
+            'mobile' => $mobile,
+            'email' => $validated['email'],
+            'otp_expires_at' => now()->addMinutes(5),
+        ]);
 
+        Log::info('OTP generated and session data stored', [
+            'mobile' => $mobile,
+            'otp' => $otp,
+            'email' => $validated['email'],
+            'unique_code' => $uniqueCode,
+        ]);
 
-			$order = DomainOrder::create([
-				'domain_name' => $validated['domain_name'],
-				'price' => $validated['price'],
-				'category' => $validated['category'],
-				'first_name' => $validated['first_name'],
-				'last_name' => $validated['last_name'],
-				'email' => $validated['email'],
-				'mobile' => $mobile,
-				'unique_code' => $uniqueCode,
-				'payment_status' => 'pending',
-			]);
-		}
+        // Log OTP generation
+        log_activity("OTP generated for order_id={$order->id}, mobile={$mobile}");
 
+        //OtpHelper::sendOtpSms($mobile, (string) $otp);
+        //Log::info('OTP sent', ['mobile' => $mobile, 'otp' => $otp]);
 
-		$otp = rand(100000, 999999);
-
-
-		session([
-			'domain_order_id' => $order->id,
-			'unique_code' => $uniqueCode,
-			'domain_order_data' => array_merge($validated, ['mobile' => $mobile]),
-			'otp' => $otp,
-			'mobile' => $mobile,
-			'email' => $validated['email'],
-			'otp_expires_at' => now()->addMinutes(5),
-		]);
-
-
-		Log::info('OTP generated and session data stored', [
-			'mobile' => $mobile,
-			'otp' => $otp,
-			'email' => $validated['email'],
-			'unique_code' => $uniqueCode,
-		]);
-
-
-		//OtpHelper::sendOtpSms($mobile, (string) $otp);
-
-		//Log::info('OTP sent', ['mobile' => $mobile, 'otp' => $otp]);
-
-		return redirect()->route('otp.verification.page')->with('success', 'OTP sent to your mobile number.');
-	}
-
-
-
-
+        return redirect()->route('otp.verification.page')->with('success', 'OTP sent to your mobile number.');
+    }
 
     // Admin: List all domain orders
     public function adminIndex(Request $request)
@@ -148,6 +145,8 @@ class DomainOrderController extends Controller
                 $queryActived->whereBetween('created_at', [$startDateTime, $endDateTime]);
 
                 Log::info('Admin filtered orders by date range', compact('startDateTime', 'endDateTime'));
+                // Activity log
+                log_activity("Admin filtered orders by date range: {$startDateTime} - {$endDateTime}");
             }
         }
 
@@ -161,13 +160,12 @@ class DomainOrderController extends Controller
         ]);
     }
 
-
-
     // Admin: Show a single order
     public function show($id)
     {
         $order = DomainOrder::findOrFail($id);
         Log::info('Admin viewed order details', ['order_id' => $id]);
+        log_activity("Admin viewed order details: order_id={$id}");
         return view('admin.layouts.management.order_show', compact('order'));
     }
 
@@ -177,42 +175,40 @@ class DomainOrderController extends Controller
         $order = DomainOrder::findOrFail($id);
         $order->delete();
         Log::warning('Order moved to trash', ['order_id' => $id]);
+        log_activity("Order moved to trash: order_id={$id}");
         return redirect()->back()->with('success', 'Order moved to trash.');
     }
 
     // Admin: View trashed orders
     public function trashed(Request $request)
-	{
-		$query = DomainOrder::onlyTrashed()->orderBy('deleted_at', 'desc');
+    {
+        $query = DomainOrder::onlyTrashed()->orderBy('deleted_at', 'desc');
 
-		// Date range filter applied on 'deleted_at'
-		if ($request->has('date_range') && !empty($request->date_range)) {
-			$dates = explode(' - ', $request->date_range);
+        if ($request->has('date_range') && !empty($request->date_range)) {
+            $dates = explode(' - ', $request->date_range);
 
-			if (count($dates) === 2) {
-				$startDateTime = $dates[0] . ' 00:00:00';
-				$endDateTime = $dates[1] . ' 23:59:59';
+            if (count($dates) === 2) {
+                $startDateTime = $dates[0] . ' 00:00:00';
+                $endDateTime = $dates[1] . ' 23:59:59';
 
-				$query->whereBetween('deleted_at', [$startDateTime, $endDateTime]);
-			}
-		}
+                $query->whereBetween('deleted_at', [$startDateTime, $endDateTime]);
+            }
+        }
 
-		// Clone query for each payment_status group
-		$all = (clone $query)->get();
-		$paid = (clone $query)->where('payment_status', 'paid')->get();
-		$pending = (clone $query)->where('payment_status', 'pending')->get();
-		$awaitingProof = (clone $query)->where('payment_status', 'awaiting_proof')->get();
-		$clientAccCreated = (clone $query)->where('payment_status', 'client_acc_created')->get();
-		$actived = (clone $query)->where('payment_status', 'actived')->get();
+        $all = (clone $query)->get();
+        $paid = (clone $query)->where('payment_status', 'paid')->get();
+        $pending = (clone $query)->where('payment_status', 'pending')->get();
+        $awaitingProof = (clone $query)->where('payment_status', 'awaiting_proof')->get();
+        $clientAccCreated = (clone $query)->where('payment_status', 'client_acc_created')->get();
+        $actived = (clone $query)->where('payment_status', 'actived')->get();
 
-		Log::info('Admin filtered trashed orders', ['date_range' => $request->date_range ?? null]);
+        Log::info('Admin filtered trashed orders', ['date_range' => $request->date_range ?? null]);
+        log_activity("Admin filtered trashed orders, date_range={$request->date_range}");
 
-		return view('admin.layouts.management.orders_trashed', compact(
-			'all', 'paid', 'pending', 'awaitingProof', 'clientAccCreated', 'actived'
-		));
-	}
-
-
+        return view('admin.layouts.management.orders_trashed', compact(
+            'all', 'paid', 'pending', 'awaitingProof', 'clientAccCreated', 'actived'
+        ));
+    }
 
     // Admin: Restore a trashed order
     public function restore($id)
@@ -221,6 +217,7 @@ class DomainOrderController extends Controller
         $order->restore();
 
         Log::info('Order restored', ['order_id' => $id]);
+        log_activity("Order restored: order_id={$id}");
 
         $trashedCount = DomainOrder::onlyTrashed()->count();
 
@@ -238,6 +235,7 @@ class DomainOrderController extends Controller
         $order->forceDelete();
 
         Log::error('Order permanently deleted', ['order_id' => $id]);
+        log_activity("Order permanently deleted: order_id={$id}");
 
         return redirect()->route('admin.orders.trash')->with('success', 'Order permanently deleted.');
     }
@@ -247,23 +245,21 @@ class DomainOrderController extends Controller
     {
         $order = DomainOrder::findOrFail($orderId);
         Log::info('User viewed payment details', ['order_id' => $orderId]);
+        log_activity("User viewed payment details: order_id={$orderId}");
         return view('layouts.paymentDetails', compact('order'));
     }
 
-
     public function viewInvoiceByCode($unique_code)
-{
-    $order = DomainOrder::where('unique_code', $unique_code)->first();
+    {
+        $order = DomainOrder::where('unique_code', $unique_code)->first();
 
-    if (!$order) {
-        abort(404, 'Invoice not found.');
+        if (!$order) {
+            abort(404, 'Invoice not found.');
+        }
+
+        // Log invoice viewed publicly
+        log_activity("Invoice viewed publicly by code: {$unique_code}, order_id={$order->id}");
+
+        return view('layouts.viewInvoice', compact('order'));
     }
-
-    // Return a public invoice view (create this blade)
-    return view('layouts.viewInvoice', compact('order'));
-
 }
-
-
-}
-

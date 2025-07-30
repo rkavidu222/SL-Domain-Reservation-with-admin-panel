@@ -57,7 +57,7 @@ class VerificationController extends Controller
         $receipt->move($destinationPath, $filename);
         $receiptPath = 'payment_slips/receipts/' . $filename;
 
-        Verification::create([
+        $verification = Verification::create([
             'domain_order_id' => $request->domain_order_id,
             'reference_number' => $request->reference_number,
             'description' => $request->description,
@@ -67,6 +67,9 @@ class VerificationController extends Controller
         DomainOrder::where('id', $request->domain_order_id)->update([
             'payment_status' => 'awaiting_proof',
         ]);
+
+        // Log activity
+        log_activity("Payment verification created for order_id={$request->domain_order_id}, verification_id={$verification->id}");
 
         return redirect()->back()->with('success', 'Payment verification submitted successfully.');
     }
@@ -107,24 +110,28 @@ class VerificationController extends Controller
 
     // Update payment status on related domain order
     public function updateStatus(Request $request, $id)
-{
-    $request->validate([
-        'payment_status' => 'required|in:pending,paid,awaiting_proof,client_acc_created,actived',
-    ]);
+    {
+        $request->validate([
+            'payment_status' => 'required|in:pending,paid,awaiting_proof,client_acc_created,actived',
+        ]);
 
-    $verification = Verification::with('domainOrder')->findOrFail($id);
+        $verification = Verification::with('domainOrder')->findOrFail($id);
 
-    if ($verification->domainOrder) {
-        $verification->domainOrder->payment_status = $request->payment_status;
-        $verification->domainOrder->save();
+        if ($verification->domainOrder) {
+            $oldStatus = $verification->domainOrder->payment_status;
 
-        // Send SMS after saving status
-        $this->sendSms($verification->domainOrder->id);
+            $verification->domainOrder->payment_status = $request->payment_status;
+            $verification->domainOrder->save();
+
+            // Log activity
+            log_activity("Payment status updated for order_id={$verification->domain_order_id}, from '{$oldStatus}' to '{$request->payment_status}'");
+
+            // Send SMS after saving status
+            $this->sendSms($verification->domainOrder->id);
+        }
+
+        return redirect()->back()->with('success', 'Payment status updated and SMS sent successfully.');
     }
-
-    return redirect()->back()->with('success', 'Payment status updated and SMS sent successfully.');
-}
-
 
     // Delete verification and associated receipt file
     public function destroy($id)
@@ -137,6 +144,9 @@ class VerificationController extends Controller
         }
 
         $verification->delete();
+
+        // Log activity
+        log_activity("Payment verification deleted, verification_id={$id}");
 
         return redirect()->back()->with('success', 'Verification deleted successfully.');
     }
@@ -234,6 +244,9 @@ class VerificationController extends Controller
             'message' => $message,
             'status' => $status,
         ]);
+
+        // Log SMS sending activity
+        log_activity("Invoice SMS sent for order_id={$invoice->id}, status={$status}");
 
         return redirect()->back()->with('success', 'Invoice SMS sent and logged successfully.');
     }

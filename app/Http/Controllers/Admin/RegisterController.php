@@ -40,12 +40,17 @@ class RegisterController extends Controller
             'password'=> Hash::make($request->password),
         ]);
 
+        // Log Laravel log
         Log::info('New admin registered successfully.', [
             'admin_id' => $admin->id,
             'email' => $admin->email,
             'ip' => $request->ip(),
         ]);
 
+        // Custom activity log
+        log_activity("New admin registered, admin_id={$admin->id}, email={$admin->email}");
+
         return redirect('/admin/login')->with('success', 'Registration successful. Please login.');
     }
+
 }

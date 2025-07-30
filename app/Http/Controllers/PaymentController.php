@@ -35,6 +35,9 @@ class PaymentController extends Controller
             'payment_status' => $invoice->payment_status,
         ]);
 
+        // Custom activity log
+        log_activity("Payment status updated to 'skipped' for order_id={$invoice->id}, mobile={$invoice->mobile}");
+
         $mobile = $invoice->mobile;
         $code = $invoice->unique_code;
         $url = "https://buydomains.srilankahosting.lk/invoice/view/{$code}";
@@ -117,6 +120,9 @@ class PaymentController extends Controller
             'invoice_id' => $invoice->id,
             'payment_status' => $invoice->payment_status,
         ]);
+
+        // Custom activity log
+        log_activity("Payment status updated to 'awaiting_proof' for order_id={$invoice->id}, mobile={$invoice->mobile}");
 
         $mobile = $invoice->mobile;
         $code = $invoice->unique_code;

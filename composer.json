@@ -26,8 +26,15 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+
+        "files": [
+        "app/Helpers/LogHelper.php"
+    ]
+
     },
+
+
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
@@ -36,6 +43,8 @@
             "app/Helpers/OtpHelper.php"
         ]
     },
+
+
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

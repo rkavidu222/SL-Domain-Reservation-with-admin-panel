@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\DomainPriceController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InvoiceController;
@@ -149,6 +150,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 		Route::post('verification/{id}/send-sms', [VerificationController::class, 'sendSms'])->name('verification.sendSms');
 
 
+
+       Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity_logs.index');
 
 
 

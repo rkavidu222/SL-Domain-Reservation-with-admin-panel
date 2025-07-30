@@ -4,6 +4,11 @@
 
 @section('content')
 
+@push('styles')
+  <link rel="stylesheet" href="{{ asset('admin/css/order.css') }}">
+@endpush
+
+
 <div class="management-container">
     <h2 class="mb-4 d-flex justify-content-center align-items-center gap-2 text-primary fw-bold flex-wrap text-center">
         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-tag-fill" viewBox="0 0 16 16" width="24" height="24">

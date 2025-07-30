@@ -189,22 +189,27 @@
         </li>
 
         <li class="nav-item has-treeview {{ request()->routeIs('admin.verification.*') ? 'menu-open' : '' }}">
-          <a href="#" class="nav-link {{ request()->routeIs('admin.verification.*') ? 'active' : '' }}">
-            <i class="nav-icon bi bi-file-earmark-check-fill"></i>
-            <span>Payment Verification</span>
-            <i class="right bi bi-caret-down-fill"></i>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              {{-- Replace 1 with dynamic order ID as needed --}}
-              <a href="{{ route('admin.verification.create') }}" class="nav-link {{ request()->routeIs('admin.verification.create') ? 'active' : '' }}">
-                <i class="bi bi-file-earmark-check-fill nav-icon"></i>
-                <span>Submit Verification</span>
-              </a>
-            </li>
+  <a href="#" class="nav-link {{ request()->routeIs('admin.verification.*') ? 'active' : '' }}">
+    <i class="nav-icon bi bi-file-earmark-check-fill"></i>
+    <span>Payment Verification</span>
+    <i class="right bi bi-caret-down-fill"></i>
+  </a>
+  <ul class="nav nav-treeview">
+    <li class="nav-item">
+      <a href="{{ route('admin.verification.create') }}" class="nav-link {{ request()->routeIs('admin.verification.create') ? 'active' : '' }}">
+        <i class="bi bi-file-earmark-check-fill nav-icon"></i>
+        <span>Submit Verification</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ route('admin.verification.index') }}" class="nav-link {{ request()->routeIs('admin.verification.index') ? 'active' : '' }}">
+        <i class="bi bi-card-list nav-icon"></i>
+        <span>View Verifications</span>
+      </a>
+    </li>
+  </ul>
+</li>
 
-          </ul>
-        </li>
 
         <li class="nav-item has-treeview {{ request()->routeIs('admin.sms.*') ? 'menu-open' : '' }}">
           <a href="#" class="nav-link {{ request()->routeIs('admin.sms.*') ? 'active' : '' }}">
@@ -236,6 +241,12 @@
           </ul>
         </li>
 
+        <li class="nav-item">
+  <a href="{{ route('admin.activity_logs.index') }}" class="nav-link {{ request()->routeIs('admin.activity_logs.*') ? 'active' : '' }}">
+    <i class="nav-icon bi bi-clock-history"></i>
+    <span>Activity Logs</span>
+  </a>
+</li>
       </ul>
     </nav>
   </div>

@@ -8,7 +8,6 @@ use App\Models\SmsLog;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
-
 class SmsController extends Controller
 {
     // Show the SMS send form with templates
@@ -39,7 +38,6 @@ class SmsController extends Controller
 
         return $number;
     }
-
 
     private function sendSmsCurl(array $data)
     {
@@ -111,13 +109,15 @@ class SmsController extends Controller
             // Send SMS via cURL helper
             $result = $this->sendSmsCurl($smsData);
 
-
             SmsLog::create([
                 'recipient' => $normalizedPhone,
                 'message' => $message,
                 'status' => $result['success'] ? 'success' : 'failed',
                 'response' => json_encode($result['response'] ?? $result['error']),
             ]);
+
+            // Add activity log for each SMS attempt
+            log_activity("SMS sent to {$normalizedPhone} using template '{$request->template_slug}' with status: " . ($result['success'] ? 'success' : 'failed'));
 
             if ($result['success']) {
                 $totalSent++;
@@ -149,7 +149,9 @@ class SmsController extends Controller
             'content' => 'required|string',
         ]);
 
-        SmsTemplate::create($request->only('name', 'slug', 'content'));
+        $template = SmsTemplate::create($request->only('name', 'slug', 'content'));
+
+        log_activity("SMS template '{$template->slug}' created by admin_id=" . (Auth::guard('admin')->id() ?? 'unknown'));
 
         return redirect()->back()->with('success', 'SMS template saved.');
     }
@@ -161,9 +163,6 @@ class SmsController extends Controller
         return view('admin.layouts.sms.report', compact('logs'));
     }
 
-
-
-
     public function destroyTemplate($id)
     {
         $admin = Auth::guard('admin')->user();
@@ -173,7 +172,10 @@ class SmsController extends Controller
         }
 
         $template = SmsTemplate::findOrFail($id);
+        $slug = $template->slug;
         $template->delete();
+
+        log_activity("SMS template '{$slug}' deleted by admin_id={$admin->id}");
 
         return redirect()->back()->with('success', 'SMS template deleted successfully.');
     }
@@ -198,9 +200,8 @@ class SmsController extends Controller
 
         $template->update($request->only('name', 'slug', 'content'));
 
+        log_activity("SMS template '{$template->slug}' updated by admin_id=" . (Auth::guard('admin')->id() ?? 'unknown'));
+
         return redirect()->route('admin.sms.template')->with('success', 'SMS template updated successfully.');
     }
-
-
-
 }
