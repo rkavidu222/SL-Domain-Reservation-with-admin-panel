@@ -26,11 +26,11 @@ class PaymentController extends Controller
         }
 
         // ✅ Update payment status
-        $invoice->payment_status = 'skipped';
+        $invoice->payment_status = 'pending';
         $invoice->save();
 
         // ✅ Debug log
-        Log::info('Payment status updated to skipped', [
+        Log::info('Payment status updated to pending', [
             'invoice_id' => $invoice->id,
             'payment_status' => $invoice->payment_status,
         ]);
@@ -92,8 +92,10 @@ class PaymentController extends Controller
         */
 
         return redirect('/confirmation')
-            ->with('paymentMethod', 'skip')
-            ->with('success', 'Payment skipped. Status saved to database.');
+    ->with('paymentMethod', 'skip')
+    ->with('success', 'Payment skipped. Status saved to database.')
+    ->with('invoice_code', $invoice->unique_code);
+
     }
 
     public function paySecurely(Request $request)
@@ -178,8 +180,10 @@ class PaymentController extends Controller
         */
 
         return redirect('/confirmation')
-            ->with('paymentMethod', 'paysecurely')
-            ->with('status', 'secure')
-            ->with('message', 'Secure payment selected. Status saved to database.');
+    ->with('paymentMethod', 'paysecurely')
+    ->with('status', 'secure')
+    ->with('message', 'Secure payment selected. Status saved to database.')
+    ->with('invoice_code', $invoice->unique_code);
+
     }
 }

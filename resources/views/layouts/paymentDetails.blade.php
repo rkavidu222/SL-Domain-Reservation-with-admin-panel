@@ -28,23 +28,22 @@
     <label for="payment_method">Payment Method</label>
     <div class="select-icon">
       <select name="payment_method" id="payment_method" class="select" required>
-        <option value="" disabled selected>-- Select Payment Method --</option>
-        <option value="bank">🏦 Bank Transfer</option>
+        <option value="bank" selected>🏦 Bank Transfer</option>
         {{-- Add more payment methods here if needed --}}
       </select>
     </div>
 
-    <!-- Bank Details (Shown only if "Bank Transfer" selected) -->
-    <div id="bankDetails" class="bank-info" style="display: none;">
+    <!-- Bank Details (Always Visible) -->
+    <div id="bankDetails" class="bank-info" style="display: block; margin-top: 1rem;">
       <div class="bank-card">
         <strong>BANK 01 -</strong><br>
         Bank Name: <strong>SAMPATH BANK</strong><br>
         Branch Name and Code: <strong>BIBILE / 161</strong><br>
         Account Holder: <strong>ServerClub.LK (Private) Limited</strong><br>
         Account Number: <strong>116114023727</strong><br><br>
-        <span class="text-success">
-          After making the payment, please upload the proof via WhatsApp:<br>
-          <a href="https://wa.me/94774233244" target="_blank" class="btn btn-sm btn-success mt-2">
+        <span class="text-success" style="display: flex; align-items: center; gap: 0.5rem;">
+          WhatsApp Number: <strong>94 774 233 244</strong>
+          <a href="https://wa.me/94774233244" target="_blank" class="btn btn-sm btn-success" style="margin-left: auto;">
             <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp Us
           </a>
         </span>
@@ -91,7 +90,7 @@
     document.getElementById('skipForm').submit();
   }
 
-  // Show bank info when 'Bank Transfer' is selected
+  // Bank details always visible, but keeping event listener if you add other payment methods later
   document.getElementById('payment_method').addEventListener('change', function () {
     const bankInfo = document.getElementById('bankDetails');
     bankInfo.style.display = this.value === 'bank' ? 'block' : 'none';

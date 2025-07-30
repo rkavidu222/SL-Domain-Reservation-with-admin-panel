@@ -53,9 +53,13 @@
   </div>
 
   <div class="info-row">
-    <span class="section-label">Billing Month :</span>
-    <span class="section-value">{{ optional($order->created_at)->format('Y-F') ?? 'N/A' }}</span>
-  </div>
+      <span class="section-label">Duration:</span>
+      <span class="section-value">
+        {{ optional($order->created_at)->format('Y-F') ?? 'N/A' }}
+        to
+        {{ optional($order->created_at)->addMonths(12)->subDay()->format('Y-F') ?? 'N/A' }}
+      </span>
+    </div>
 
   <div class="info-row">
     <span class="section-label">Billing Date :</span>
