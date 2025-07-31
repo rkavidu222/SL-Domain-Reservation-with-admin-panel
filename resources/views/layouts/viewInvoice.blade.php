@@ -6,6 +6,26 @@
 
 @push('styles')
   <link href="{{ asset('/resources/css/viewInvoice.css') }}" rel="stylesheet">
+
+<style>
+
+  .bank-details {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  .bank-details h4 {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: #333;
+  }
+  .bank-details p {
+    margin: 5px 0;
+    font-size: 0.95rem;
+  }
+</style>
 @endpush
 
 @php
@@ -92,10 +112,23 @@
 
   <hr>
 
-  <div class="powered-by">
-	  Developed by<br>
-	  <strong>SriLanka Hosting Team © {{ date('Y') }}</strong>
-	</div>
+  <div class="bank-details">
+      <h4>Payment Information</h4>
+      <p><strong>Bank Name:</strong> SAMPATH BANK</p>
+      <p><strong>Branch Name and Code:</strong> BIBILE / 161</p>
+      <p><strong>Account Holder:</strong> ServerClub.LK (Private) Limited</p>
+      <p><strong>Account Number:</strong> 116114023727</p>
+       <p><strong>WhatsApp Number:</strong> <a href="https://wa.me/+94774233244" target="_blank">94 774 233 244</a></p>
+    </div>
+
+    <hr>
+
+    <div class="powered-by">
+      Developed by<br>
+      <strong>SriLanka Hosting Team © {{ date('Y') }}</strong>
+    </div>
+
+  </div>
 
 
 </div>

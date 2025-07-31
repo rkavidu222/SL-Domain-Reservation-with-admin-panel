@@ -12,7 +12,7 @@
   @if($cat2Price)
     <div class="price-info text-center mt-2">
       <del>Rs. {{ number_format($cat2Price->old_price, 2) }}/=</del>
-      <span class="text-danger fw-bold">Now Rs. {{ number_format($cat2Price->new_price, 2) }}/=</span>
+      <span class="text-danger fw-bold">Now Rs. {{ number_format($cat2Price->new_price, 2) }}/ Yearly</span>
     </div>
   @endif
 
@@ -53,25 +53,25 @@
 	}
 
 
-    function getBaseDomain(input) {
-    const knownExts = ['.lk', '.com.lk', '.org.lk', '.edu.lk', '.hotel.lk', '.web.lk'];
-    let cleaned = input.trim().toLowerCase();
+  function getBaseDomain(input) {
+  const knownExts = ['.lk', '.com.lk', '.org.lk', '.edu.lk', '.hotel.lk', '.web.lk'];
+  let cleaned = input.trim().toLowerCase();
 
-    if (cleaned.startsWith('www.')) cleaned = cleaned.slice(4);
-    cleaned = cleaned.replace(/^\.+|\.+$/g, '');
+  if (cleaned.startsWith('www.')) cleaned = cleaned.slice(4);
+  cleaned = cleaned.replace(/^\.+|\.+$/g, '');
 
-    for (const ext of knownExts) {
-        if (cleaned.endsWith(ext)) {
-        cleaned = cleaned.slice(0, -ext.length);
-        break;
-        }
+  for (const ext of knownExts) {
+    if (cleaned.endsWith(ext)) {
+      cleaned = cleaned.slice(0, -ext.length);
+      break;
     }
+  }
 
-    cleaned = cleaned.replace(/\.(com|org|hotel|edu|web)$/, '');
-    cleaned = cleaned.replace(/[^a-z0-9\-]/g, '');
+  cleaned = cleaned.replace(/\.(com|org|hotel|edu|web)$/, '');
+  cleaned = cleaned.replace(/[^a-z0-9\-]/g, '');
 
-    return cleaned;
-    }
+  return cleaned;
+}
 
 
   function renderRow(domain, cat) {
@@ -85,7 +85,7 @@
           <span class="old-price">LKR ${Number(oldPrice).toFixed(2)}</span>
         </div>
         <div class="line2">
-          <span class="new-price">LKR ${Number(newPrice).toFixed(2)}</span>
+          <span class="new-price">LKR ${Number(newPrice).toFixed(2)} /Yearly </span>
           <a href="${buyNowUrl(domain, newPrice, cat, oldPrice)}" class="btn btn-sm btn-primary btn-buy">
             <i class="bi bi-cart3 me-1"></i> Buy Now
           </a>
