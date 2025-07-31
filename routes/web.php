@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\DomainPriceController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InvoiceController;
@@ -16,7 +15,6 @@ use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PaymentController;
 use App\Models\DomainPrice;
 use Illuminate\Support\Facades\Route;
-
 use Illuminate\Support\Facades\Artisan;
 
 // Public domain search page and API
@@ -27,28 +25,17 @@ Route::get('/', function () {
 
 Route::post('/domain-search/api', [DomainSearchController::class, 'search'])->name('domain.search.api');
 
-// Domain order routes - consistent naming
+// Domain order routes
 Route::get('/domain/contact-info', [DomainOrderController::class, 'showContactForm'])->name('domain.contact.info');
 Route::post('/domain/contact-submit', [DomainOrderController::class, 'store'])->name('domain.contact.submit');
 
 Route::get('/otp-verification', [OtpController::class, 'showVerificationForm'])->name('otp.verification.page');
-Route::post('/otp-resend', [OtpController::class, 'resendOtp'])->name('otp.resend');  // Added this route for resend AJAX
-
-
+Route::post('/otp-resend', [OtpController::class, 'resendOtp'])->name('otp.resend');
 Route::post('/payment-details', [OtpController::class, 'paymentDetails'])->name('payment.details');
-
-
-// Contact form routes (separate from domain order contact info)
-//Route::get('/contact-information', [ContactController::class, 'showForm'])->name('contact.page');
-//Route::post('/contact-information', [ContactController::class, 'submit'])->name('contact.submit');
-
-
 
 Route::post('/pay-securely', [PaymentController::class, 'paySecurely'])->name('payment.paysecurely');
 Route::post('/skip-payment', [PaymentController::class, 'skipPayment'])->name('payment.skip');
 
-
-// Confirmation page
 Route::get('/confirmation', function () {
     return view('layouts.confirmation');
 });
@@ -56,25 +43,26 @@ Route::get('/confirmation', function () {
 Route::get('/invoice/view/{unique_code}', [DomainOrderController::class, 'viewInvoiceByCode'])->name('invoice.view');
 
 
-// Admin routes group
-Route::prefix('admin')->name('admin.')->group(function () {
+// ===============================
+// ✅ Admin Routes - Fixed Prefix
+// ===============================
+Route::prefix('lkadminslh')->name('admin.')->group(function () {
 
-    // Guest routes for admin (login/register)
+    // Admin login (guest)
     Route::middleware('guest:admin')->group(function () {
         Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
         Route::post('login', [LoginController::class, 'login'])->name('login.submit');
 
-        //Route::get('register', [RegisterController::class, 'showRegisterForm'])->name('register');
-        //Route::post('register', [RegisterController::class, 'register'])->name('register.submit');
+        // If you ever enable registration:
+        // Route::get('register', [RegisterController::class, 'showRegisterForm'])->name('register');
+        // Route::post('register', [RegisterController::class, 'register'])->name('register.submit');
     });
 
-    // Authenticated admin routes
+    // Authenticated admin-only routes
     Route::middleware('auth:admin')->group(function () {
 
-        // Logout
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-        // Dashboard view (FIXED: call DashboardController@index to pass data)
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Domain Prices Management
@@ -84,30 +72,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::post('invoices/{id}/sms', [InvoiceController::class, 'sendSms'])->name('invoices.sendSms');
 
-
-
-
-        // User management routes for all admins
+        // User management
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::get('users/create', [UserController::class, 'create'])->name('users.create');
         Route::post('users', [UserController::class, 'store'])->name('users.store');
         Route::get('users/{admin}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('users/{admin}', [UserController::class, 'update'])->name('users.update');
 
-        // Soft delete (trash) functionality for users
         Route::prefix('users')->group(function () {
             Route::get('/trash', [UserController::class, 'trash'])->name('users.trash');
             Route::put('/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
             Route::delete('/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.forceDelete');
         });
 
-        // Super admin-only routes for user delete and suspend
+        // Super admin privileges
         Route::middleware('super_admin')->group(function () {
             Route::delete('users/{admin}', [UserController::class, 'destroy'])->name('users.destroy');
             Route::put('users/{admin}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
         });
 
-        // Domain Orders Management (Admin)
+        // Domain orders
         Route::prefix('orders')->group(function () {
             Route::get('/', [DomainOrderController::class, 'adminIndex'])->name('orders.index');
             Route::get('/trash', [DomainOrderController::class, 'trashed'])->name('orders.trash');
@@ -117,57 +101,42 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{id}/force-delete', [DomainOrderController::class, 'forceDelete'])->name('orders.forceDelete');
         });
 
-
+        // SMS Templates and Reports
         Route::prefix('sms')->name('sms.')->group(function () {
             Route::get('/template', [SmsController::class, 'createTemplate'])->name('template');
             Route::post('/template', [SmsController::class, 'storeTemplate'])->name('template.store');
-
             Route::get('/template/{id}/edit', [SmsController::class, 'editTemplate'])->name('template.edit');
             Route::put('/template/{id}', [SmsController::class, 'updateTemplate'])->name('template.update');
-
             Route::delete('/template/{id}', [SmsController::class, 'destroyTemplate'])->name('template.destroy');
 
             Route::get('/report', [SmsController::class, 'report'])->name('report');
-
             Route::get('/send', [SmsController::class, 'showSendForm'])->name('send');
             Route::post('/send', [SmsController::class, 'sendSms'])->name('send.post');
-
             Route::post('/request-sender-id', [SmsController::class, 'requestSenderId'])->name('request_sender_id');
         });
 
-
+        // Invoices
         Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('invoices/report', [InvoiceController::class, 'report'])->name('invoices.report');
         Route::get('invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
 
-       // Payment Verification Routes
+        // Payment Verifications
         Route::get('verification', [VerificationController::class, 'index'])->name('verification.index');
-		Route::get('verification/create', [VerificationController::class, 'create'])->name('verification.create');
-		Route::post('verification/store', [VerificationController::class, 'store'])->name('verification.store');
-		Route::get('verification/{id}', [VerificationController::class, 'show'])->name('verification.show');
-		Route::patch('verification/{id}/update-status', [VerificationController::class, 'updateStatus'])->name('verification.updateStatus');
-		Route::delete('verification/{id}', [VerificationController::class, 'destroy'])->name('verification.destroy');
-		Route::post('verification/{id}/send-sms', [VerificationController::class, 'sendSms'])->name('verification.sendSms');
-
-
-
-       Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity_logs.index');
-
-
-
-
-
+        Route::get('verification/create', [VerificationController::class, 'create'])->name('verification.create');
+        Route::post('verification/store', [VerificationController::class, 'store'])->name('verification.store');
+        Route::get('verification/{id}', [VerificationController::class, 'show'])->name('verification.show');
+        Route::patch('verification/{id}/update-status', [VerificationController::class, 'updateStatus'])->name('verification.updateStatus');
+        Route::delete('verification/{id}', [VerificationController::class, 'destroy'])->name('verification.destroy');
+        Route::post('verification/{id}/send-sms', [VerificationController::class, 'sendSms'])->name('verification.sendSms');
     });
 });
 
 
-
-
-
-//Route::get('/clear-cache', function () {
-   // Artisan::call('cache:clear');
-   // Artisan::call('route:clear');
-   // Artisan::call('config:clear');
-   // Artisan::call('view:clear');
-   // return 'Caches cleared!';
-//});
+// (Optional) cache clearing routes for dev
+// Route::get('/clear-cache', function () {
+//     Artisan::call('cache:clear');
+//     Artisan::call('route:clear');
+//     Artisan::call('config:clear');
+//     Artisan::call('view:clear');
+//     return 'Caches cleared!';
+// });
