@@ -114,8 +114,8 @@ class DomainOrderController extends Controller
         // Log OTP generation
         log_activity("OTP generated for order_id={$order->id}, mobile={$mobile}");
 
-        //OtpHelper::sendOtpSms($mobile, (string) $otp);
-        //Log::info('OTP sent', ['mobile' => $mobile, 'otp' => $otp]);
+        OtpHelper::sendOtpSms($mobile, (string) $otp);
+        Log::info('OTP sent', ['mobile' => $mobile, 'otp' => $otp]);
 
         return redirect()->route('otp.verification.page')->with('success', 'OTP sent to your mobile number.');
     }

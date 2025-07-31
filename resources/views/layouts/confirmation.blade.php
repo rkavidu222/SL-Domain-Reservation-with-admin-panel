@@ -51,7 +51,7 @@
   <div class="alert alert-info mt-4" role="alert">
     <h5 class="alert-heading">Your Invoice is Ready</h5>
     <p>
-      You can view and download your invoice by clicking the button below:
+      You can view your invoice here:
     </p>
     <a href="https://buydomains.srilankahosting.lk/invoice/view/{{ session('invoice_code') }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
       View Invoice <i class="fa-solid fa-arrow-up-right-from-square ms-1"></i>

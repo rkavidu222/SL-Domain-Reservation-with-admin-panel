@@ -43,7 +43,7 @@ class PaymentController extends Controller
         $url = "https://buydomains.srilankahosting.lk/invoice/view/{$code}";
         $message = "Hello {$invoice->first_name}, Thank you for connecting with us. Here you can view your invoice: {$url}";
 
-        /*
+
         $data = [
             'api_token' => env('SMS_API_TOKEN'),
             'recipient' => OtpHelper::normalizeSriLankanMobile($mobile),
@@ -89,7 +89,7 @@ class PaymentController extends Controller
             'status' => $status,
             'response' => $responseContent,
         ]);
-        */
+
 
         return redirect('/confirmation')
     ->with('paymentMethod', 'skip')
@@ -131,7 +131,7 @@ class PaymentController extends Controller
         $url = "https://buydomains.srilankahosting.lk/invoice/view/{$code}";
         $message = "Hello {$invoice->first_name}, Thank you for choosing to pay securely. Please upload your payment proof. View your invoice here: {$url}";
 
-        /*
+
         $data = [
             'api_token' => env('SMS_API_TOKEN'),
             'recipient' => OtpHelper::normalizeSriLankanMobile($mobile),
@@ -177,7 +177,7 @@ class PaymentController extends Controller
             'status' => $status,
             'response' => $responseContent,
         ]);
-        */
+
 
         return redirect('/confirmation')
     ->with('paymentMethod', 'paysecurely')
