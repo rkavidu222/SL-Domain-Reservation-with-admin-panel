@@ -93,8 +93,8 @@
   <hr>
 
   <div class="powered-by">
-	  Powered by<br>
-	  <strong>SriLankaHosting.lk © {{ date('Y') }}</strong>
+	  Developed by<br>
+	  <strong>SriLanka Hosting Team © {{ date('Y') }}</strong>
 	</div>
 
 

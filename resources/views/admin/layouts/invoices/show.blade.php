@@ -95,10 +95,10 @@
 
     <hr>
 
-    <div class="powered-by">
-        Powered by<br>
-    <strong>SriLankaHosting.lk © {{ date('Y') }}</strong>
-    </div>
+  <div class="powered-by">
+	  Developed by<br>
+	  <strong>SriLanka Hosting Team © {{ date('Y') }}</strong>
+	</div>
 
 
   </div>

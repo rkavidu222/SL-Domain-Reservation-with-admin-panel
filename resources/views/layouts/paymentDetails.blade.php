@@ -41,12 +41,15 @@
         Branch Name and Code: <strong>BIBILE / 161</strong><br>
         Account Holder: <strong>ServerClub.LK (Private) Limited</strong><br>
         Account Number: <strong>116114023727</strong><br><br>
-        <span class="text-success" style="display: flex; align-items: center; gap: 0.5rem;">
-          WhatsApp Number: <strong>94 774 233 244</strong>
-          <a href="https://wa.me/94774233244" target="_blank" class="btn btn-sm btn-success" style="margin-left: auto;">
-            <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp Us
-          </a>
-        </span>
+        <div class="text-success">
+		  <div class="text-row">
+			<span>WhatsApp Number: <strong>94 774 233 244</strong></span>
+			<a href="https://wa.me/94774233244" target="_blank" class="btn btn-sm btn-success">
+			  <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp Us
+			</a>
+		  </div>
+		</div>
+
       </div>
     </div>
 

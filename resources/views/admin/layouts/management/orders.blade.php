@@ -142,10 +142,12 @@
                   <td class="text-center">{{ $order->created_at->format('Y-m-d') }}</td>
                   <td class="text-center">
                     <button class="btn btn-sm btn-info btn-view-order" data-order='@json($order)'>View</button>
-                    <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure to delete this order?');">
+                    <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" class="d-inline action-form">
                       @csrf
                       @method('DELETE')
-                      <button type="submit" class="btn btn-sm btn-danger ms-1">Delete</button>
+                      <button type="button" class="btn btn-sm btn-danger ms-1 action-btn" data-message="Are you sure you want to delete order ID: {{ $order->id }}?">
+                        Delete
+                      </button>
                     </form>
                   </td>
                 </tr>
@@ -178,6 +180,25 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <div class="modal-body">
+        <div class="text-warning mb-3" style="font-size: 48px;">
+          <i class="bi bi-exclamation-circle-fill"></i>
+        </div>
+        <h2 class="mb-3" id="modalConfirmTitle">Action Required</h2>
+        <p id="modalConfirmMessage">You need to confirm this action.</p>
+        <div class="d-flex justify-content-center gap-3 mt-4">
+          <button type="button" class="btn btn-danger" id="modalConfirmYes">Yes</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         </div>
       </div>
     </div>
@@ -267,6 +288,26 @@
       toast.style.animation = 'slideOut 0.4s forwards';
       toast.addEventListener('animationend', () => toast.remove());
     }
+  });
+
+  // Confirmation Modal logic
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+    const modalMessage = document.getElementById('modalConfirmMessage');
+    const confirmBtn = document.getElementById('modalConfirmYes');
+    let currentForm = null;
+
+    document.querySelectorAll('.action-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        currentForm = this.closest('form');
+        modalMessage.textContent = this.getAttribute('data-message') || 'Confirm this action?';
+        modal.show();
+      });
+    });
+
+    confirmBtn.addEventListener('click', () => {
+      if (currentForm) currentForm.submit();
+    });
   });
 </script>
 @endsection

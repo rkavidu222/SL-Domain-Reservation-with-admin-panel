@@ -2,6 +2,10 @@
 
 @section('title', 'Create SMS Template')
 
+@push('styles')
+  <link rel="stylesheet" href="{{ asset('admin/css/order.css') }}">
+@endpush
+
 @section('content')
 
 <div class="admin-management-container">

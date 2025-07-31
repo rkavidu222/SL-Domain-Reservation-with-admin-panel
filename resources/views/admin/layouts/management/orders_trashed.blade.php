@@ -4,7 +4,6 @@
 
 @push('styles')
   <link rel="stylesheet" href="{{ asset('admin/css/trashed-orders.css') }}">
-
 @endpush
 
 @section('content')
@@ -13,9 +12,9 @@
     <i class="bi bi-trash3-fill"></i> Trashed Orders
   </h2>
 
-  {{-- Flash Messages --}}
+  {{-- Flash Messages as Toast Notifications --}}
   @if (session('success'))
-    <div id="flashMessage" class="success" role="alert" aria-live="polite" aria-atomic="true">
+    <div class="toast-notification toast-success" role="alert" aria-live="polite" aria-atomic="true">
       <div class="toast-icon">
         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 6L9 17l-5-5"/>
@@ -24,12 +23,12 @@
       <div class="toast-message">
         <strong>Success:</strong> {{ session('success') }}
       </div>
-      <button type="button" class="btn-close" aria-label="Close notification"></button>
+      <button class="toast-close" aria-label="Close notification">&times;</button>
     </div>
   @endif
 
   @if (session('error'))
-    <div id="flashMessage" class="error" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-notification toast-error" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="toast-icon">
         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
@@ -40,7 +39,7 @@
       <div class="toast-message">
         <strong>Error:</strong> {{ session('error') }}
       </div>
-      <button type="button" class="btn-close" aria-label="Close notification"></button>
+      <button class="toast-close" aria-label="Close notification">&times;</button>
     </div>
   @endif
 
@@ -145,16 +144,34 @@
                     <td class="text-center">{{ $order->created_at->format('Y-m-d') }}</td>
                     <td class="text-center">
                       <button class="btn btn-sm btn-info btn-view-order" data-order='@json($order)'>View</button>
-                      <form action="{{ route('admin.orders.restore', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Do you want to restore this order?');">
+
+                      {{-- Restore form/button --}}
+                      <form method="POST" action="" class="d-inline restore-form">
                         @csrf
-                        <button class="btn btn-sm btn-success ms-1" title="Restore">
+                        <button type="button"
+                          class="btn btn-sm btn-success ms-1 action-btn"
+                          data-action="restore"
+                          data-order-id="{{ $order->id }}"
+                          data-message="Are you sure you want to restore order #{{ $order->id }} for {{ $order->first_name }} {{ $order->last_name }}?"
+                          title="Restore"
+                          aria-label="Restore Order {{ $order->id }}"
+                        >
                           <i class="bi bi-arrow-counterclockwise"></i> Restore
                         </button>
                       </form>
-                      <form action="{{ route('admin.orders.forceDelete', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete permanently?');">
+
+                      {{-- Delete form/button --}}
+                      <form method="POST" action="" class="d-inline delete-form">
                         @csrf
                         @method('DELETE')
-                        <button class="btn btn-sm btn-danger ms-1" title="Delete Permanently">
+                        <button type="button"
+                          class="btn btn-sm btn-danger ms-1 action-btn"
+                          data-action="delete"
+                          data-order-id="{{ $order->id }}"
+                          data-message="Are you sure you want to permanently delete order #{{ $order->id }}? This action cannot be undone."
+                          title="Delete Permanently"
+                          aria-label="Delete Order {{ $order->id }} Permanently"
+                        >
                           <i class="bi bi-x-circle"></i> Delete
                         </button>
                       </form>
@@ -196,28 +213,54 @@
       </div>
     </div>
   </div>
+
+  {{-- Shared Confirmation Modal --}}
+  <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center p-4">
+        <div class="modal-body">
+          <div class="text-warning mb-3" style="font-size: 48px;">
+            <i class="bi bi-exclamation-circle-fill"></i>
+          </div>
+          <h2 class="mb-3" id="confirmationModalTitle">Confirm Action</h2>
+          <p id="confirmationModalMessage">Are you sure you want to proceed?</p>
+          <form id="confirmationForm" method="POST" action="">
+            @csrf
+            <div id="methodField"></div>
+            <div class="d-flex justify-content-center gap-3 mt-4">
+              <button type="submit" class="btn btn-danger" id="confirmationConfirmBtn">Yes</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 @endsection
 
 @section('scripts')
 <script>
   $(function () {
-    // Initialize DataTables
-    ['#allTable', '#paidTable', '#pendingTable', '#awaitOrdersTable', '#clientAccCreatedOrdersTable', '#activedOrdersTable'].forEach(tableId => {
-      $(tableId).DataTable({
+    // Initialize DataTables on each table
+    ['#allTable', '#paidTable', '#pendingTable', '#awaitOrdersTable', '#clientAccCreatedOrdersTable', '#activedOrdersTable'].forEach(id => {
+      $(id).DataTable({
         responsive: true,
         paging: true,
         lengthChange: true,
         searching: true,
         ordering: true,
         info: true,
-        autoWidth: false
+        autoWidth: false,
       });
     });
 
-    const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+    // Bootstrap modal instances
+    const orderDetailsModal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+    const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
 
-    // Delegated click handler for view order buttons
+    // Show Order Details Modal
     $(document).on('click', '.btn-view-order', function () {
       const order = $(this).data('order');
       $('#modal-order-id').text(order.id ?? '-');
@@ -228,11 +271,44 @@
       $('#modal-category').text(order.category ?? '-');
       $('#modal-price').text(order.price !== undefined ? 'Rs.' + parseFloat(order.price).toFixed(2) : '-');
       $('#modal-order-date').text(order.created_at ? new Date(order.created_at).toLocaleDateString() : '-');
-      $('#modal-payment-status').text(order.payment_status ? order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1) : '-');
-      modal.show();
+      $('#modal-payment-status').text(order.payment_status ? order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1).replace(/_/g, ' ') : '-');
+      orderDetailsModal.show();
     });
 
-    // Date range filter
+    // Handle Restore and Delete buttons with single confirmation modal
+    $(document).on('click', '.action-btn', function () {
+      const btn = $(this);
+      const action = btn.data('action'); // "restore" or "delete"
+      const orderId = btn.data('order-id');
+      const message = btn.data('message');
+      let formAction = '';
+      let methodField = '';
+
+      if (action === 'restore') {
+        formAction = "{{ route('admin.orders.restore', ':id') }}".replace(':id', orderId);
+        methodField = ''; // POST default
+      } else if (action === 'delete') {
+        formAction = "{{ route('admin.orders.forceDelete', ':id') }}".replace(':id', orderId);
+        methodField = '<input type="hidden" name="_method" value="DELETE">';
+      }
+
+      $('#confirmationModalTitle').text(action === 'restore' ? 'Confirm Restore' : 'Confirm Permanent Deletion');
+      $('#confirmationModalMessage').text(message);
+      $('#confirmationForm').attr('action', formAction);
+      $('#methodField').html(methodField);
+
+      // Set button color
+      const confirmBtn = $('#confirmationConfirmBtn');
+      if (action === 'restore') {
+        confirmBtn.removeClass('btn-danger').addClass('btn-success').text('Restore');
+      } else {
+        confirmBtn.removeClass('btn-success').addClass('btn-danger').text('Delete Permanently');
+      }
+
+      confirmationModal.show();
+    });
+
+    // Date Range Picker setup
     $('#dateRangeInput').daterangepicker({
       autoUpdateInput: false,
       opens: 'left',
@@ -265,21 +341,20 @@
     @endif
   });
 
-  // Flash message auto-hide and close
+  // Toast notification auto-hide & close
   document.addEventListener('DOMContentLoaded', () => {
-    const flashMessages = document.querySelectorAll('#flashMessage');
-    flashMessages.forEach(flash => {
-      const timeoutId = setTimeout(() => hideFlash(flash), 4000);
-      const closeBtn = flash.querySelector('.btn-close');
-      closeBtn.addEventListener('click', () => {
+    const toasts = document.querySelectorAll('.toast-notification');
+    toasts.forEach(toast => {
+      const timeoutId = setTimeout(() => hideToast(toast), 4000);
+      toast.querySelector('.toast-close').addEventListener('click', () => {
         clearTimeout(timeoutId);
-        hideFlash(flash);
+        hideToast(toast);
       });
     });
 
-    function hideFlash(flash) {
-      flash.style.animation = 'fadeOutSlide 0.5s ease forwards';
-      flash.addEventListener('animationend', () => flash.remove());
+    function hideToast(toast) {
+      toast.style.animation = 'fadeOutSlide 0.5s ease forwards';
+      toast.addEventListener('animationend', () => toast.remove());
     }
   });
 </script>

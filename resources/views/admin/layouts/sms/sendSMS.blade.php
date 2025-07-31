@@ -1,3 +1,4 @@
+
 @extends('admin.layouts.app')
 
 @section('title', 'Send SMS')
@@ -7,8 +8,6 @@
 @endpush
 
 @section('content')
-
-
 <div class="container mt-4 quick-sms-container">
     <div class="quick-sms-header">
         <i class="bi bi-send-fill me-2"></i>Send SMS
@@ -45,7 +44,7 @@
         </div>
     @endif
 
-    <form id="smsForm" method="POST" action="{{ route('admin.sms.send.post') }}">
+    <form id="smsForm" method="POST" action="{{ route('admin.sms.send.post') }}" class="action-form">
         @csrf
 
         <!-- Template Select -->
@@ -76,12 +75,31 @@
         </div>
 
         <!-- Submit Button with Spinner -->
-        <button type="submit" id="sendSmsBtn" class="btn btn-primary d-flex align-items-center">
+        <button type="button" id="sendSmsBtn" class="btn btn-primary d-flex align-items-center action-btn" data-message="Are you sure you want to send this SMS?">
             <span id="btnText">Send SMS</span>
             <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
             <span id="loadingText" class="ms-2 d-none">Loading...</span>
         </button>
     </form>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4">
+            <div class="modal-body">
+                <div class="text-warning mb-3" style="font-size: 48px;">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                </div>
+                <h2 class="mb-3" id="modalConfirmTitle">Action Required</h2>
+                <p id="modalConfirmMessage">You need to confirm this action.</p>
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <button type="button" class="btn btn-danger" id="modalConfirmYes">Yes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -146,24 +164,41 @@
         }
     });
 
-    // Spinner and disable logic
-    const form = document.getElementById('smsForm');
-    const sendBtn = document.getElementById('sendSmsBtn');
-    const btnText = document.getElementById('btnText');
-    const btnSpinner = document.getElementById('btnSpinner');
-    const loadingText = document.getElementById('loadingText');
-
-    form.addEventListener('submit', () => {
-        sendBtn.disabled = true;
-        btnText.classList.add('d-none');
-        btnSpinner.classList.remove('d-none');
-        loadingText.classList.remove('d-none');
-    });
-
-    // Toast close logic
+    // Confirmation modal and form submission logic
     document.addEventListener('DOMContentLoaded', () => {
-        const toasts = document.querySelectorAll('.toast-notification');
+        const form = document.getElementById('smsForm');
+        const sendBtn = document.getElementById('sendSmsBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const loadingText = document.getElementById('loadingText');
+        const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        const modalConfirmMessage = document.getElementById('modalConfirmMessage');
+        const confirmBtn = document.getElementById('modalConfirmYes');
+        let currentForm = null;
 
+        // Handle action button (Send SMS)
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                currentForm = this.closest('form');
+                modalConfirmMessage.textContent = this.getAttribute('data-message') || 'Confirm this action?';
+                confirmationModal.show();
+            });
+        });
+
+        // Handle modal confirmation
+        confirmBtn.addEventListener('click', () => {
+            if (currentForm) {
+                sendBtn.disabled = true;
+                btnText.classList.add('d-none');
+                btnSpinner.classList.remove('d-none');
+                loadingText.classList.remove('d-none');
+                currentForm.submit();
+            }
+            confirmationModal.hide();
+        });
+
+        // Toast close logic
+        const toasts = document.querySelectorAll('.toast-notification');
         toasts.forEach(toast => {
             const timeoutId = setTimeout(() => {
                 hideToast(toast);
