@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\DomainPriceController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InvoiceController;
@@ -64,6 +65,8 @@ Route::prefix('lkadminslh')->name('admin.')->group(function () {
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+		 Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity_logs.index');
 
         // Domain Prices Management
         Route::get('domain-prices', [DomainPriceController::class, 'index'])->name('domain_prices.index');

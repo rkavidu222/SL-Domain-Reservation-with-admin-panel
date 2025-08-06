@@ -35,25 +35,37 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>
-                        @if ($log->user)
-                            {{ $log->user->name }}<br>
-                            <small class="text-muted">{{ $log->user->email }}</small>
+                        @if ($log->admin)
+                            {{ $log->admin->name }}<br>
+                            <small class="text-muted">{{ $log->admin->email }}</small>
                         @else
-                            <em class="text-muted">System / Deleted User</em>
+                            @php
+                                // Extract email from the task string if present
+                                preg_match('/email=([\w\.\-\+@]+)/', $log->task, $matches);
+                                $email = $matches[1] ?? null;
+                            @endphp
+                            @if ($email)
+                                <em class="text-muted">Deleted User</em><br>
+                                <small class="text-muted">{{ $email }}</small>
+                            @else
+                                <em class="text-muted">System / Deleted User</em>
+                            @endif
                         @endif
                     </td>
                     <td>{{ $log->task }}</td>
-                    <td>{{ $log->created_at->format('Y-m-d H:i A') }}</td>
+                    <td>{{ $log->created_at->format('Y-m-d h:i A') }}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
 
-    {{-- If you want pagination with links, you can add below --}}
-    {{-- <div class="mt-3">
+    {{-- Pagination (optional) --}}
+    {{--
+    <div class="mt-3">
         {{ $logs->links('pagination::bootstrap-4') }}
-    </div> --}}
+    </div>
+    --}}
 </div>
 @endsection
 

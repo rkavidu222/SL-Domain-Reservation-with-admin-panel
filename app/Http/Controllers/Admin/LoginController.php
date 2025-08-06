@@ -29,6 +29,8 @@ class LoginController extends Controller
             // Log custom activity
             log_activity("Admin login successful, admin_id={$admin->id}, email={$admin->email}");
 
+
+
             if ($admin->is_suspended) {
                 Auth::guard('admin')->logout();
 

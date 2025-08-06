@@ -177,8 +177,8 @@
       autoWidth: false,
       order: [[0, 'desc']],
       columnDefs: [
-        { orderable: false, targets: 5 }, // Disable sorting on Actions column
-        { className: 'text-center', targets: [0, 4, 5] } // Center-align #, Created, Actions
+        { orderable: false, targets: 5 },
+        { className: 'text-center', targets: [0, 4, 5] }
       ],
       language: {
         search: "_INPUT_",

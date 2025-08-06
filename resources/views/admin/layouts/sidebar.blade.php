@@ -241,12 +241,15 @@
           </ul>
         </li>
 
-        <li class="nav-item">
-  <a href="{{ route('admin.activity_logs.index') }}" class="nav-link {{ request()->routeIs('admin.activity_logs.*') ? 'active' : '' }}">
-    <i class="nav-icon bi bi-clock-history"></i>
-    <span>Activity Logs</span>
-  </a>
-</li>
+        @if($adminUser && $adminUser->role === 'super_admin')
+		  <li class="nav-item">
+			<a href="{{ route('admin.activity_logs.index') }}" class="nav-link {{ request()->routeIs('admin.activity_logs.*') ? 'active' : '' }}">
+			  <i class="nav-icon bi bi-clock-history"></i>
+			  <span>Activity Logs</span>
+			</a>
+		  </li>
+		@endif
+
       </ul>
     </nav>
   </div>

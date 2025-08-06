@@ -55,7 +55,7 @@
             </label>
             <input type="text" id="first_name" name="first_name" required
                 class="form-control @error('first_name') is-invalid @enderror"
-                placeholder="e.g. John" value="{{ old('first_name') }}" />
+                placeholder="John" value="{{ old('first_name') }}" />
             @error('first_name')
                 <div class="error-text">{{ $message }}</div>
             @enderror
@@ -67,7 +67,7 @@
             </label>
             <input type="text" id="last_name" name="last_name" required
                 class="form-control @error('last_name') is-invalid @enderror"
-                placeholder="e.g. Doe" value="{{ old('last_name') }}" />
+                placeholder="Doe" value="{{ old('last_name') }}" />
             @error('last_name')
                 <div class="error-text">{{ $message }}</div>
             @enderror
@@ -79,7 +79,7 @@
             </label>
             <input type="email" id="email" name="email" required
                 class="form-control @error('email') is-invalid @enderror"
-                placeholder="e.g. john@example.com" value="{{ old('email') }}" />
+                placeholder="john@example.com" value="{{ old('email') }}" />
             @error('email')
                 <div class="error-text">{{ $message }}</div>
             @enderror
@@ -91,7 +91,7 @@
             </label>
             <input type="tel" id="mobile" name="mobile" required
                 class="form-control @error('mobile') is-invalid @enderror"
-                placeholder="e.g. +94 77 123 4567" value="{{ old('mobile') }}" />
+                placeholder="07########" value="{{ old('mobile') }}" />
             @error('mobile')
                 <div class="error-text">{{ $message }}</div>
             @enderror
