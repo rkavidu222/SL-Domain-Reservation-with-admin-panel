@@ -53,7 +53,7 @@
                         @endif
                     </td>
                     <td>{{ $log->task }}</td>
-                    <td>{{ $log->created_at->format('Y-m-d h:i A') }}</td>
+                    <td>{{ $log->created_at->format('Y-m-d') }}</td>
                 </tr>
                 @endforeach
             </tbody>

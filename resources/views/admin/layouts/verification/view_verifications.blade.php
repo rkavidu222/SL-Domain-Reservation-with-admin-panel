@@ -1,4 +1,3 @@
-
 @extends('admin.layouts.app')
 
 @section('title', 'View Verifications')
@@ -107,23 +106,29 @@
             </td>
             <td class="text-center">{{ $verification->created_at->format('Y-m-d') }}</td>
             <td class="text-center">
-              <button
-                class="btn btn-sm btn-info btn-details"
-                data-bs-toggle="modal"
-                data-bs-target="#detailsModal"
-                data-verification="{{ json_encode($verification) }}"
-                data-domain-order="{{ json_encode($verification->domainOrder) }}"
-              >Details</button>
-
-              <form action="{{ route('admin.verification.destroy', $verification->id) }}" method="POST" class="d-inline action-form">
-                @csrf
-                @method('DELETE')
-                <button type="button"
-                  class="btn btn-sm btn-danger ms-1 action-btn"
-                  data-message="Are you sure you want to delete this verification?">
-                  Delete
+              <div class="d-flex justify-content-center align-items-center gap-2">
+                <button
+                  class="btn btn-sm btn-info btn-details"
+                  data-bs-toggle="modal"
+                  data-bs-target="#detailsModal"
+                  data-verification="{{ json_encode($verification) }}"
+                  data-domain-order="{{ json_encode($verification->domainOrder) }}"
+                >
+                  Details
                 </button>
-              </form>
+
+                <form action="{{ route('admin.verification.destroy', $verification->id) }}" method="POST" class="m-0">
+                  @csrf
+                  @method('DELETE')
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-danger action-btn"
+                    data-message="Are you sure you want to delete this verification?"
+                  >
+                    Delete
+                  </button>
+                </form>
+              </div>
             </td>
           </tr>
         @endforeach
@@ -243,20 +248,18 @@ $(function () {
   let currentForm = null;
   let currentSelect = null;
 
-  // Handle action buttons (Delete)
-  document.querySelectorAll('.action-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-      currentForm = this.closest('form');
-      currentSelect = null; // Reset select for non-select actions
-      modalConfirmMessage.textContent = this.getAttribute('data-message') || 'Confirm this action?';
-      confirmationModal.show();
-    });
+  // Handle action buttons (Delete) - delegated event listener for responsiveness
+  $(document).on('click', '.action-btn', function () {
+    currentForm = $(this).closest('form')[0]; // get native form element
+    currentSelect = null; // Reset select for non-select actions
+    modalConfirmMessage.textContent = $(this).data('message') || 'Confirm this action?';
+    confirmationModal.show();
   });
 
   // Handle payment status change
   $('select[name="payment_status"]').on('change', function(e) {
     const select = $(this);
-    currentForm = select.closest('form');
+    currentForm = select.closest('form')[0];
     currentSelect = select;
     const oldStatus = select.data('current') || select.find('option[selected]').val();
     const newStatus = select.val();

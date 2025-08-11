@@ -5,24 +5,6 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('admin/css/invoiceShow.css') }}">
-<style>
-  .bank-details {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-  }
-  .bank-details h4 {
-    margin-bottom: 15px;
-    font-size: 1.2rem;
-    color: #333;
-  }
-  .bank-details p {
-    margin: 5px 0;
-    font-size: 0.95rem;
-  }
-</style>
 @endpush
 
 @section('content')
